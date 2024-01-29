@@ -1,0 +1,200 @@
+#! /bin/bash
+
+application_name='Pantos Service Node'
+
+# Directory and file paths
+application_directory='/opt/pantos/service-node'
+log_directory='/var/log/pantos'
+configuration_file='/etc/pantos-service-node.conf'
+old_configuration_file="${configuration_file}.old_$(date +%Y%m%d_%H%M%S)"
+offchain_bids_default_file='/etc/pantos-offchain-bids.yaml'
+old_offchain_bids_default_file="${offchain_bids_default_file}.old_$(date +%Y%m%d_%H%M%S)"
+alembic_file='/etc/pantos-alembic.ini'
+old_alembic_file="${alembic_file}.old_$(date +%Y%m%d_%H%M%S)"
+startup_script_file='/usr/local/bin/pantos-service-node-server'
+signer_key_file='/etc/pantos-service-node-signer.pem'
+
+# User names
+postgresql_user='pantos-service-node'
+rabbitmq_user='pantos-service-node'
+system_user='pantos'
+
+# Database and virtual host names
+application_database='pantos-service-node'
+celery_database='pantos-service-node-celery'
+virtual_host='pantos-service-node'
+
+# System user
+system_user_exists=$(id ${system_user} >/dev/null 2>&1; echo $?)
+if [ "${system_user_exists}" -eq 0 ]
+then
+  echo "${application_name} system user '${system_user}' already exists"
+else
+  adduser --system --no-create-home --group --quiet ${system_user}
+  echo "${application_name} system user '${system_user}' added"
+fi
+
+# Application
+rm --force ${application_directory}/wsgi.py
+rm --recursive --force ${application_directory}/virtual-environment/
+python3 -m venv ${application_directory}/virtual-environment
+source ${application_directory}/virtual-environment/bin/activate
+python3 -m pip install ${application_directory}/pantos_service_node-VERSION-py3-none-any.whl
+python3 -m pip install mod_wsgi
+deactivate
+rm ${application_directory}/pantos_service_node-VERSION-py3-none-any.whl
+ln --symbolic virtual-environment/lib/$(ls ${application_directory}/virtual-environment/lib/ | grep python3)/site-packages/pantos/servicenode/wsgi.py ${application_directory}/wsgi.py
+echo "${application_name} application installed in ${application_directory}"
+
+# Startup script
+chmod +x ${startup_script_file}
+
+# Configuration
+if [ -e "${configuration_file}" ]
+then
+  mv ${configuration_file} ${old_configuration_file}
+  echo "Old ${application_name} configuration file moved to ${old_configuration_file}"
+fi
+mv ${application_directory}/virtual-environment/lib/python3.*/site-packages/pantos/pantos-service-node.conf ${configuration_file}
+chown ${system_user}:${system_user} ${configuration_file}
+chmod 640 ${configuration_file}
+echo "${application_name} configuration file installed at ${configuration_file}"
+
+# url
+url=$(cat ${old_configuration_file} | grep 'url:' | head -1 | awk '{$1=$1;print}' )
+sed -i  "0,/url:.*http.*\/\/.*/ s|url:.*http.*\/\/.*|${url}|" ${configuration_file}
+
+# Signer key
+if [ -e "${signer_key_file}" ]
+then
+  echo "Signer key exists, not generating new one"
+  password=$(grep  'pem_password' $old_configuration_file | awk '{ print $2 }')
+  sudo sed -i "s/pem_password: \w*/pem_password: ${password}/" ${configuration_file}
+else
+  echo "Signer key does not exist, generating new one"
+  read -s -p "Please enter your password for your pem file: " passwd
+  ssh-keygen -t ed25519 -f "$signer_key_file" -N "$passwd" >/dev/null 2>&1
+  sudo sed -i "s/pem_password: \w*/pem_password: ${passwd}/" ${configuration_file}
+fi
+
+# Keystore file passwords
+passwords=$(grep -o 'private_key_password: .*' ${old_configuration_file})
+count=$(( $(grep -o 'private_key_password: .*' ${old_configuration_file} | wc -l) * 2 ))
+
+counter=0
+grep -Fn 'private_key_password: PRIVATE_KEY_PASSWORD' ${configuration_file} | cut -d: -f1 | while read -r line; do
+    counter=$(( counter + 2 ))
+    password=$(echo $passwords | awk -v x=$counter '{ print $x}')
+    if [[ $password =~ \'\s* ]]; then
+        continue
+    fi
+    sudo sed -i "${line}s/private_key_password: PRIVATE_KEY_PASSWORD/private_key_password: ${password}/" ${configuration_file}
+done
+
+# Offchain bids
+if [ -e "${offchain_bids_default_file}" ]
+then
+  mv ${offchain_bids_default_file} ${old_offchain_bids_default_file}
+  echo "Old ${application_name} offchain bids configuration file moved to ${old_offchain_bids_default_file}"
+fi
+mv ${application_directory}/virtual-environment/lib/python3.*/site-packages/pantos/bids.yaml ${offchain_bids_default_file}
+chown ${system_user}:${system_user} ${offchain_bids_default_file}
+chmod 640 ${offchain_bids_default_file}
+echo "${application_name} offchain bids file installed at ${offchain_bids_default_file}"
+
+# Alembic configuration
+if [ -e "${alembic_file}" ]
+then
+  mv ${alembic_file} ${old_alembic_file}
+  echo "Old ${application_name} alembic configuration file moved to ${old_alembic_file}"
+fi
+mv ${application_directory}/virtual-environment/lib/python3.*/site-packages/pantos/alembic.ini ${alembic_file}
+chown ${system_user}:${system_user} ${alembic_file}
+chmod 640 ${alembic_file}
+echo "${application_name} configuration file installed at ${alembic_file}"
+
+# Logs
+mkdir --parents ${log_directory}
+chown ${system_user}:adm ${log_directory}
+chmod 750 ${log_directory}
+echo "${application_name} log file directory set up at ${log_directory}"
+
+# PostgreSQL
+postgresql_user_exists=$(runuser -u postgres -- psql --no-align --no-psqlrc --tuples-only --quiet --command "SELECT 1 FROM pg_roles WHERE rolname='${postgresql_user}'" | grep --quiet --word-regexp ^1; echo $?)
+if [ "${postgresql_user_exists}" -eq 0 ]
+then
+  echo "${application_name} PostgreSQL user '${postgresql_user}' already exists"
+  if [ -e "${old_configuration_file}" ]
+  then
+    application_database_url=$(cat ${old_configuration_file} | grep "url:.*postgresql:" | awk '{$1=$1;print}')
+    sed --in-place "s/url:.*postgresql:.*/${application_database_url//\//\\/}/g" ${configuration_file}
+    celery_database_url=$(cat ${old_configuration_file} | grep "backend:.*db+postgresql:" | awk '{$1=$1;print}')
+    sed --in-place "s/backend:.*db+postgresql:.*/${celery_database_url//\//\\/}/g" ${configuration_file}
+    echo "Old ${application_name} PostgreSQL URLs copied to configuration file ${configuration_file}"
+  fi
+else
+  postgresql_password=$(openssl rand -base64 32 | sed --expression 's/\///g;s/=//g')
+  runuser -u postgres -- psql --quiet --command "CREATE ROLE \"${postgresql_user}\" WITH LOGIN PASSWORD '${postgresql_password}'"
+	sed --in-place "s/DATABASE_PASSWORD/${postgresql_password}/g" ${configuration_file}
+  echo "${application_name} PostgreSQL user '${postgresql_user}' created"
+fi
+application_database_exists=$(runuser -u postgres -- psql --no-align --no-psqlrc --tuples-only --quiet --list | cut --delimiter \| --fields 1 | grep --quiet --word-regexp "^${application_database}"; echo $?)
+if [ "${application_database_exists}" -eq 0 ]
+then
+  echo "${application_name} PostgreSQL application database '${application_database}' already exists"
+else
+  runuser -u postgres -- psql --quiet --command "CREATE DATABASE \"${application_database}\" WITH OWNER \"${postgresql_user}\""
+  echo "${application_name} PostgreSQL application database '${application_database}' created"
+fi
+celery_database_exists=$(runuser -u postgres -- psql --no-align --no-psqlrc --tuples-only --quiet --list | cut --delimiter \| --fields 1 | grep --quiet --word-regexp "^${celery_database}"; echo $?)
+if [ "${celery_database_exists}" -eq 0 ]
+then
+  echo "${application_name} PostgreSQL Celery database '${celery_database}' already exists"
+else
+  runuser -u postgres -- psql --quiet --command "CREATE DATABASE \"${celery_database}\" WITH OWNER \"${postgresql_user}\""
+  echo "${application_name} PostgreSQL Celery database '${celery_database}' created"
+fi
+
+# Application database initialization
+source ${application_directory}/virtual-environment/bin/activate
+alembic --config ${alembic_file} upgrade head
+deactivate
+
+# RabbitMQ
+rabbitmq_user_exists=$(rabbitmqctl list_users | grep --quiet --word-regexp "^${rabbitmq_user}"; echo $?)
+if [ "${rabbitmq_user_exists}" -eq 0 ]
+then
+  echo "${application_name} RabbitMQ user '${rabbitmq_user}' already exists"
+  if [ -e "${old_configuration_file}" ]
+  then
+    broker_url=$(cat ${old_configuration_file} | grep "broker:.*amqp:" | awk '{$1=$1;print}')
+    sed --in-place "s/broker:.*amqp:.*/${broker_url//\//\\/}/g" ${configuration_file}
+    echo "Old ${application_name} RabbitMQ URL copied to configuration file ${configuration_file}"
+  fi
+else
+  rabbitmq_password=$(openssl rand -base64 32 | sed --expression 's/\///g;s/=//g')
+  rabbitmqctl add_user ${rabbitmq_user} ${rabbitmq_password}
+	sed --in-place "s/MESSAGE_BROKER_PASSWORD/${rabbitmq_password}/g" ${configuration_file}
+  echo "${application_name} RabbitMQ user '${rabbitmq_user}' added"
+fi
+virtual_host_exists=$(rabbitmqctl list_vhosts | grep --quiet --word-regexp "^${virtual_host}"; echo $?)
+if [ "${virtual_host_exists}" -eq 0 ]
+then
+  echo "${application_name} RabbitMQ virtual host '${virtual_host}' already exists"
+else
+  rabbitmqctl add_vhost ${virtual_host}
+  rabbitmqctl set_permissions -p ${virtual_host} ${rabbitmq_user} ".*" ".*" ".*"
+  echo "${application_name} RabbitMQ virtual host '${virtual_host}' added"
+fi
+
+echo
+echo "${application_name} installation finished"
+echo
+echo -e "\033[1;33mImportant:\033[0m Review the ${application_name} configuration and file dependencies before starting the server:"
+echo "- Server URL, keystore paths, passwords, Service Node bids, etc. in ${configuration_file}"
+echo "- Keystore files (e.g. at /etc/pantos-service-node.keystore)"
+echo "- SSL certificate and key files at /etc/pantos-service-node-fullchain.pem and /etc/pantos-service-node-privkey.pem"
+echo
+echo "Afterwards start the server:"
+echo "sudo systemctl start pantos-service-node"
+echo

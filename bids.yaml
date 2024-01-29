@@ -1,0 +1,331 @@
+blockchains:
+  ethereum:
+    ethereum:
+      - execution_time: 600
+        fee: 50000000
+        valid_period: 300
+    bnb_chain:
+      - execution_time: 600
+        fee: 10000000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 8500000000
+        valid_period: 300
+    avalanche:
+      - execution_time: 600
+        fee: 10000000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 8500000000
+        valid_period: 300
+    polygon:
+      - execution_time: 600
+        fee: 10000000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 8500000000
+        valid_period: 300
+    cronos:
+      - execution_time: 600
+        fee: 10000000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 8500000000
+        valid_period: 300
+    fantom:
+      - execution_time: 600
+        fee: 10000000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 8500000000
+        valid_period: 300
+    celo:
+      - execution_time: 600
+        fee: 10000000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 8500000000
+        valid_period: 300
+  bnb_chain:
+    ethereum:
+      - execution_time: 600
+        fee: 10000000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 8500000000
+        valid_period: 300
+    bnb_chain:
+      - execution_time: 600
+        fee: 50000000
+        valid_period: 300
+    avalanche:
+      - execution_time: 600
+        fee: 200000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 150000000
+        valid_period: 300
+    polygon:
+      - execution_time: 600
+        fee: 200000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 150000000
+        valid_period: 300
+    cronos:
+      - execution_time: 600
+        fee: 200000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 150000000
+        valid_period: 300
+    fantom:
+      - execution_time: 600
+        fee: 200000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 150000000
+        valid_period: 300
+    celo:
+      - execution_time: 600
+        fee: 200000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 150000000
+        valid_period: 300
+  avalanche:
+    ethereum:
+      - execution_time: 600
+        fee: 10000000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 8500000000
+        valid_period: 300
+    bnb_chain:
+      - execution_time: 600
+        fee: 200000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 150000000
+        valid_period: 300
+    avalanche:
+      - execution_time: 600
+        fee: 50000000
+        valid_period: 300
+    polygon:
+      - execution_time: 600
+        fee: 200000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 150000000
+        valid_period: 300
+    cronos:
+      - execution_time: 600
+        fee: 200000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 150000000
+        valid_period: 300
+    fantom:
+      - execution_time: 600
+        fee: 200000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 150000000
+        valid_period: 300
+    celo:
+      - execution_time: 600
+        fee: 200000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 150000000
+        valid_period: 300
+  polygon:
+    ethereum:
+      - execution_time: 600
+        fee: 10000000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 8500000000
+        valid_period: 300
+    bnb_chain:
+      - execution_time: 600
+        fee: 200000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 150000000
+        valid_period: 300
+    avalanche:
+      - execution_time: 600
+        fee: 200000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 150000000
+        valid_period: 300
+    polygon:
+      - execution_time: 600
+        fee: 50000000
+        valid_period: 300
+    cronos:
+      - execution_time: 600
+        fee: 200000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 150000000
+        valid_period: 300
+    fantom:
+      - execution_time: 600
+        fee: 200000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 150000000
+        valid_period: 300
+    celo:
+      - execution_time: 600
+        fee: 200000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 150000000
+        valid_period: 300
+  cronos:
+    ethereum:
+      - execution_time: 600
+        fee: 10000000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 8500000000
+        valid_period: 300
+    bnb_chain:
+      - execution_time: 600
+        fee: 200000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 150000000
+        valid_period: 300
+    avalanche:
+      - execution_time: 600
+        fee: 200000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 150000000
+        valid_period: 300
+    polygon:
+      - execution_time: 600
+        fee: 200000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 150000000
+        valid_period: 300
+    cronos:
+      - execution_time: 600
+        fee: 50000000
+        valid_period: 300
+    fantom:
+      - execution_time: 600
+        fee: 200000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 150000000
+        valid_period: 300
+    celo:
+      - execution_time: 600
+        fee: 200000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 150000000
+        valid_period: 300
+  fantom:
+    ethereum:
+      - execution_time: 600
+        fee: 10000000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 8500000000
+        valid_period: 300
+    bnb_chain:
+      - execution_time: 600
+        fee: 200000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 150000000
+        valid_period: 300
+    avalanche:
+      - execution_time: 600
+        fee: 200000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 150000000
+        valid_period: 300
+    polygon:
+      - execution_time: 600
+        fee: 200000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 150000000
+        valid_period: 300
+    cronos:
+      - execution_time: 600
+        fee: 200000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 150000000
+        valid_period: 300
+    fantom:
+      - execution_time: 600
+        fee: 50000000
+        valid_period: 300
+    celo:
+      - execution_time: 600
+        fee: 200000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 150000000
+        valid_period: 300
+  celo:
+    ethereum:
+      - execution_time: 600
+        fee: 10000000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 8500000000
+        valid_period: 300
+    bnb_chain:
+      - execution_time: 600
+        fee: 200000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 150000000
+        valid_period: 300
+    avalanche:
+      - execution_time: 600
+        fee: 200000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 150000000
+        valid_period: 300
+    polygon:
+      - execution_time: 600
+        fee: 200000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 150000000
+        valid_period: 300
+    cronos:
+      - execution_time: 600
+        fee: 200000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 150000000
+        valid_period: 300
+    fantom:
+      - execution_time: 600
+        fee: 200000000
+        valid_period: 300
+      - execution_time: 1200
+        fee: 150000000
+        valid_period: 300
+    celo:
+      - execution_time: 600
+        fee: 50000000
+        valid_period: 300
+    

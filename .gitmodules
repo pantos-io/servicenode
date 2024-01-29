@@ -1,0 +1,3 @@
+[submodule "submodules/common"]
+	path = submodules/common
+	url = https://github.com/pantos-io/common.git

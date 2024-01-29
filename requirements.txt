@@ -1,0 +1,14 @@
+.
+bandit==1.7.5
+flake8==6.0.0
+isort==5.12.0
+mypy==1.0.1
+pre-commit==3.3.3
+pytest==7.4.0
+pytest-cov==4.1.0
+pytest-mock==3.11.1
+types-PyYAML==6.0.12.10
+web3[tester]==6.5.0
+wheel==0.40.0
+yapf==0.40.1
+eth-tester==0.9.0b1

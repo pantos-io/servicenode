@@ -1,0 +1,7 @@
+[run]
+omit =
+    pantos/servicenode/__main__.py
+    pantos/servicenode/database/migrations/*
+    pantos/servicenode/wsgi.py
+branch = True
+relative_files = True

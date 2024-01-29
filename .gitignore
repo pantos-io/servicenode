@@ -1,0 +1,14 @@
+**/__pycache__/
+*.egg-info/
+*.keystore*
+*.swp
+*signer.pem*
+.DS_store
+.venv/
+.vscode/
+build/
+dist/
+find.sh
+local/
+postgresql_data
+rabbitmq_data

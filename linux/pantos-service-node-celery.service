@@ -1,0 +1,15 @@
+[Unit]
+Description=Service Node celery worker reference implementation for the Pantos multi-blockchain system
+After=network.target postgresql.service rabbitmq-server.service
+StartLimitIntervalSec=0
+
+[Service]
+Type=forking
+Restart=always
+RestartSec=1
+KillMode=mixed
+TimeoutStopSec=600
+ExecStart=runuser -u pantos -- bash -c "source /opt/pantos/service-node/virtual-environment/bin/activate; nohup celery -A pantos.servicenode worker -l INFO -n pantos.servicenode -Q pantos.servicenode >> /var/log/pantos/service-node-celery.log 2>&1 &"
+
+[Install]
+WantedBy=multi-user.target

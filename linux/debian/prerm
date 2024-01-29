@@ -1,0 +1,8 @@
+#! /bin/bash
+
+application_directory='/opt/pantos/service-node'
+
+systemctl stop pantos-service-node
+
+rm --force ${application_directory}/wsgi.py
+rm --recursive --force ${application_directory}/virtual-environment/
