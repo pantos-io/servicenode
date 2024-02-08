@@ -36,6 +36,14 @@ There are two ways to install the apps using pre-built packages:
 
 We provide Debian packages alongside every release, you can find them in the [releases tab](https://github.com/pantos-io/servicenode/releases). Further information on how to use the service node packages can be found [here](https://pantos.gitbook.io/technical-documentation/general/service-node).
 
+We have a PPA hosted on GitHub, which can be accessed as follows:
+
+```bash
+curl -s --compressed "https://pantos-io.github.io/servicenode/KEY.gpg" | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/servicenode.gpg >/dev/null
+sudo curl -s --compressed -o /etc/apt/sources.list.d/pantos-servicenode.list "https://pantos-io.github.io/servicenode/pantos-servicenode.list"
+sudo apt update
+```
+
 #### Docker images
 
 We also distribute docker images in DockerHub with each release. These are made available under the pantosio project as either [**app**](https://hub.docker.com/r/pantosio/service-node-app) or [**worker**](https://hub.docker.com/r/pantosio/service-node-worker).

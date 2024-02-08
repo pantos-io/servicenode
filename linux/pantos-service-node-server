@@ -11,7 +11,13 @@ system_user='pantos'
 
 server_name=$(cat ${configuration_file} | grep 'url:' | head -1 | awk '{$1=$1;print}' | sed --expression 's/url:.*http.*\/\///;s/\/.*//')
 
-systemctl stop apache2
+# check if apache2 is installed on systemctl
+if [ -n "$(systemctl list-units --type=service | grep apache2)" ]; then
+    # stop apache2
+    systemctl stop apache2
+else
+    echo "[pantos-service-node-server] apache2 is not installed, not stopping it"
+fi
 
 # extract server name and port
 server_name_and_port=$(cat ${configuration_file} | grep 'url:' | head -1 | awk '{$1=$1;print}' | sed 's/url:.*http.*\/\///;s/\/.*//')
