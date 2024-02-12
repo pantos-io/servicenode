@@ -1,6 +1,7 @@
 Package: pantos-service-node
 Version: VERSION
 Architecture: all
-Depends: apache2, apache2-dev, iptables, libpq-dev, openssl, postgresql, python3 (>= 3.10), python3-pip, python3-venv, rabbitmq-server
+Depends: libpq-dev, openssl, python3 (>= 3.10), openssh-client
+Recommends: iptables, apache2, apache2-dev, postgresql, rabbitmq-server, python3-pip, python3-venv, systemctl
 Maintainer: Pantos GmbH <contact@pantos.io>
 Description: Service Node reference implementation for the Pantos multi-blockchain system.

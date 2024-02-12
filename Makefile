@@ -1,4 +1,5 @@
 PANTOS_SERVICE_NODE_REVISION ?= 1
+PANTOS_SERVICE_NODE_SSH_HOST ?= bdev-service-node
 
 .PHONY: dist
 dist: tar wheel debian
@@ -74,13 +75,13 @@ dist/pantos-service-node-$(PANTOS_SERVICE_NODE_ENVIRONMENT)_$(PANTOS_SERVICE_NOD
 	$(eval debian_package := pantos-service-node-$(PANTOS_SERVICE_NODE_ENVIRONMENT)_$(PANTOS_SERVICE_NODE_VERSION)-$(PANTOS_SERVICE_NODE_REVISION)_all)
 	$(eval build_directory := build/debian/$(debian_package))
 	mkdir -p $(build_directory)/opt/pantos/service-node
-	mv dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION)-py3-none-any.whl $(build_directory)/opt/pantos/service-node/
+	cp dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION)-py3-none-any.whl $(build_directory)/opt/pantos/service-node/
 	mkdir -p $(build_directory)/usr/local/bin
 	cp linux/pantos-service-node-server $(build_directory)/usr/local/bin/
 	mkdir -p $(build_directory)/etc/systemd/system
 	cp linux/pantos-service-node-server.service $(build_directory)/etc/systemd/system/
 	cp linux/pantos-service-node-celery.service $(build_directory)/etc/systemd/system/
-	mkdir $(build_directory)/DEBIAN
+	mkdir -p $(build_directory)/DEBIAN
 	cat linux/debian/control | sed -e 's/VERSION/$(PANTOS_SERVICE_NODE_VERSION)/g' > $(build_directory)/DEBIAN/control
 	cat linux/debian/postinst | sed -e 's/VERSION/$(PANTOS_SERVICE_NODE_VERSION)/g' > $(build_directory)/DEBIAN/postinst
 	cp linux/debian/prerm $(build_directory)/DEBIAN/prerm
@@ -91,6 +92,18 @@ dist/pantos-service-node-$(PANTOS_SERVICE_NODE_ENVIRONMENT)_$(PANTOS_SERVICE_NOD
 	cd build/debian/; \
 		dpkg-deb --build --root-owner-group -Zgzip $(debian_package)
 	mv build/debian/$(debian_package).deb dist/
+
+.PHONY: remote-install
+remote-install: environment-variables dist/pantos-service-node-$(PANTOS_SERVICE_NODE_ENVIRONMENT)_$(PANTOS_SERVICE_NODE_VERSION)-$(PANTOS_SERVICE_NODE_REVISION)_all.deb
+	$(eval deb_file := pantos-service-node-$(PANTOS_SERVICE_NODE_ENVIRONMENT)_$(PANTOS_SERVICE_NODE_VERSION)-$(PANTOS_SERVICE_NODE_REVISION)_all.deb)
+	scp dist/$(deb_file) $(PANTOS_SERVICE_NODE_SSH_HOST):
+	ssh -t $(PANTOS_SERVICE_NODE_SSH_HOST) "\
+		sudo systemctl stop pantos-service-node-celery;\
+		sudo systemctl stop pantos-service-node-server;\
+		sudo apt install ./$(deb_file);\
+		sudo systemctl start pantos-service-node-server;\
+		sudo systemctl start pantos-service-node-celery;\
+		rm $(deb_file)"
 
 .PHONY: install
 install: environment-variables dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION)-py3-none-any.whl

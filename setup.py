@@ -16,4 +16,8 @@ setuptools.setup(
         'Flask-Cors==4.0.0', 'Flask-RESTful==0.3.10', 'marshmallow==3.19.0',
         'psycopg2==2.9.6', 'PyYAML==6.0.1', 'SQLAlchemy==2.0.18', 'web3==6.5.0',
         'JSON-log-formatter==0.5.2'
-    ])
+    ],
+    url='https://github.com/pantos-io/servicenode',
+    author='Pantos',
+    long_description='Service node reference implementation for the Pantos multi-blockchain system',
+)

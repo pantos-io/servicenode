@@ -61,46 +61,57 @@ chmod 640 ${configuration_file}
 echo "${application_name} configuration file installed at ${configuration_file}"
 
 # url
-url=$(cat ${old_configuration_file} | grep 'url:' | head -1 | awk '{$1=$1;print}' )
-sed -i  "0,/url:.*http.*\/\/.*/ s|url:.*http.*\/\/.*|${url}|" ${configuration_file}
+if [ -e "${old_configuration_file}" ]
+then
+  url=$(cat ${old_configuration_file} | grep 'url:' | head -1 | awk '{$1=$1;print}' )
+  sed -i  "0,/url:.*http.*\/\/.*/ s|url:.*http.*\/\/.*|${url}|" ${configuration_file}
+fi
 
 # Signer key
 if [ -e "${signer_key_file}" ]
 then
-  echo "Signer key exists, not generating new one"
-  password=$(grep  'pem_password' $old_configuration_file | awk '{ print $2 }')
-  sudo sed -i "s/pem_password: \w*/pem_password: ${password}/" ${configuration_file}
+  # if old config exists, replace password. Otherwise keep the placeholder
+  # and user has to replace it manually
+  if [ -e "${old_configuration_file}" ]
+  then
+    echo "Signer key exists, not generating new one"
+    password=$(grep  'pem_password' $old_configuration_file | awk '{ print $2 }')
+    sed -i "s/pem_password:.*$/pem_password: ${password}/" ${configuration_file}
+  fi
 else
   echo "Signer key does not exist, generating new one"
   read -s -p "Please enter your password for your pem file: " passwd
   ssh-keygen -t ed25519 -f "$signer_key_file" -N "$passwd" >/dev/null 2>&1
-  sudo sed -i "s/pem_password: \w*/pem_password: ${passwd}/" ${configuration_file}
+  sed -i "s/pem_password:.*$/pem_password: ${passwd}/" ${configuration_file}
 fi
 
 # Keystore file passwords
-passwords=$(grep -o 'private_key_password: .*' ${old_configuration_file})
-count=$(( $(grep -o 'private_key_password: .*' ${old_configuration_file} | wc -l) * 2 ))
+if [ -e "${old_configuration_file}" ]
+  then
+    passwords=$(grep -o 'private_key_password: .*' ${old_configuration_file})
+    count=$(( $(grep -o 'private_key_password: .*' ${old_configuration_file} | wc -l) * 2 ))
 
-counter=0
-grep -Fn 'private_key_password: PRIVATE_KEY_PASSWORD' ${configuration_file} | cut -d: -f1 | while read -r line; do
-    counter=$(( counter + 2 ))
-    password=$(echo $passwords | awk -v x=$counter '{ print $x}')
-    if [[ $password =~ \'\s* ]]; then
-        continue
-    fi
-    sudo sed -i "${line}s/private_key_password: PRIVATE_KEY_PASSWORD/private_key_password: ${password}/" ${configuration_file}
-done
+    counter=0
+    grep -n 'private_key_password:.*$' ${configuration_file} | cut -d: -f1 | while read -r line; do
+        counter=$(( counter + 2 ))
+        password=$(echo $passwords | awk -v x=$counter '{ print $x}')
+        if [[ $password =~ \'\s* ]]; then
+            continue
+        fi
+        sed -i "${line}s/private_key_password:.*$/private_key_password: ${password}/" ${configuration_file}
+    done
+fi
 
 # Offchain bids
-if [ -e "${offchain_bids_default_file}" ]
+if [ ! -e "${offchain_bids_default_file}" ]
 then
-  mv ${offchain_bids_default_file} ${old_offchain_bids_default_file}
-  echo "Old ${application_name} offchain bids configuration file moved to ${old_offchain_bids_default_file}"
+  # if offchain bids default file does not exists, we add it, otherwise do nothing
+  mv ${application_directory}/virtual-environment/lib/python3.*/site-packages/pantos/bids.yaml ${offchain_bids_default_file}
+  chown ${system_user}:${system_user} ${offchain_bids_default_file}
+  chmod 640 ${offchain_bids_default_file}
+  echo "${application_name} offchain bids file installed at ${offchain_bids_default_file}"
 fi
-mv ${application_directory}/virtual-environment/lib/python3.*/site-packages/pantos/bids.yaml ${offchain_bids_default_file}
-chown ${system_user}:${system_user} ${offchain_bids_default_file}
-chmod 640 ${offchain_bids_default_file}
-echo "${application_name} offchain bids file installed at ${offchain_bids_default_file}"
+
 
 # Alembic configuration
 if [ -e "${alembic_file}" ]
@@ -126,16 +137,23 @@ then
   echo "${application_name} PostgreSQL user '${postgresql_user}' already exists"
   if [ -e "${old_configuration_file}" ]
   then
-    application_database_url=$(cat ${old_configuration_file} | grep "url:.*postgresql:" | awk '{$1=$1;print}')
-    sed --in-place "s/url:.*postgresql:.*/${application_database_url//\//\\/}/g" ${configuration_file}
-    celery_database_url=$(cat ${old_configuration_file} | grep "backend:.*db+postgresql:" | awk '{$1=$1;print}')
-    sed --in-place "s/backend:.*db+postgresql:.*/${celery_database_url//\//\\/}/g" ${configuration_file}
+    application_database_url=$(cat ${old_configuration_file} | grep "url:.*postgresql.*$" | awk '{$1=$1;print}')
+    sed --in-place "s/url:.*postgresql.*$/${application_database_url//\//\\/}/g" ${configuration_file}
+    celery_database_url=$(cat ${old_configuration_file} | grep "backend:.*$" | awk '{$1=$1;print}')
+    sed --in-place "s/backend:.*$/${celery_database_url//\//\\/}/g" ${configuration_file}
     echo "Old ${application_name} PostgreSQL URLs copied to configuration file ${configuration_file}"
+  else
+    # config doesn't exist but the database user exists, so we generate a new password
+    postgresql_password=$(openssl rand -base64 32 | sed --expression 's/\///g;s/=//g')
+    runuser -u postgres -- psql --quiet --command "ALTER ROLE \"${postgresql_user}\" WITH PASSWORD '${postgresql_password}'"
+    sed --in-place "s|url:.*postgresql.*$|url: postgresql://pantos-service-node:${postgresql_password}@localhost/pantos-service-node|g" ${configuration_file}
+    sed --in-place "s|backend:.*$|backend: db+postgresql://pantos-service-node:${postgresql_password}@localhost/pantos-service-node-celery|g" ${configuration_file}
   fi
 else
   postgresql_password=$(openssl rand -base64 32 | sed --expression 's/\///g;s/=//g')
   runuser -u postgres -- psql --quiet --command "CREATE ROLE \"${postgresql_user}\" WITH LOGIN PASSWORD '${postgresql_password}'"
-	sed --in-place "s/DATABASE_PASSWORD/${postgresql_password}/g" ${configuration_file}
+	sed --in-place "s|url:.*postgresql.*$|url: postgresql://pantos-service-node:${postgresql_password}@localhost/pantos-service-node|g" ${configuration_file}
+  sed --in-place "s|backend:.*$|backend: db+postgresql://pantos-service-node:${postgresql_password}@localhost/pantos-service-node-celery|g" ${configuration_file}
   echo "${application_name} PostgreSQL user '${postgresql_user}' created"
 fi
 application_database_exists=$(runuser -u postgres -- psql --no-align --no-psqlrc --tuples-only --quiet --list | cut --delimiter \| --fields 1 | grep --quiet --word-regexp "^${application_database}"; echo $?)
@@ -167,14 +185,20 @@ then
   echo "${application_name} RabbitMQ user '${rabbitmq_user}' already exists"
   if [ -e "${old_configuration_file}" ]
   then
-    broker_url=$(cat ${old_configuration_file} | grep "broker:.*amqp:" | awk '{$1=$1;print}')
-    sed --in-place "s/broker:.*amqp:.*/${broker_url//\//\\/}/g" ${configuration_file}
+    broker_url=$(cat ${old_configuration_file} | grep "broker:.*$" | awk '{$1=$1;print}')
+    sed --in-place "s/broker:.*$/${broker_url//\//\\/}/g" ${configuration_file}
     echo "Old ${application_name} RabbitMQ URL copied to configuration file ${configuration_file}"
+  else
+    # old config does not exist but the rabbitmq user exists, so we generate a new password
+    # and change the password of the user
+    rabbitmq_password=$(openssl rand -base64 32 | sed --expression 's/\///g;s/=//g')
+    rabbitmqctl change_password ${rabbitmq_user} ${rabbitmq_password}
+    sed --in-place "s|broker:.*$|broker: amqp://pantos-service-node:${rabbitmq_password}@localhost:5672/pantos-service-node|g" ${configuration_file}
   fi
 else
   rabbitmq_password=$(openssl rand -base64 32 | sed --expression 's/\///g;s/=//g')
   rabbitmqctl add_user ${rabbitmq_user} ${rabbitmq_password}
-	sed --in-place "s/MESSAGE_BROKER_PASSWORD/${rabbitmq_password}/g" ${configuration_file}
+	sed --in-place "s|broker:.*$|broker: amqp://pantos-service-node:${rabbitmq_password}@localhost:5672/pantos-service-node|g" ${configuration_file}
   echo "${application_name} RabbitMQ user '${rabbitmq_user}' added"
 fi
 virtual_host_exists=$(rabbitmqctl list_vhosts | grep --quiet --word-regexp "^${virtual_host}"; echo $?)

@@ -2,7 +2,11 @@
 
 application_directory='/opt/pantos/service-node'
 
-systemctl stop pantos-service-node
+# Run only if systemctl exists (doesn't in docker images)
+if [ -x /bin/systemctl ]; then
+    systemctl stop pantos-service-node-celery
+    systemctl stop pantos-service-node-server
+fi
 
 rm --force ${application_directory}/wsgi.py
 rm --recursive --force ${application_directory}/virtual-environment/
