@@ -1,0 +1,1 @@
+deb [signed-by=/etc/apt/trusted.gpg.d/servicenode.gpg] https://pantos-io.github.io/servicenode/ ./
