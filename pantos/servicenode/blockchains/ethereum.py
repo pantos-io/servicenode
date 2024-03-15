@@ -285,7 +285,7 @@ class EthereumClient(BlockchainClient):
         try:
             node_connections = self.__create_node_connections()
             hub_contract = self._create_hub_contract(node_connections)
-            fee_record = hub_contract.functions.getTrustedValidatorFeeRecord(
+            fee_record = hub_contract.functions.getValidatorFeeRecord(
                 blockchain.value).call().get()
             # Check if the valid from of the factor has passed
             if time.time() >= fee_record[2]:

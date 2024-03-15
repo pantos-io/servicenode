@@ -173,7 +173,7 @@ def test_create_application_correct(mock_config, mock_flask_app,
                                     mock_update_bid_registration):
     returned_flask_app = create_application()
 
-    mock_initialize_application.assert_called_once_with()
+    mock_initialize_application.assert_called_once_with(True)
     mock_update_bid_registration.assert_called_once_with()
     assert returned_flask_app == mock_flask_app
 

@@ -5,7 +5,7 @@ import pytest
 from pantos.servicenode.plugins.base import BidPluginError
 from pantos.servicenode.plugins.bids import ConfigFileBidPlugin
 
-FILE_PATH = 'bids.yaml'
+FILE_PATH = 'bids.yml'
 
 
 def test_get_bids_correct():

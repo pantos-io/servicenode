@@ -21,7 +21,7 @@ def is_celery_worker_process() -> bool:
 
 
 if is_celery_worker_process():
-    initialize_application()  # pragma: no cover
+    initialize_application(False)  # pragma: no cover
 
 celery_app = celery.Celery(
     'pantos.servicenode', broker=config['celery']['broker'],

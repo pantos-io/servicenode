@@ -1,0 +1,119 @@
+name: service-node
+
+networks:
+  pantos:
+    name: pantos
+    attachable: true
+
+services:
+  app:
+    restart: always
+    image: pantosio/service-node-app:${DOCKER_TAG-latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: servicenode
+      x-bake:
+        tags:
+          - ${DOCKER_REGISTRY-pantosio}/service-node-app:${DOCKER_TAG-latest}
+    networks:
+      pantos:
+    env_file:
+      - service-node-config.env
+    environment:
+      APP_HOST: 0.0.0.0
+      APP_PORT: 8080
+      APP_URL: http://app:8080
+      APP_LOG_FILE_ENABLED: false
+      APP_LOG_FORMAT: human_readable
+      DB_URL: postgresql://pantos-service-node:pantos@db/pantos-service-node
+      CELERY_BROKER: amqp://pantos-service-node:pantos@broker:5672/pantos-service-node
+      CELERY_BACKEND: db+postgresql://pantos-service-node:pantos@db/pantos-service-node-celery
+    volumes:
+      - type: bind
+        source: ./keystore
+        target: /etc/pantos/service-node.keystore
+        read_only: true
+      - type: bind
+        source: ./signer_key.pem
+        target: /etc/pantos/service-node-signer.pem
+        read_only: true
+    ports:
+      - 8080:8080
+    depends_on:
+      broker:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+  worker:
+    restart: always
+    image: pantosio/service-node-worker:${DOCKER_TAG-latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: servicenode-celery-worker
+      x-bake:
+        tags:
+          - ${DOCKER_REGISTRY-pantosio}/service-node-worker:${DOCKER_TAG-latest}
+    networks:
+      pantos:
+    env_file:
+      - service-node-config.env
+    environment:
+      APP_HOST: 0.0.0.0
+      APP_PORT: 8080
+      APP_URL: http://app:8080
+      CELERY_LOG_FORMAT: human_readable
+      CELERY_LOG_FILE_ENABLED: false
+      DB_URL: postgresql://pantos-service-node:pantos@db/pantos-service-node
+      CELERY_BROKER: amqp://pantos-service-node:pantos@broker:5672/pantos-service-node
+      CELERY_BACKEND: db+postgresql://pantos-service-node:pantos@db/pantos-service-node-celery
+    volumes:
+      - type: bind
+        source: ./keystore
+        target: /etc/pantos/service-node.keystore
+        read_only: true
+      - type: bind
+        source: ./signer_key.pem
+        target: /etc/pantos/service-node-signer.pem
+        read_only: true
+    depends_on:
+      app:
+        condition: service_healthy
+  db:
+    image: postgres:latest
+    restart: on-failure
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      pantos:
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - ./postgresql_data:/postgresql_data
+      - type: bind
+        source: ./db_init.sh
+        target: /docker-entrypoint-initdb.d/init-user-db.sh
+        read_only: true
+  broker:
+    image: rabbitmq:latest
+    restart: on-failure
+    hostname: pantos-service-node
+    networks:
+      pantos:
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    environment:
+      RABBITMQ_DEFAULT_USER: pantos-service-node
+      RABBITMQ_DEFAULT_PASS: pantos
+      RABBITMQ_DEFAULT_VHOST: pantos-service-node
+    volumes:
+      - ./rabbitmq_data:/rabbitmq_data

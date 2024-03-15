@@ -28,6 +28,14 @@ The celery application is responsible for the following:
 
 ## 2. Installation
 
+### IMPORTANT ###
+
+We provide two ways to modify the app configuration, either through `service-node-config.env` or `service-node-config.yml`. We recommend using the `.env` file, as the `.conf` file is overwritten on every install.
+
+While using the `.env` file you need to be aware that any fields containing certain special characters need to be wrapped around single quotes (e.g. `ETHEREUM_PRIVATE_KEY_PASSWORD='12$$#%R^'`).
+
+The application will complain on startup should the configuration be incorrect.
+
 ### 2.1 Pre-built packages
 
 There are two ways to install the apps using pre-built packages:
@@ -48,6 +56,17 @@ sudo apt install pantos-service-node
 #### Docker images
 
 We also distribute docker images in DockerHub with each release. These are made available under the pantosio project as either [**app**](https://hub.docker.com/r/pantosio/service-node-app) or [**worker**](https://hub.docker.com/r/pantosio/service-node-worker).
+
+You can run a local setup with docker by doing the following steps:
+
+- The variables `DB_URL`, `CELERY_BACKEND` and `CELERY_BROKER` are already defined in the `docker-compose.yml`
+- Modify the `.env` file to match your current setup
+- Ensure you have a `keystore` and `signer_key.pem` file located in the same directory
+- Run `docker compose up`
+
+Please note that you may need to add a load balancer or another webserver in front of this setup should you want to host this setup under a specific domain.
+
+If you're hosting this on a cloud provider (AWS, GCP, Azure or alike), these are normally provided. You just need to point the load balancer to the port exposed by the app, `8080`, and configure the rest accordingly.
 
 #### Python package
 

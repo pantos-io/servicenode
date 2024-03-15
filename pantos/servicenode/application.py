@@ -27,7 +27,7 @@ def create_application() -> flask.Flask:
     """Create the service node application.
 
     """
-    initialize_application()
+    initialize_application(True)
     # Imported here to ensure Celery is initialized after loading the
     # configuration and before updating the registrations
     import pantos.servicenode.celery  # noqa: F401
@@ -38,7 +38,7 @@ def create_application() -> flask.Flask:
     return flask_app
 
 
-def initialize_application() -> None:
+def initialize_application(is_flask_app: bool = False) -> None:
     """Initialize the service node application.
 
     """
@@ -70,7 +70,7 @@ def initialize_application() -> None:
         sys.exit(1)
     # Package-specific initialization
     try:
-        initialize_database_package()
+        initialize_database_package(is_flask_app)
     except Exception:
         _logger.critical('unable to initialize the database', exc_info=True)
         sys.exit(1)

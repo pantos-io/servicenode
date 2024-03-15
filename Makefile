@@ -1,3 +1,4 @@
+PANTOS_SERVICE_NODE_VERSION ?= 0.0.0
 PANTOS_SERVICE_NODE_REVISION ?= 1
 PANTOS_SERVICE_NODE_SSH_HOST ?= bdev-service-node
 
@@ -43,36 +44,39 @@ format:
 .PHONY: tar
 tar: dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION).tar.gz
 
-dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION).tar.gz: environment-variables pantos/ alembic.ini pantos-service-node.conf.$(PANTOS_SERVICE_NODE_ENVIRONMENT) pantos-service-node.sh submodules/common/pantos/common/
+dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION).tar.gz: pantos/ alembic.ini service-node-config.yml service-node-config.publish.env pantos-service-node.sh submodules/common/pantos/common/
 	mkdir -p build/tar/pantos
 	mkdir -p dist
-	cp pantos-service-node.conf.$(PANTOS_SERVICE_NODE_ENVIRONMENT) build/tar/pantos-service-node.conf
+	cp service-node-config.yml build/tar/service-node-config.yml
+	cp service-node-config.publish.env build/tar/service-node-config.env
 	cp alembic.ini build/tar/pantos/alembic.ini
 	cp pantos-service-node.sh build/tar/
 	chmod 755 build/tar/pantos-service-node.sh
 	cp pantos/__init__.py build/tar/pantos/
-	cp --recursive pantos/servicenode/ build/tar/pantos/
-	cp --recursive submodules/common/pantos/common/ build/tar/pantos/
+	cp -R pantos/servicenode/ build/tar/pantos/
+	cp -R submodules/common/pantos/common/ build/tar/pantos/
 	cd build/tar/; \
 		tar --exclude='__pycache__' -czvf ../../dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION).tar.gz *
 
 .PHONY: wheel
 wheel: dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION)-py3-none-any.whl
 
-dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION)-py3-none-any.whl: environment-variables pantos/ alembic.ini pantos-service-node.conf.$(PANTOS_SERVICE_NODE_ENVIRONMENT) setup.py submodules/common/pantos/common/
-	cp pantos-service-node.conf.$(PANTOS_SERVICE_NODE_ENVIRONMENT) pantos/pantos-service-node.conf
-	cp bids.yaml pantos/bids.yaml
+dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION)-py3-none-any.whl: pantos/ alembic.ini service-node-config.yml service-node-config.publish.env setup.py submodules/common/pantos/common/
+	cp service-node-config.yml pantos/service-node-config.yml
+	cp service-node-config.publish.env pantos/service-node-config.env
+	cp bids.yml pantos/bids.yml
 	cp alembic.ini pantos/alembic.ini
 	python3 setup.py bdist_wheel
 	rm pantos/alembic.ini
-	rm pantos/pantos-service-node.conf
-	rm pantos/bids.yaml
+	rm pantos/service-node-config.yml
+	rm pantos/service-node-config.env
+	rm pantos/bids.yml
 
 .PHONY: debian
-debian: dist/pantos-service-node-$(PANTOS_SERVICE_NODE_ENVIRONMENT)_$(PANTOS_SERVICE_NODE_VERSION)-$(PANTOS_SERVICE_NODE_REVISION)_all.deb
+debian: dist/pantos-service-node-$(PANTOS_SERVICE_NODE_VERSION)-$(PANTOS_SERVICE_NODE_REVISION)_all.deb
 
-dist/pantos-service-node-$(PANTOS_SERVICE_NODE_ENVIRONMENT)_$(PANTOS_SERVICE_NODE_VERSION)-$(PANTOS_SERVICE_NODE_REVISION)_all.deb: environment-variables linux/ dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION)-py3-none-any.whl
-	$(eval debian_package := pantos-service-node-$(PANTOS_SERVICE_NODE_ENVIRONMENT)_$(PANTOS_SERVICE_NODE_VERSION)-$(PANTOS_SERVICE_NODE_REVISION)_all)
+dist/pantos-service-node-$(PANTOS_SERVICE_NODE_VERSION)-$(PANTOS_SERVICE_NODE_REVISION)_all.deb: linux/ dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION)-py3-none-any.whl
+	$(eval debian_package := pantos-service-node-$(PANTOS_SERVICE_NODE_VERSION)-$(PANTOS_SERVICE_NODE_REVISION)_all)
 	$(eval build_directory := build/debian/$(debian_package))
 	mkdir -p $(build_directory)/opt/pantos/service-node
 	cp dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION)-py3-none-any.whl $(build_directory)/opt/pantos/service-node/
@@ -94,19 +98,19 @@ dist/pantos-service-node-$(PANTOS_SERVICE_NODE_ENVIRONMENT)_$(PANTOS_SERVICE_NOD
 	mv build/debian/$(debian_package).deb dist/
 
 .PHONY: remote-install
-remote-install: environment-variables dist/pantos-service-node-$(PANTOS_SERVICE_NODE_ENVIRONMENT)_$(PANTOS_SERVICE_NODE_VERSION)-$(PANTOS_SERVICE_NODE_REVISION)_all.deb
-	$(eval deb_file := pantos-service-node-$(PANTOS_SERVICE_NODE_ENVIRONMENT)_$(PANTOS_SERVICE_NODE_VERSION)-$(PANTOS_SERVICE_NODE_REVISION)_all.deb)
+remote-install: dist/pantos-service-node-$(PANTOS_SERVICE_NODE_VERSION)-$(PANTOS_SERVICE_NODE_REVISION)_all.deb
+	$(eval deb_file := pantos-service-node-$(PANTOS_SERVICE_NODE_VERSION)-$(PANTOS_SERVICE_NODE_REVISION)_all.deb)
 	scp dist/$(deb_file) $(PANTOS_SERVICE_NODE_SSH_HOST):
 	ssh -t $(PANTOS_SERVICE_NODE_SSH_HOST) "\
 		sudo systemctl stop pantos-service-node-celery;\
 		sudo systemctl stop pantos-service-node-server;\
-		sudo apt install ./$(deb_file);\
+		sudo apt install -y ./$(deb_file);\
 		sudo systemctl start pantos-service-node-server;\
 		sudo systemctl start pantos-service-node-celery;\
 		rm $(deb_file)"
 
 .PHONY: install
-install: environment-variables dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION)-py3-none-any.whl
+install: dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION)-py3-none-any.whl
 	python -m pip install dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION)-py3-none-any.whl
 
 .PHONY: uninstall
@@ -118,12 +122,3 @@ clean:
 	rm -r -f build/
 	rm -r -f dist/
 	rm -r -f pantos_service_node.egg-info/
-
-.PHONY: environment-variables
-environment-variables:
-ifndef PANTOS_SERVICE_NODE_ENVIRONMENT
-	$(error PANTOS_SERVICE_NODE_ENVIRONMENT is undefined)
-endif
-ifndef PANTOS_SERVICE_NODE_VERSION
-	$(error PANTOS_SERVICE_NODE_VERSION is undefined)
-endif

@@ -28,7 +28,9 @@ def test_initialize_package_blockchain_correct(mocked_create_engine,
             'url': '',
             'echo': '',
             'pool_size': '',
-            'max_overflow': ''
+            'max_overflow': '',
+            'alembic_config': '',
+            'apply_migrations': ''
         }
     }
     mocked_config.__getitem__.side_effect = mocked_config_dict.__getitem__
@@ -58,7 +60,9 @@ def test_initialize_package_transfer_status_correct(mocked_create_engine,
             'url': '',
             'echo': '',
             'pool_size': '',
-            'max_overflow': ''
+            'max_overflow': '',
+            'alembic_config': '',
+            'apply_migrations': ''
         }
     }
     mocked_config.__getitem__.side_effect = mocked_config_dict.__getitem__

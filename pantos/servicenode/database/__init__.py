@@ -1,11 +1,14 @@
 """Package for managing and accessing the database.
 
 """
+import logging
 import typing
 
 import sqlalchemy  # type: ignore
 import sqlalchemy.exc  # type: ignore
 import sqlalchemy.orm  # type: ignore
+from alembic import command
+from alembic.config import Config
 
 from pantos.common.blockchains.enums import Blockchain
 from pantos.servicenode.configuration import config
@@ -16,6 +19,7 @@ from pantos.servicenode.database.models import \
     TransferStatus as TransferStatus_
 
 _session_maker: typing.Optional[sqlalchemy.orm.sessionmaker] = None
+_logger = logging.getLogger(__name__)
 
 
 def get_session_maker() -> sqlalchemy.orm.sessionmaker:
@@ -56,7 +60,21 @@ def get_session() -> sqlalchemy.orm.Session:
     return get_session_maker()()
 
 
-def initialize_package() -> None:
+def run_migrations(config_path: str, dsn: str) -> None:
+    _logger.info('running DB migrations using %r', config_path)
+    alembic_cfg = Config(config_path)
+    alembic_cfg.set_main_option('sqlalchemy.url', dsn)
+    command.upgrade(alembic_cfg, 'head')
+    _logger.info('db migrations done')
+
+
+def initialize_package(is_flask_app: bool = False) -> None:
+    # Before connecting, run alembic to ensure
+    # the database schema is up to date
+    if is_flask_app and config['database']['apply_migrations']:
+        run_migrations(config['database']['alembic_config'],
+                       config['database']['url'])
+
     sql_engine = sqlalchemy.create_engine(
         config['database']['url'], pool_size=config['database']['pool_size'],
         max_overflow=config['database']['max_overflow'], pool_pre_ping=True,

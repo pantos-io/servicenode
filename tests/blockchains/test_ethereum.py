@@ -954,7 +954,7 @@ def test_get_validator_fee_factor_new_factor_correct(
         'hub': hub_contract_address
     }
     mock_get_blockchain_utilities().create_contract().functions.\
-        getTrustedValidatorFeeRecord().call().get.return_value = [2, 4, 9]
+        getValidatorFeeRecord().call().get.return_value = [2, 4, 9]
 
     result = ethereum_client.get_validator_fee_factor(Blockchain.ETHEREUM)
 
@@ -971,7 +971,7 @@ def test_get_validator_fee_factor_old_factor_correct(
         'hub': hub_contract_address
     }
     mock_get_blockchain_utilities().create_contract().functions.\
-        getTrustedValidatorFeeRecord().call().get.return_value = [2, 4, 11]
+        getValidatorFeeRecord().call().get.return_value = [2, 4, 11]
 
     result = ethereum_client.get_validator_fee_factor(Blockchain.ETHEREUM)
 

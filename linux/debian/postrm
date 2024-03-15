@@ -1,8 +1,9 @@
 #! /bin/bash
 
-configuration_file='/etc/pantos-service-node.conf'
+configuration_file='/etc/pantos/service-node-config.yml'
 
 if [ $1 = 'purge' ]
 then
   rm --force ${configuration_file}
+  # TODO: remove everything else
 fi

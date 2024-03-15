@@ -10,7 +10,7 @@ from pantos.common.blockchains.enums import Blockchain
 from pantos.common.configuration import Config
 from pantos.common.logging import LogFormat
 
-_DEFAULT_FILE_NAME: typing.Final[str] = 'pantos-service-node.conf'
+_DEFAULT_FILE_NAME: typing.Final[str] = 'service-node-config.yml'
 """Default configuration file name."""
 
 config = Config(_DEFAULT_FILE_NAME)
@@ -197,6 +197,15 @@ _VALIDATION_SCHEMA = {
             'echo': {
                 'type': 'boolean',
                 'default': False
+            },
+            'alembic_config': {
+                'type': 'string',
+                'required': True,
+                'empty': False
+            },
+            'apply_migrations': {
+                'type': 'boolean',
+                'default': False,
             }
         }
     },
