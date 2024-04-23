@@ -11,7 +11,7 @@ log_directory='/var/log/pantos'
 base_directory='/etc/pantos'
 configuration_file="${base_directory}/service-node-config.yml"
 env_file="${base_directory}/service-node-config.env"
-old_env_file="${offchain_bids_default_file}.old_$(date +%Y%m%d_%H%M%S)"
+old_env_file="${env_file}.old_$(date +%Y%m%d_%H%M%S)"
 offchain_bids_default_file="${base_directory}/service-node-bids.yml"
 old_offchain_bids_default_file="${offchain_bids_default_file}.old_$(date +%Y%m%d_%H%M%S)"
 alembic_file="${base_directory}/service-node-alembic.ini"
@@ -57,6 +57,7 @@ fi
 mkdir -p ${base_directory}
 chown -R ${system_user}:${system_user} ${base_directory}
 chmod -R 640 ${base_directory}
+chmod 740 ${base_directory}
 
 # Application
 echo "Installing ${application_name} application"

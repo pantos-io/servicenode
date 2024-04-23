@@ -31,7 +31,8 @@ _VALIDATION_SCHEMA_BLOCKCHAIN = {
         'private_key': {
             'type': 'string',
             'required': True,
-            'empty': False
+            'empty': False,
+            'coerce': 'load_if_file'
         },
         'private_key_password': {
             'type': 'string',
@@ -228,9 +229,10 @@ _VALIDATION_SCHEMA = {
     'signer': {
         'type': 'dict',
         'schema': {
-            'pem_path': {
+            'pem': {
                 'type': 'string',
-                'required': True
+                'required': True,
+                'coerce': 'load_if_file'
             },
             'pem_password': {
                 'type': 'string',

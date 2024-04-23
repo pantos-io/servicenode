@@ -16,11 +16,7 @@ FROM bitnami/minideb:bookworm AS prod
 RUN apt-get update
 
 # TODO: Remove this whenever we mount the key and keystore as volumes
-COPY --from=dev /app/dist/*.deb /app/signer_key.pe[m] /app/keystor[e] /
-
-RUN mkdir -p /etc/pantos && \
-    mv /signer_key.pem /etc/pantos/service-node-signer.pem || true && \
-    mv /keystore /etc/pantos/service-node.keystore || true
+COPY --from=dev /app/dist/*.deb /
 
 RUN apt-get install -y --no-install-recommends ./*.deb && rm -f ./*.deb && apt-get clean && rm -rf /var/lib/apt/lists/*
 

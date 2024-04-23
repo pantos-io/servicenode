@@ -3,7 +3,6 @@
 """
 import json
 import logging
-import pathlib
 import time
 import typing
 import uuid
@@ -66,10 +65,10 @@ class EthereumClient(BlockchainClient):
     def __init__(self):
         # Docstring inherited
         super().__init__()
-        private_key_path = pathlib.Path(self._get_config()['private_key'])
+        private_key = self._get_config()['private_key']
         private_key_password = self._get_config()['private_key_password']
-        private_key = self._get_utilities().load_private_key(
-            private_key_path, private_key_password)
+        private_key = self._get_utilities().decrypt_private_key(
+            private_key, private_key_password)
         self.__address = self._get_utilities().get_address(private_key)
 
     @classmethod

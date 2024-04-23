@@ -438,7 +438,7 @@ def mock_get_blockchain_utilities():
 @pytest.fixture
 def ethereum_client(mock_get_blockchain_config, mock_get_blockchain_utilities,
                     node_connections, service_node_address):
-    mock_get_blockchain_utilities().load_private_key.return_value = \
+    mock_get_blockchain_utilities().decrypt_private_key.return_value = \
         _PRIVATE_KEY
     mock_get_blockchain_utilities().get_address.return_value = \
         service_node_address

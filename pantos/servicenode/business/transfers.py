@@ -517,7 +517,7 @@ class TransferInteractor(Interactor):
             True if the bid is valid, False otherwise.
         """
         signer_config = get_signer_config()
-        signer = get_signer(signer_config['pem_path'],
+        signer = get_signer(signer_config['pem'],
                             signer_config['pem_password'])
         bid_message = signer.build_message('', fee, bid_valid_until,
                                            source_blockchain_id,

@@ -80,7 +80,7 @@ class BidInteractor(Interactor):
                 source_blockchain_id, destination_blockchain_id)
             bids = []
             signer_config = get_signer_config()
-            signer = get_signer(signer_config['pem_path'],
+            signer = get_signer(signer_config['pem'],
                                 signer_config['pem_password'])
             for bid in raw_bids:
                 bid_message = signer.build_message('', int(bid.fee),

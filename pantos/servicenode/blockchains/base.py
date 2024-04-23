@@ -4,7 +4,6 @@
 import abc
 import dataclasses
 import logging
-import pathlib
 import typing
 import uuid
 
@@ -86,14 +85,14 @@ class BlockchainClient(BlockchainHandler, ErrorCreator[BlockchainClientError]):
         required_transaction_confirmations = \
             self._get_config()['confirmations']
         transaction_network_id = self._get_config().get('chain_id')
-        private_key_path = pathlib.Path(self._get_config()['private_key'])
+        private_key = self._get_config()['private_key']
         private_key_password = self._get_config()['private_key_password']
         try:
             initialize_blockchain_utilities(
                 self.get_blockchain(), [blockchain_node_url],
                 fallback_blockchain_nodes_urls, average_block_time,
                 required_transaction_confirmations, transaction_network_id,
-                default_private_key=(private_key_path, private_key_password),
+                default_private_key=(private_key, private_key_password),
                 celery_tasks_enabled=True)
         except BlockchainUtilitiesError:
             raise self._create_error(

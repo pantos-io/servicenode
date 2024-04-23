@@ -85,7 +85,7 @@ def mock_config(request, monkeypatch):
         config['blockchains'][blockchain_name]['active'] = blockchain in active
         config['blockchains'][blockchain_name]['hub'] = HUB_ADDRESS
     config['signer'] = {}
-    config['signer']['pem_path'] = 'test.path'
+    config['signer']['pem'] = 'test.path'
     config['signer']['pem_password'] = '1234'
 
     def mock_get_signer_config():

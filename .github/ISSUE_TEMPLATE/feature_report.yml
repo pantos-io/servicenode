@@ -1,0 +1,28 @@
+name: Feature Request
+description: You want a new feature to be implemented.
+labels: [wishlisted]
+projects: ["pantos-io/1"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting this. Please provide some details so we can have a better understanding of why you need this new feature.
+
+  - type: textarea
+    id: Requirements
+    attributes:
+      label: Requirements
+      description: |
+        Please add some details of what is needed, including use cases.
+      placeholder: ex. "I want my tokens to be... because..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: Info
+    attributes:
+      label: "Notes & References"
+      description: |
+        Please add relevant notes, links other related issues/PRs,
+        anything to help diagnose, understand and develop the
+        feature you want.
