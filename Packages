@@ -1,13 +1,13 @@
 Package: pantos-service-node
-Version: 1.6.0
+Version: 1.7.0
 Architecture: all
 Maintainer: Pantos GmbH <contact@pantos.io>
 Depends: libpq-dev, openssl, python3-dev (>= 3.10), apache2, apache2-dev, python3-venv
 Recommends: iptables, postgresql, rabbitmq-server, python3-pip, systemctl, openssh-client
-Filename: ./pantos-service-node-1.6.0-1_all.deb
-Size: 103520
-MD5sum: f1386cf8830b4825c15da8965056607d
-SHA1: 6f33c168dbb516257293d0492d9a79674577de2c
-SHA256: f0b154fa253a9022acfb2229c462b764bc2bf2ab34bd7f205e5d503d4d7862a2
+Filename: ./pantos-service-node-1.7.0-1_all.deb
+Size: 72846
+MD5sum: 1664d7d1848dc5ac94c13eb4ceaa0b5b
+SHA1: d507488a78044027f50f12aae01a6c53829ffc69
+SHA256: 3af8956d9a08b0160c6ed937e5aa47dd13357d8966680dd391b6d54f8f38f409
 Description: Service Node reference implementation for the Pantos multi-blockchain system.
 
