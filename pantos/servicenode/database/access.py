@@ -10,8 +10,8 @@ import uuid
 import sqlalchemy  # type: ignore
 import sqlalchemy.exc  # type: ignore
 import sqlalchemy.orm  # type: ignore
-
 from pantos.common.blockchains.enums import Blockchain
+
 from pantos.servicenode.database import get_session
 from pantos.servicenode.database import get_session_maker
 from pantos.servicenode.database.enums import TransferStatus
@@ -57,7 +57,9 @@ def create_bid(source_blockchain: Blockchain,
     assert fee > 0
     bid = Bid(source_blockchain_id=source_blockchain.value,
               destination_blockchain_id=destination_blockchain.value,
-              execution_time=execution_time, valid_until=valid_until, fee=fee)
+              execution_time=execution_time,
+              valid_until=valid_until,
+              fee=fee)
     with get_session_maker().begin() as session:
         session.add(bid)
         session.flush()
@@ -145,15 +147,17 @@ def create_transfer(source_blockchain: Blockchain,
             # Create the source and destination token contract instances if
             # they do not exist yet
             source_token_contract = _read_token_contract(
-                session, blockchain_id=source_blockchain.value,
+                session,
+                blockchain_id=source_blockchain.value,
                 address=source_token_address)
             source_token_contract_id = (
-                source_token_contract.id if source_token_contract is not None
-                else _create_token_contract(
-                    blockchain_id=source_blockchain.value,
-                    address=source_token_address))
+                source_token_contract.id
+                if source_token_contract is not None else
+                _create_token_contract(blockchain_id=source_blockchain.value,
+                                       address=source_token_address))
             destination_token_contract = _read_token_contract(
-                session, blockchain_id=destination_blockchain.value,
+                session,
+                blockchain_id=destination_blockchain.value,
                 address=destination_token_address)
             destination_token_contract_id = (
                 destination_token_contract.id if destination_token_contract
@@ -163,14 +167,16 @@ def create_transfer(source_blockchain: Blockchain,
             # Create the hub and forwarder contract instances if they do not
             # exist yet
             hub_contract = _read_hub_contract(
-                session, blockchain_id=source_blockchain.value,
+                session,
+                blockchain_id=source_blockchain.value,
                 address=hub_address)
             hub_contract_id = (hub_contract.id if hub_contract is not None else
                                _create_hub_contract(
                                    blockchain_id=source_blockchain.value,
                                    address=hub_address))
             forwarder_contract = _read_forwarder_contract(
-                session, blockchain_id=source_blockchain.value,
+                session,
+                blockchain_id=source_blockchain.value,
                 address=forwarder_address)
             forwarder_contract_id = (forwarder_contract.id
                                      if forwarder_contract is not None else
@@ -185,8 +191,11 @@ def create_transfer(source_blockchain: Blockchain,
                 recipient_address=recipient_address,
                 source_token_contract_id=source_token_contract_id,
                 destination_token_contract_id=destination_token_contract_id,
-                amount=amount, fee=fee, sender_nonce=sender_nonce,
-                signature=signature, hub_contract_id=hub_contract_id,
+                amount=amount,
+                fee=fee,
+                sender_nonce=sender_nonce,
+                signature=signature,
+                hub_contract_id=hub_contract_id,
                 forwarder_contract_id=forwarder_contract_id,
                 status_id=TransferStatus.ACCEPTED.value)
             session.add(transfer)
@@ -354,16 +363,18 @@ def update_transfer_nonce(internal_transfer_id: int, blockchain: Blockchain,
             sqlalchemy.and_(
                 Transfer.source_blockchain_id == blockchain.value,
                 Transfer.nonce == minimum_failed_nonce_cte.c.min))).values({
-                    Transfer.nonce: sqlalchemy.case(
-                        (count_failed_nonces_subquery == 0,
-                         sqlalchemy.case((maximum_transfer_nonce_subquery
+                    Transfer.nonce:
+                    sqlalchemy.case((count_failed_nonces_subquery == 0,
+                                     sqlalchemy.case(
+                                         (maximum_transfer_nonce_subquery
                                           >= latest_blockchain_nonce,
                                           maximum_transfer_nonce_subquery + 1),
                                          else_=latest_blockchain_nonce)),
-                        (Transfer.id == internal_transfer_id,
-                         minimum_failed_nonce_cte.c.min),
-                        else_=sqlalchemy.null()),
-                    Transfer.status_id: sqlalchemy.case(
+                                    (Transfer.id == internal_transfer_id,
+                                     minimum_failed_nonce_cte.c.min),
+                                    else_=sqlalchemy.null()),
+                    Transfer.status_id:
+                    sqlalchemy.case(
                         (Transfer.id == internal_transfer_id,
                          TransferStatus.ACCEPTED_NEW_NONCE_ASSIGNED.value),
                         else_=sqlalchemy.case(

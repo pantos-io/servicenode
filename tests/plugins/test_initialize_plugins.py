@@ -1,8 +1,8 @@
 import unittest.mock
 
 import pytest
-
 from pantos.common.blockchains.enums import Blockchain
+
 from pantos.servicenode.plugins import initialize_plugins
 
 
@@ -20,15 +20,20 @@ def patched_execute_bid_plugin(mocker):
 
 
 @pytest.mark.parametrize('start_worker', [True, False])
+@pytest.mark.parametrize('registered', [True, False])
 @pytest.mark.parametrize('active', [True, False])
 @unittest.mock.patch('pantos.servicenode.plugins.get_blockchain_config')
 @unittest.mock.patch('pantos.servicenode.plugins._import_bid_plugin')
 def test_initialize_plugins_correct(mocked_import_bid_plugin,
                                     mocked_get_blockchain_config,
                                     patched_execute_bid_plugin, active,
-                                    start_worker):
-    mocked_get_blockchain_config.return_value = {'active': active}
+                                    registered, start_worker):
+    mocked_get_blockchain_config.return_value = {
+        'active': active,
+        'registered': registered
+    }
     initialize_plugins(start_worker)
 
-    call_count = len(Blockchain) if active and start_worker else 0
+    call_count = (len(Blockchain)
+                  if active and registered and start_worker else 0)
     assert patched_execute_bid_plugin.call_count == call_count

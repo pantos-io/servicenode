@@ -1,32 +1,25 @@
 repos:
-  - repo: local
-    hooks:
-      - id: validate-commit-msg
-        name: Commit message is prefixed by Jira ticket number
-        entry: ^(?!PAN-\d*:.+) 
-        language: pygrep
-        stages: [ commit-msg ]
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v2.2.1
+    rev: v4.5.0
     hooks:
       - id: no-commit-to-branch
         name: Check that branch name follows our standard
         description: Checks that a branch has a proper name
-        args: ['--branch', 'main','--pattern', '^(?!(feature|bugfix)\/PAN-[0-9]+-[a-z0-9._-]+).*']
+        args: ['--branch', 'main','--pattern', '^(?![a-zA-Z0-9._-]+)']
         stages: [ commit-msg ]
   - repo: https://github.com/PyCQA/flake8
-    rev: 5.0.4
+    rev: 6.0.0
     hooks:
       - id: flake8
         files: ^pantos/servicenode
         stages: [ commit ]
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v0.981
+    rev: v1.0.1
     hooks:
       - id: mypy
         files: ^pantos/servicenode
-        stages: [ commit ]
         additional_dependencies: ['types-requests', 'types-PyYAML']
+        stages: [ commit ]
   - repo: https://github.com/PyCQA/isort
     rev: 5.12.0
     hooks:
@@ -35,7 +28,7 @@ repos:
         args: ['--force-single-line-imports' ]
         stages: [ commit ]
   - repo: https://github.com/PyCQA/bandit
-    rev: 1.7.4
+    rev: 1.7.5
     hooks:
       - id: bandit
         alias: lint
@@ -43,5 +36,4 @@ repos:
           - --quiet
           - --format=custom
           - --configfile=.bandit
-        exclude: tests
         stages: [ commit ]

@@ -8,10 +8,12 @@ import time
 import typing
 import uuid
 
+import celery  # type: ignore
 from pantos.common.blockchains.enums import Blockchain
 from pantos.common.entities import ServiceNodeBid
 from pantos.common.entities import TransactionStatus
 from pantos.common.signer import get_signer
+
 from pantos.servicenode.blockchains.base import BlockchainClient
 from pantos.servicenode.blockchains.base import InsufficientBalanceError
 from pantos.servicenode.blockchains.base import InvalidSignatureError
@@ -21,7 +23,6 @@ from pantos.servicenode.blockchains.factory import get_blockchain_client
 from pantos.servicenode.business.base import Interactor
 from pantos.servicenode.business.base import InteractorError
 from pantos.servicenode.business.bids import BidInteractorError
-from pantos.servicenode.celery import celery_app
 from pantos.servicenode.configuration import config
 from pantos.servicenode.configuration import get_blockchain_config
 from pantos.servicenode.configuration import get_signer_config
@@ -68,6 +69,7 @@ class TransferInteractor(Interactor):
     """Interactor for handling token transfers.
 
     """
+
     @dataclasses.dataclass
     class ConfirmTransferRequest:
         """Request data for confirming the inclusion of a token transfer
@@ -124,7 +126,8 @@ class TransferInteractor(Interactor):
                         request.internal_transaction_id,
                         request.destination_blockchain)
             except UnresolvableTransferSubmissionError:
-                _logger.error('token transfer failed', extra=extra_info,
+                _logger.error('token transfer failed',
+                              extra=extra_info,
                               exc_info=True)
                 database_access.reset_transfer_nonce(
                     request.internal_transfer_id)
@@ -259,7 +262,8 @@ class TransferInteractor(Interactor):
                 request.internal_transfer_id, TransferStatus.FAILED)
             raise TransferInteractorUnrecoverableError(
                 'source and destination token addresses must be equal for '
-                'a single-chain token transfer', request=request)
+                'a single-chain token transfer',
+                request=request)
         transfer_request = BlockchainClient.TransferSubmissionStartRequest(
             request.internal_transfer_id, request.sender_address,
             request.recipient_address, request.source_token_address,
@@ -348,14 +352,17 @@ class TransferInteractor(Interactor):
                 raise TransferInteractorBidNotAcceptedError(
                     message='"valid until" timestamp must be at least '
                     'the current timestamp plus the service '
-                    'node bid\'s execution time', field_name='valid_until')
+                    'node bid\'s execution time',
+                    field_name='valid_until')
         except TransferInteractorBidNotAcceptedError:
             _logger.critical('unable to check the "valid until" timestamp',
                              exc_info=True)
             raise
 
     def __is_valid_execution_time_limit(
-            self, blockchain: Blockchain, execution_time_limit: int,
+            self,
+            blockchain: Blockchain,
+            execution_time_limit: int,
             bid_execution_time: int,
             start_time: typing.Optional[float] = None) -> bool:
         """Check if a given execution time limit matches the execution
@@ -436,17 +443,19 @@ class TransferInteractor(Interactor):
             'Checking if given bid is for source/destination blockchain')
         if (bid.source_blockchain != source_blockchain_id
                 or bid.destination_blockchain != destination_blockchain_id):
-            _logger.info(
-                'new transfer request: invalid bid', extra={
-                    'bid.fee': bid.fee,
-                    'bid.valid_until': bid.valid_until,
-                    'bid.execution_time': bid.execution_time,
-                    'bid.source_blockchain': bid.source_blockchain,
-                    'bid.destination_blockchain': bid.destination_blockchain,
-                    'source_blockchain_id': source_blockchain_id,
-                    'destination_blockchain_id': destination_blockchain_id,
-                    'bid.signature': bid.signature
-                })
+            _logger.info('new transfer request: invalid bid',
+                         extra={
+                             'bid.fee': bid.fee,
+                             'bid.valid_until': bid.valid_until,
+                             'bid.execution_time': bid.execution_time,
+                             'bid.source_blockchain': bid.source_blockchain,
+                             'bid.destination_blockchain':
+                             bid.destination_blockchain,
+                             'source_blockchain_id': source_blockchain_id,
+                             'destination_blockchain_id':
+                             destination_blockchain_id,
+                             'bid.signature': bid.signature
+                         })
             raise TransferInteractorBidNotAcceptedError(
                 message='bid not valid for blockchain pair',
                 field_name='bid.source_blockchain/bid.destination_blockchain')
@@ -456,15 +465,16 @@ class TransferInteractor(Interactor):
         bid_expired = self.__has_bid_expired(bid.valid_until)
 
         if bid_expired:
-            _logger.info(
-                'new transfer request: bid expired', extra={
-                    'bid.fee': bid.fee,
-                    'bid.valid_until': bid.valid_until,
-                    'bid.execution_time': bid.execution_time,
-                    'bid.source_blockchain': bid.source_blockchain,
-                    'bid.destination_blockchain': bid.destination_blockchain,
-                    'bid.signature': bid.signature
-                })
+            _logger.info('new transfer request: bid expired',
+                         extra={
+                             'bid.fee': bid.fee,
+                             'bid.valid_until': bid.valid_until,
+                             'bid.execution_time': bid.execution_time,
+                             'bid.source_blockchain': bid.source_blockchain,
+                             'bid.destination_blockchain':
+                             bid.destination_blockchain,
+                             'bid.signature': bid.signature
+                         })
             raise TransferInteractorBidNotAcceptedError(
                 message='bid has expired', field_name='bid.valid_until')
 
@@ -475,15 +485,16 @@ class TransferInteractor(Interactor):
                                                  destination_blockchain_id,
                                                  bid.signature)
         if not valid_bid:
-            _logger.info(
-                'new transfer request: invalid bid', extra={
-                    'bid.fee': bid.fee,
-                    'bid.valid_until': bid.valid_until,
-                    'bid.execution_time': bid.execution_time,
-                    'source_blockchain_id': source_blockchain_id,
-                    'destination_blockchain_id': destination_blockchain_id,
-                    'bid.signature': bid.signature
-                })
+            _logger.info('new transfer request: invalid bid',
+                         extra={
+                             'bid.fee': bid.fee,
+                             'bid.valid_until': bid.valid_until,
+                             'bid.execution_time': bid.execution_time,
+                             'source_blockchain_id': source_blockchain_id,
+                             'destination_blockchain_id':
+                             destination_blockchain_id,
+                             'bid.signature': bid.signature
+                         })
             raise TransferInteractorBidNotAcceptedError(
                 message='bid\'s signature is invalid',
                 field_name='bid.signature')
@@ -722,6 +733,7 @@ class TransferInteractor(Interactor):
             destination_blockchain_client = get_blockchain_client(
                 request.destination_blockchain)
             assert source_blockchain_config['active']
+            assert source_blockchain_config['registered']
             assert source_blockchain_client.is_valid_address(
                 request.sender_address)
             assert destination_blockchain_client.is_valid_address(
@@ -774,7 +786,7 @@ class TransferInteractor(Interactor):
                 'unable to initiate a new token transfer', request=request)
 
 
-@celery_app.task(bind=True, max_retries=100)
+@celery.current_app.task(bind=True, max_retries=100)
 def confirm_transfer_task(self, internal_transfer_id: int,
                           source_blockchain_id: int,
                           destination_blockchain_id: int,
@@ -813,7 +825,8 @@ def confirm_transfer_task(self, internal_transfer_id: int,
             confirm_transfer_request)
     except Exception as error:
         _logger.error('unable to confirm a token transfer',
-                      extra=vars(confirm_transfer_request), exc_info=True)
+                      extra=vars(confirm_transfer_request),
+                      exc_info=True)
         retry_interval = config['tasks']['confirm_transfer'][
             'retry_interval_after_error']
         raise self.retry(countdown=retry_interval, exc=error)
@@ -823,7 +836,7 @@ def confirm_transfer_task(self, internal_transfer_id: int,
     return True
 
 
-@celery_app.task(bind=True, max_retries=None)
+@celery.current_app.task(bind=True, max_retries=None)
 def execute_transfer_task(self, internal_transfer_id: int,
                           source_blockchain_id: int,
                           destination_blockchain_id: int, sender_address: str,
@@ -886,19 +899,22 @@ def execute_transfer_task(self, internal_transfer_id: int,
             execute_transfer_request)
         confirm_transfer_interval = config['tasks']['confirm_transfer'][
             'interval']
-        confirm_transfer_task.apply_async(
-            args=(internal_transfer_id, source_blockchain_id,
-                  destination_blockchain_id, str(internal_transaction_id)),
-            countdown=confirm_transfer_interval)
+        confirm_transfer_task.apply_async(args=(internal_transfer_id,
+                                                source_blockchain_id,
+                                                destination_blockchain_id,
+                                                str(internal_transaction_id)),
+                                          countdown=confirm_transfer_interval)
         return True
     except TransferInteractorUnrecoverableError as error:
         _logger.error(
             'unable to execute a token transfer - unrecoverable error',
-            extra=error.details, exc_info=True)
+            extra=error.details,
+            exc_info=True)
         return False
     except TransferInteractorError as error:
         _logger.error('unable to execute a token transfer - retrying',
-                      extra=error.details, exc_info=True)
+                      extra=error.details,
+                      exc_info=True)
         retry_interval = config['tasks']['execute_transfer'][
             'retry_interval_after_error']
         raise self.retry(countdown=retry_interval, exc=error)

@@ -1,10 +1,10 @@
 import json
 import unittest.mock
 
-import flask_restful
+import flask_restful  # type: ignore
 import marshmallow
-
 from pantos.common.blockchains.enums import Blockchain
+
 from pantos.servicenode.business.transfers import SenderNonceNotUniqueError
 from pantos.servicenode.business.transfers import \
     TransferInteractorBidNotAcceptedError
@@ -18,7 +18,8 @@ from pantos.servicenode.restapi import _TransferSchema
 def test_transfer_correct(mocked_load, test_client, uuid_,
                           initiate_transfer_request):
     mocked_load.return_value = initiate_transfer_request
-    with unittest.mock.patch.object(TransferInteractor, 'initiate_transfer',
+    with unittest.mock.patch.object(TransferInteractor,
+                                    'initiate_transfer',
                                     return_value=uuid_):
         response = test_client.post('/transfer', json={})
 
@@ -27,7 +28,8 @@ def test_transfer_correct(mocked_load, test_client, uuid_,
 
 
 @unittest.mock.patch('pantos.servicenode.restapi.not_acceptable')
-@unittest.mock.patch.object(_TransferSchema, 'load',
+@unittest.mock.patch.object(_TransferSchema,
+                            'load',
                             side_effect=marshmallow.ValidationError(''))
 def test_transfer_validation_error(mocked_load, mocked_not_acceptable,
                                    test_client):
@@ -42,9 +44,10 @@ def test_transfer_validation_error(mocked_load, mocked_not_acceptable,
 
 
 @unittest.mock.patch('pantos.servicenode.restapi.conflict')
-@unittest.mock.patch.object(
-    TransferInteractor, 'initiate_transfer',
-    side_effect=SenderNonceNotUniqueError(Blockchain.ETHEREUM, '', 0))
+@unittest.mock.patch.object(TransferInteractor,
+                            'initiate_transfer',
+                            side_effect=SenderNonceNotUniqueError(
+                                Blockchain.ETHEREUM, '', 0))
 @unittest.mock.patch.object(_TransferSchema, 'load')
 def test_transfer_sender_nonce_not_unique_error(mocked_load,
                                                 mocked_initiate_transfer,
@@ -64,7 +67,8 @@ def test_transfer_sender_nonce_not_unique_error(mocked_load,
 
 @unittest.mock.patch('pantos.servicenode.restapi.not_acceptable')
 @unittest.mock.patch.object(
-    TransferInteractor, 'initiate_transfer',
+    TransferInteractor,
+    'initiate_transfer',
     side_effect=TransferInteractorBidNotAcceptedError('bid not accepted'))
 @unittest.mock.patch.object(_TransferSchema, 'load')
 def test_transfer_bid_not_accepted_error(mocked_load, mocked_initiate_transfer,

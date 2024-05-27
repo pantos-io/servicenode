@@ -6,10 +6,10 @@ import pathlib
 import sys
 
 import flask
-
 from pantos.common.logging import LogFile
 from pantos.common.logging import LogFormat
 from pantos.common.logging import initialize_logger
+
 from pantos.servicenode.blockchains.factory import \
     initialize_blockchain_clients
 from pantos.servicenode.business.node import NodeInteractor

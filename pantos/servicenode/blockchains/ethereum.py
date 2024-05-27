@@ -10,7 +10,6 @@ import uuid
 import web3
 import web3.contract.contract
 import web3.exceptions
-
 from pantos.common.blockchains.base import NodeConnections
 from pantos.common.blockchains.base import TransactionNonceTooLowError
 from pantos.common.blockchains.base import TransactionUnderpricedError
@@ -18,6 +17,7 @@ from pantos.common.blockchains.enums import Blockchain
 from pantos.common.blockchains.enums import ContractAbi
 from pantos.common.blockchains.ethereum import EthereumUtilities
 from pantos.common.types import BlockchainAddress
+
 from pantos.servicenode.blockchains.base import BlockchainClient
 from pantos.servicenode.blockchains.base import BlockchainClientError
 from pantos.servicenode.database import access as database_access
@@ -62,6 +62,7 @@ class EthereumClient(BlockchainClient):
     """Ethereum-specific blockchain client.
 
     """
+
     def __init__(self):
         # Docstring inherited
         super().__init__()
@@ -158,7 +159,8 @@ class EthereumClient(BlockchainClient):
             _logger.info('node registration submitted', extra=extra_info)
         except Exception:
             raise self._create_error('unable to register the service node',
-                                     node_url=node_url, node_stake=node_stake)
+                                     node_url=node_url,
+                                     node_stake=node_stake)
 
     def start_transfer_submission(
             self, request: BlockchainClient.TransferSubmissionStartRequest) \
@@ -316,7 +318,8 @@ class EthereumClient(BlockchainClient):
             assert (
                 transaction_receipt['transactionHash'].hex() == transaction_id)
             _logger.info(
-                'transfer/transferFrom transaction receipt', extra=json.loads(
+                'transfer/transferFrom transaction receipt',
+                extra=json.loads(
                     web3.Web3.to_json(transaction_receipt)))  # type: ignore
             hub_contract = self._create_hub_contract(node_connections)
             if self.get_blockchain() is destination_blockchain:
@@ -331,7 +334,8 @@ class EthereumClient(BlockchainClient):
         except Exception:
             raise self._create_error(
                 'unable to read the Pantos transfer ID on the source '
-                'blockchain', transaction_id=transaction_id,
+                'blockchain',
+                transaction_id=transaction_id,
                 destination_blockchain=destination_blockchain)
 
     def __create_node_connections(self) -> NodeConnections:

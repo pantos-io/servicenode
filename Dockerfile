@@ -1,11 +1,8 @@
-FROM python:3.10-bookworm AS dev
+FROM python:3.12-bookworm AS dev
 
-COPY requirements.txt /app/requirements.txt
-COPY setup.py /app/setup.py
+RUN python3 -m pip install poetry
 
 WORKDIR /app
-
-RUN pip3 install -r requirements.txt
 
 COPY . /app
 
@@ -15,10 +12,16 @@ FROM bitnami/minideb:bookworm AS prod
 
 RUN apt-get update
 
-# TODO: Remove this whenever we mount the key and keystore as volumes
-COPY --from=dev /app/dist/*.deb /
+COPY --from=dev /app/dist/*.deb .
 
-RUN apt-get install -y --no-install-recommends ./*.deb && rm -f ./*.deb && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN if [ -f ./*-signed.deb ]; then \
+        apt-get install -y --no-install-recommends ./*-signed.deb; \
+    else \
+        apt-get install -y --no-install-recommends ./*.deb; \
+    fi && \
+    rm -rf *.deb && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 FROM prod AS servicenode
 
@@ -46,4 +49,4 @@ ENTRYPOINT bash -c 'source /opt/pantos/service-node/virtual-environment/bin/acti
     -l INFO \
     --concurrency 4 \
     -n pantos.servicenode \
-    -Q pantos.servicenode'
+    -Q transfers,bids'

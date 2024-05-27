@@ -2,7 +2,7 @@ import json
 import unittest.mock
 import uuid
 
-import flask_restful
+import flask_restful  # type: ignore
 import marshmallow
 
 from pantos.servicenode.business.transfers import \
@@ -48,7 +48,8 @@ def test_transfer_status_correct(mocked_load, mocked_find_transfer,
 @unittest.mock.patch(
     'pantos.servicenode.restapi.resource_not_found',
     lambda error_message: flask_restful.abort(404, message=error_message))
-@unittest.mock.patch.object(_TransferStatusSchema, 'load',
+@unittest.mock.patch.object(_TransferStatusSchema,
+                            'load',
                             side_effect=marshmallow.ValidationError(''))
 def test_transfer_status_validation_error(mocked_load, test_client, uuid_):
     expected_error_messsage = f'task ID {uuid_} is not a UUID'
@@ -78,7 +79,8 @@ def test_transfer_status_resource_not_found_error(mocked_load,
 
 @unittest.mock.patch('pantos.servicenode.restapi.internal_server_error',
                      lambda error_message: flask_restful.abort(500))
-@unittest.mock.patch.object(_TransferStatusSchema, 'load',
+@unittest.mock.patch.object(_TransferStatusSchema,
+                            'load',
                             side_effect=Exception)
 def test_transfer_status_internal_error(mocked_load, test_client, uuid_):
     response = test_client.get(f'/transfer/{uuid_}/status')

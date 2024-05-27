@@ -4,6 +4,7 @@ pantos.servicenode.blockchains.ethereum module.
 
 """
 from pantos.common.blockchains.enums import Blockchain
+
 from pantos.servicenode.blockchains.base import BlockchainClientError
 from pantos.servicenode.blockchains.ethereum import EthereumClient
 from pantos.servicenode.blockchains.ethereum import EthereumClientError
@@ -20,6 +21,7 @@ class FantomClient(EthereumClient):
     """Fantom-specific blockchain client.
 
     """
+
     @classmethod
     def get_blockchain(cls) -> Blockchain:
         # Docstring inherited

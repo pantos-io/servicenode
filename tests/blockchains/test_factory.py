@@ -1,8 +1,8 @@
 import unittest.mock
 
 import pytest
-
 from pantos.common.blockchains.enums import Blockchain
+
 from pantos.servicenode.blockchains.avalanche import AvalancheClient
 from pantos.servicenode.blockchains.base import BlockchainClient
 from pantos.servicenode.blockchains.bnbchain import BnbChainClient
@@ -26,9 +26,12 @@ def clear_blockchain_clients():
 @pytest.mark.parametrize('blockchain',
                          [blockchain for blockchain in Blockchain])
 @unittest.mock.patch(
+    'pantos.servicenode.blockchains.factory.get_blockchain_config',
+    return_value={'active': True})
+@unittest.mock.patch(
     'pantos.servicenode.blockchains.factory._blockchain_client_classes')
 def test_get_blockchain_client_correct(mock_blockchain_client_classes,
-                                       blockchain):
+                                       mock_get_blockchain_config, blockchain):
     blockchain_client_class = _get_blockchain_client_class(blockchain)
     mock_blockchain_client_classes.__getitem__.return_value = \
         blockchain_client_class

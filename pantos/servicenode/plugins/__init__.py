@@ -1,7 +1,7 @@
 import importlib
-import typing
 
 from pantos.common.blockchains.enums import Blockchain
+
 from pantos.servicenode.configuration import get_blockchain_config
 from pantos.servicenode.configuration import get_plugin_config
 from pantos.servicenode.plugins.base import BidPlugin
@@ -9,10 +9,18 @@ from pantos.servicenode.plugins.base import BidPlugin
 _DEFAULT_PLUGIN = 'pantos.servicenode.plugins.bids.ConfigFileBidPlugin'
 """Default plugin to use if no plugin is configured."""
 
-_bid_plugin: typing.Optional[BidPlugin] = None
+_bid_plugin: BidPlugin | None = None
 
 
 def get_bid_plugin():
+    """Get the bid plugin.
+
+    Returns
+    -------
+    BidPlugin
+        The initialized bid plugin.
+
+    """
     return _bid_plugin
 
 
@@ -34,10 +42,10 @@ def initialize_plugins(start_worker: bool):
     if start_worker:
         for source_blockchain in Blockchain:
             source_blockchain_config = get_blockchain_config(source_blockchain)
-
-            if not source_blockchain_config['active']:
+            active = source_blockchain_config['active']
+            registered = source_blockchain_config['registered']
+            if not active or not registered:
                 continue
-
             execute_bid_plugin.delay(source_blockchain)
 
 

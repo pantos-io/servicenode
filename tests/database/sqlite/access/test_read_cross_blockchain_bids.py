@@ -1,6 +1,7 @@
 import unittest.mock
 
 from pantos.common.blockchains.enums import Blockchain
+
 from pantos.servicenode.database.access import create_bid
 from pantos.servicenode.database.access import read_cross_blockchain_bids
 

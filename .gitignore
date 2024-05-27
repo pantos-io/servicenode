@@ -3,6 +3,7 @@
 *.keystore*
 *.swp
 *signer.pem*
+.coverage
 .DS_store
 .venv/
 .vscode/

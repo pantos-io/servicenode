@@ -1,6 +1,7 @@
 import unittest.mock
 
 from pantos.common.blockchains.enums import Blockchain
+
 from pantos.servicenode.configuration import _DEFAULT_FILE_NAME
 from pantos.servicenode.configuration import Config
 from pantos.servicenode.configuration import get_blockchain_config

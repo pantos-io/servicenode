@@ -1,7 +1,6 @@
 import unittest.mock
 
 import pytest
-
 from pantos.common.logging import LogFormat
 
 

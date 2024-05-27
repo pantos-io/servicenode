@@ -4,8 +4,8 @@
 import unittest.mock
 
 import pytest
-
 from pantos.common.blockchains.enums import Blockchain
+
 from pantos.servicenode.blockchains.base import BlockchainClientError
 from pantos.servicenode.business import node as node_module
 from pantos.servicenode.business.node import NodeInteractor
@@ -21,11 +21,13 @@ CONFIG_UNSTAKING_ADDRESS = '0xceb95Cb81e4f71c8Fc426a84fA29F2ac552AD752'
 
 
 class MockBlockchainClientError(BlockchainClientError):
+
     def __init__(self):
         super().__init__('')
 
 
 class MockBlockchainClient:
+
     def __init__(self, node_registered, is_unbonding, raise_error):
         self.node_registered = node_registered
         self.unbonding = is_unbonding
@@ -84,10 +86,11 @@ class MockBlockchainClient:
 
 @pytest.fixture(autouse=True)
 def mock_blockchain_client(request, monkeypatch):
-    registered_marker = request.node.get_closest_marker('registered')
+    is_registered_marker = request.node.get_closest_marker('is_registered')
     unbonding_marker = request.node.get_closest_marker('unbonding')
     unbonding = [] if unbonding_marker is None else unbonding_marker.args[0]
-    registered = [] if registered_marker is None else registered_marker.args[0]
+    is_registered = ([] if is_registered_marker is None else
+                     is_registered_marker.args[0])
     error_marker = request.node.get_closest_marker('error')
     blockchain_clients = {}
 
@@ -95,9 +98,9 @@ def mock_blockchain_client(request, monkeypatch):
         try:
             return blockchain_clients[blockchain]
         except KeyError:
-            blockchain_client = MockBlockchainClient(blockchain in registered,
-                                                     blockchain in unbonding,
-                                                     error_marker is not None)
+            blockchain_client = MockBlockchainClient(
+                blockchain in is_registered, blockchain in unbonding,
+                error_marker is not None)
             blockchain_clients[blockchain] = blockchain_client
             return blockchain_client
 
@@ -107,8 +110,10 @@ def mock_blockchain_client(request, monkeypatch):
 
 @pytest.fixture(autouse=True)
 def mock_config(request, monkeypatch):
-    active_marker = request.node.get_closest_marker('active')
-    active = [] if active_marker is None else active_marker.args[0]
+    to_be_registered_marker = request.node.get_closest_marker(
+        'to_be_registered')
+    to_be_registered = ([] if to_be_registered_marker is None else
+                        to_be_registered_marker.args[0])
     config = {}
     config['application'] = {}
     config['application']['url'] = CONFIG_NODE_URL
@@ -116,7 +121,9 @@ def mock_config(request, monkeypatch):
     for blockchain in Blockchain:
         blockchain_name = blockchain.name.lower()
         config['blockchains'][blockchain_name] = {}
-        config['blockchains'][blockchain_name]['active'] = blockchain in active
+        config['blockchains'][blockchain_name]['active'] = True
+        config['blockchains'][blockchain_name]['registered'] = (
+            blockchain in to_be_registered)
         config['blockchains'][blockchain_name]['stake'] = 10000000000000
         config['blockchains'][blockchain_name][
             'unstaking_address'] = CONFIG_UNSTAKING_ADDRESS
@@ -136,14 +143,16 @@ def node_interactor():
 
 def update_node_registrations_no_error(request, node_interactor):
     node_interactor.update_node_registrations()
-    active_marker = request.node.get_closest_marker('active')
-    active = [] if active_marker is None else active_marker.args[0]
+    to_be_registered_marker = request.node.get_closest_marker(
+        'to_be_registered')
+    to_be_registered = ([] if to_be_registered_marker is None else
+                        to_be_registered_marker.args[0])
     unbonding_marker = request.node.get_closest_marker('unbonding')
     unbonding = [] if unbonding_marker is None else unbonding_marker.args[0]
     get_blockchain_client = getattr(node_module, 'get_blockchain_client')
     for blockchain in Blockchain:
         blockchain_client = get_blockchain_client(blockchain)
-        if blockchain in active:
+        if blockchain in to_be_registered:
             assert blockchain_client.node_registered
             if blockchain in unbonding:
                 assert blockchain_client.node_url == DEFAULT_NODE_URL
@@ -156,27 +165,27 @@ def update_node_registrations_no_error(request, node_interactor):
                 DEFAULT_UNSTAKING_ADDRESS
 
 
-@pytest.mark.active(list(Blockchain))
-@pytest.mark.registered(list(Blockchain))
+@pytest.mark.to_be_registered(list(Blockchain))
+@pytest.mark.is_registered(list(Blockchain))
 def test_update_node_registrations_all_active_all_registered(
         request, node_interactor):
     update_node_registrations_no_error(request, node_interactor)
 
 
-@pytest.mark.active(list(Blockchain))
+@pytest.mark.to_be_registered(list(Blockchain))
 @pytest.mark.unbonding(list(Blockchain))
 def test_update_node_registrations_all_active_none_registered_all_unbonding(
         request, node_interactor):
     update_node_registrations_no_error(request, node_interactor)
 
 
-@pytest.mark.active(list(Blockchain))
+@pytest.mark.to_be_registered(list(Blockchain))
 def test_update_node_registrations_all_active_none_registered(
         request, node_interactor):
     update_node_registrations_no_error(request, node_interactor)
 
 
-@pytest.mark.registered(list(Blockchain))
+@pytest.mark.is_registered(list(Blockchain))
 def test_update_node_registrations_none_active_all_registered(
         request, node_interactor):
     update_node_registrations_no_error(request, node_interactor)
@@ -187,45 +196,45 @@ def test_update_node_registrations_none_active_none_registered(
     update_node_registrations_no_error(request, node_interactor)
 
 
-@pytest.mark.active([Blockchain.AVALANCHE, Blockchain.ETHEREUM])
-@pytest.mark.registered(list(Blockchain))
+@pytest.mark.to_be_registered([Blockchain.AVALANCHE, Blockchain.ETHEREUM])
+@pytest.mark.is_registered(list(Blockchain))
 def test_update_node_registrations_some_active_all_registered(
         request, node_interactor):
     update_node_registrations_no_error(request, node_interactor)
 
 
-@pytest.mark.active(list(Blockchain))
-@pytest.mark.registered([Blockchain.FANTOM, Blockchain.POLYGON])
+@pytest.mark.to_be_registered(list(Blockchain))
+@pytest.mark.is_registered([Blockchain.FANTOM, Blockchain.POLYGON])
 def test_update_node_registrations_all_active_some_registered(
         request, node_interactor):
     update_node_registrations_no_error(request, node_interactor)
 
 
-@pytest.mark.registered([Blockchain.ETHEREUM, Blockchain.SOLANA])
+@pytest.mark.is_registered([Blockchain.ETHEREUM, Blockchain.SOLANA])
 def test_update_node_registrations_none_active_some_registered(
         request, node_interactor):
     update_node_registrations_no_error(request, node_interactor)
 
 
-@pytest.mark.active(
+@pytest.mark.to_be_registered(
     [Blockchain.BNB_CHAIN, Blockchain.ETHEREUM, Blockchain.SOLANA])
-@pytest.mark.registered(
+@pytest.mark.is_registered(
     [Blockchain.AVALANCHE, Blockchain.BNB_CHAIN, Blockchain.CRONOS])
 def test_update_node_registrations_some_active_some_registered_overlapping(
         request, node_interactor):
     update_node_registrations_no_error(request, node_interactor)
 
 
-@pytest.mark.active(
+@pytest.mark.to_be_registered(
     [Blockchain.AVALANCHE, Blockchain.BNB_CHAIN, Blockchain.POLYGON])
-@pytest.mark.registered(
+@pytest.mark.is_registered(
     [Blockchain.CELO, Blockchain.ETHEREUM, Blockchain.SOLANA])
 def test_update_node_registrations_some_active_some_registered_non_overlapping(
         request, node_interactor):
     update_node_registrations_no_error(request, node_interactor)
 
 
-@pytest.mark.active(list(Blockchain))
+@pytest.mark.to_be_registered(list(Blockchain))
 @pytest.mark.error
 def test_update_node_registrations_error(node_interactor):
     with pytest.raises(NodeInteractorError):

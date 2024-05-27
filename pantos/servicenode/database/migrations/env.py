@@ -47,8 +47,10 @@ def run_migrations_online() -> None:
             alembic_config.config_ini_section)) if alembic_config.get_section(
                 alembic_config.config_ini_section) is not None else {}
     connectable = sqlalchemy.engine_from_config(
-        alembic_ini_config, url=config['database']['url'],
-        prefix="sqlalchemy.", poolclass=sqlalchemy.pool.NullPool)
+        alembic_ini_config,
+        url=config['database']['url'],
+        prefix="sqlalchemy.",
+        poolclass=sqlalchemy.pool.NullPool)
 
     with connectable.connect() as connection:
         alembic.context.configure(connection=connection,

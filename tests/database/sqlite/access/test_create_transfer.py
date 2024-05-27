@@ -4,8 +4,8 @@ import unittest.mock
 import pytest
 import sqlalchemy
 import sqlalchemy.exc
-
 from pantos.common.blockchains.enums import Blockchain
+
 from pantos.servicenode.database.access import create_transfer
 from pantos.servicenode.database.enums import TransferStatus
 from pantos.servicenode.database.exceptions import SenderNonceNotUniqueError

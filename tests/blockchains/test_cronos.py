@@ -1,8 +1,8 @@
 import unittest.mock
 
 import pytest
-
 from pantos.common.blockchains.enums import Blockchain
+
 from pantos.servicenode.blockchains.cronos import CronosClient
 from pantos.servicenode.blockchains.cronos import CronosClientError
 

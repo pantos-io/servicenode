@@ -7,6 +7,7 @@ import typing
 
 from pantos.common.blockchains.enums import Blockchain
 from pantos.common.signer import get_signer
+
 from pantos.servicenode.business.base import Interactor
 from pantos.servicenode.business.base import InteractorError
 from pantos.servicenode.configuration import get_signer_config
@@ -27,6 +28,7 @@ class BidInteractor(Interactor):
     """Interactor for managing service node bids.
 
     """
+
     @dataclasses.dataclass
     class Bid:
         """Data for a transfer bid.

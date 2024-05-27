@@ -4,7 +4,9 @@
 import typing
 
 from pantos.common.blockchains.enums import Blockchain
+
 from pantos.servicenode.blockchains.base import BlockchainClient
+from pantos.servicenode.configuration import get_blockchain_config
 
 _blockchain_clients: typing.Dict[Blockchain, BlockchainClient] = {}
 """Blockchain-specific client objects."""
@@ -14,13 +16,14 @@ _blockchain_client_classes = BlockchainClient.find_subclasses()
 
 
 def initialize_blockchain_clients() -> None:
-    """Initialize the blockchain-specific client objects for all
+    """Initialize the blockchain-specific client objects for all active
     blockchains.
 
     """
     for blockchain in Blockchain:
-        blockchain_client = _blockchain_client_classes[blockchain]()
-        _blockchain_clients[blockchain] = blockchain_client
+        if get_blockchain_config(blockchain)['active']:
+            blockchain_client = _blockchain_client_classes[blockchain]()
+            _blockchain_clients[blockchain] = blockchain_client
 
 
 def get_blockchain_client(blockchain: Blockchain) -> BlockchainClient:
@@ -37,4 +40,5 @@ def get_blockchain_client(blockchain: Blockchain) -> BlockchainClient:
         A blockchain client instance for the specified blockchain.
 
     """
+    assert get_blockchain_config(blockchain)['active']
     return _blockchain_clients[blockchain]

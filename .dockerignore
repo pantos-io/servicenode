@@ -15,4 +15,3 @@ rabbitmq_data
 Dockerfile
 docker-compose.yml
 .dockerignore
-*.md

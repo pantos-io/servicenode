@@ -4,8 +4,8 @@
 import pytest
 import sqlalchemy  # type: ignore
 import sqlalchemy.orm  # type: ignore
-
 from pantos.common.blockchains.enums import Blockchain
+
 from pantos.servicenode.database.enums import TransferStatus
 from pantos.servicenode.database.models import Base
 from pantos.servicenode.database.models import Bid
@@ -32,14 +32,18 @@ def populate_transfer_database(session, source_blockchain_ids, statuses,
     for source_blockchain_id, nonce, status in zip(source_blockchain_ids,
                                                    nonces, statuses):
         transfer = Transfer(source_blockchain_id=source_blockchain_id,
-                            destination_blockchain_id=0, sender_address='',
+                            destination_blockchain_id=0,
+                            sender_address='',
                             recipient_address='',
                             source_token_contract_id=token_contract.id,
                             destination_token_contract_id=token_contract.id,
-                            amount=0, fee=0, signature='',
+                            amount=0,
+                            fee=0,
+                            signature='',
                             hub_contract_id=hub_contract.id,
                             forwarder_contract_id=forwarder_contract.id,
-                            nonce=nonce, status_id=status)
+                            nonce=nonce,
+                            status_id=status)
         session.add(transfer)
         session.flush()
         transfer_ids.append(transfer.id)

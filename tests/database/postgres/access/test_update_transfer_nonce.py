@@ -3,8 +3,8 @@ import unittest.mock
 import pytest
 import sqlalchemy
 import sqlalchemy.exc
-
 from pantos.common.blockchains.enums import Blockchain
+
 from pantos.servicenode.database.access import update_transfer_nonce
 from pantos.servicenode.database.enums import TransferStatus
 from pantos.servicenode.database.models import Transfer

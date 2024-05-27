@@ -78,31 +78,34 @@ Please make sure that your environment meets the following requirements:
 
 #### Python Version
 
-The Pantos Service Node requires **Python 3.10**. Ensure that you have the correct Python version installed before the installation steps. You can download the latest version of Python from the official [Python website](https://www.python.org/downloads/).
+The Pantos Service Node supports **Python 3.10** or higher. Ensure that you have the correct Python version installed before the installation steps. You can download the latest version of Python from the official [Python website](https://www.python.org/downloads/).
 
 #### Library Versions
 
-The Pantos Service Node has been tested with the library versions in **requirements.py** and **setup.py**.
+The Pantos Service Node has been tested with the library versions specified in **poetry.lock**.
 
-### 2.3  Installation Steps
+#### Poetry
 
-#### Virtual environment
+Poetry is our tool of choice for dependency management and packaging.
 
-Create a virtual environment from the repository's root directory:
+Installing: 
+https://python-poetry.org/docs/#installing-with-the-official-installer
+or
+https://python-poetry.org/docs/#installing-with-pipx
 
+By default poetry creates the venv directory under under ```{cache-dir}/virtualenvs```. If you opt for creating the virtualenv inside the project’s root directory, execute the following command:
 ```bash
-$ python -m venv .venv
+poetry config virtualenvs.in-project true
 ```
 
-Activate the virtual environment:
+### 2.2  Installation Steps
+
+#### Libraries
+
+Create the virtual environment and install the dependencies:
 
 ```bash
-$ source .venv/bin/activate
-```
-
-Install the required packages:
-```bash
-$ python -m pip install -r requirements.txt
+$ poetry install --no-root
 ```
 
 #### Pre-commit

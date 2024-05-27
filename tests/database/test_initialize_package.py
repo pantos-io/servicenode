@@ -3,8 +3,8 @@ import unittest.mock
 import pytest
 import sqlalchemy  # type: ignore
 import sqlalchemy.exc  # type: ignore
-
 from pantos.common.blockchains.enums import Blockchain
+
 from pantos.servicenode.database import get_session
 from pantos.servicenode.database import get_session_maker
 from pantos.servicenode.database import initialize_package

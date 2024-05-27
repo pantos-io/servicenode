@@ -2,11 +2,11 @@ import time
 import unittest.mock
 import uuid
 
-import celery.exceptions
+import celery.exceptions  # type: ignore
 import pytest
-
 from pantos.common.blockchains.enums import Blockchain
 from pantos.common.entities import TransactionStatus
+
 from pantos.servicenode.blockchains.base import BlockchainClient
 from pantos.servicenode.blockchains.base import InvalidSignatureError
 from pantos.servicenode.blockchains.base import \
@@ -25,6 +25,7 @@ from pantos.servicenode.database.exceptions import SenderNonceNotUniqueError
 
 
 class MockBidPlugin:
+
     def accept_bid(self, bid):
         return True
 
@@ -384,7 +385,8 @@ def test_confirm_transfer_confirmed_correct(mocked_database_access,
                                             transaction_id,
                                             transfer_on_chain_id):
     status_response = BlockchainClient.TransferSubmissionStatusResponse(
-        True, transaction_status=TransactionStatus.CONFIRMED,
+        True,
+        transaction_status=TransactionStatus.CONFIRMED,
         transaction_id=transaction_id,
         on_chain_transfer_id=transfer_on_chain_id)
     mocked_get_blockchain_client().get_transfer_submission_status.\
@@ -439,7 +441,8 @@ def test_confirm_transfer_reverted_correct(mocked_database_access,
                                            confirm_transfer_request,
                                            transaction_id):
     status_response = BlockchainClient.TransferSubmissionStatusResponse(
-        True, transaction_status=TransactionStatus.REVERTED,
+        True,
+        transaction_status=TransactionStatus.REVERTED,
         transaction_id=transaction_id)
     mocked_get_blockchain_client().get_transfer_submission_status.\
         return_value = status_response
@@ -532,7 +535,8 @@ def test_execute_transfer_task_correct(
 
 @unittest.mock.patch('pantos.servicenode.business.transfers.config')
 @unittest.mock.patch.object(
-    TransferInteractor, 'execute_transfer',
+    TransferInteractor,
+    'execute_transfer',
     side_effect=TransferInteractorUnrecoverableError(''))
 def test_execute_transfer_task_unrecoverable_error(
         mocked_execute_transfer, transfer_internal_id, source_blockchain,
@@ -659,7 +663,8 @@ def test_confirm_transfer_task_confirmation_error(
 
 
 @unittest.mock.patch.object(
-    TransferInteractor, '_TransferInteractor__is_valid_execution_time_limit',
+    TransferInteractor,
+    '_TransferInteractor__is_valid_execution_time_limit',
     return_value=True)
 def test_check_valid_until_correct(mocked_is_valid_execution_time_limit,
                                    source_blockchain, valid_until,
@@ -669,7 +674,8 @@ def test_check_valid_until_correct(mocked_is_valid_execution_time_limit,
 
 
 @unittest.mock.patch.object(
-    TransferInteractor, '_TransferInteractor__is_valid_execution_time_limit',
+    TransferInteractor,
+    '_TransferInteractor__is_valid_execution_time_limit',
     return_value=False)
 def test_check_valid_until_invalid(mocked_is_valid_execution_time_limit,
                                    source_blockchain, valid_until,

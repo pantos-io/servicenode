@@ -12,7 +12,6 @@ import flask_restful  # type: ignore
 import flask_restful.reqparse  # type: ignore
 import marshmallow
 import marshmallow.validate
-
 from pantos.common.blockchains.enums import Blockchain
 from pantos.common.entities import ServiceNodeBid
 from pantos.common.restapi import Live
@@ -22,6 +21,7 @@ from pantos.common.restapi import internal_server_error
 from pantos.common.restapi import not_acceptable
 from pantos.common.restapi import ok_response
 from pantos.common.restapi import resource_not_found
+
 from pantos.servicenode.blockchains.factory import get_blockchain_client
 from pantos.servicenode.business.bids import BidInteractor
 from pantos.servicenode.business.transfers import SenderNonceNotUniqueError
@@ -56,10 +56,10 @@ class _TransferSchema(marshmallow.Schema):
     """Validation schema for the transfer endpoint parameters.
 
     """
-
     source_blockchain_id = marshmallow.fields.Integer(required=True)
     destination_blockchain_id = marshmallow.fields.Integer(
-        required=True, validate=marshmallow.validate.OneOf(
+        required=True,
+        validate=marshmallow.validate.OneOf(
             [blockchain.value for blockchain in Blockchain]))
     sender_address = marshmallow.fields.String(required=True)
     recipient_address = marshmallow.fields.String(required=True)
@@ -82,7 +82,10 @@ class _TransferSchema(marshmallow.Schema):
                 message='This is not a supported blockchain. '
                 f'Must be one of: {supported_blockchains_ids}.',
                 field_name='source_blockchain_id')
-        elif not get_blockchain_config(Blockchain(blockchain_id))['active']:
+        blockchain_config = get_blockchain_config(Blockchain(blockchain_id))
+        active = blockchain_config['active']
+        registered = blockchain_config['registered']
+        if not active or not registered:
             raise marshmallow.ValidationError(
                 message='This is not an active blockchain.',
                 field_name='source_blockchain_id')
@@ -123,11 +126,13 @@ class _TransferSchema(marshmallow.Schema):
         if not get_blockchain_client(
                 destination_blockchain).is_valid_recipient_address(
                     recipient_address):
-            _logger.warning(
-                'new transfer request: invalid recipient address', extra={
-                    'recipient_address': recipient_address,
-                    'destination_blockchain': destination_blockchain.name
-                })
+            _logger.warning('new transfer request: invalid recipient address',
+                            extra={
+                                'recipient_address':
+                                recipient_address,
+                                'destination_blockchain':
+                                destination_blockchain.name
+                            })
             raise marshmallow.ValidationError(
                 'recipient address must be a valid blockchain '
                 'address, different from the 0 address on '
@@ -200,10 +205,12 @@ class _BidsSchema(marshmallow.Schema):
 
     """
     source_blockchain = marshmallow.fields.Integer(
-        required=True, validate=marshmallow.validate.OneOf(
+        required=True,
+        validate=marshmallow.validate.OneOf(
             [blockchain.value for blockchain in Blockchain]))
     destination_blockchain = marshmallow.fields.Integer(
-        required=True, validate=marshmallow.validate.OneOf(
+        required=True,
+        validate=marshmallow.validate.OneOf(
             [blockchain.value for blockchain in Blockchain]))
 
 
@@ -211,6 +218,7 @@ class _Transfer(flask_restful.Resource):
     """RESTful resource for token transfer requests.
 
     """
+
     def post(self) -> flask.Response:
         try:
             time_received = time.time()
@@ -240,6 +248,7 @@ class _TransferStatus(flask_restful.Resource):
     """RESTful resource for token transfer status requests.
 
     """
+
     def get(self, task_id: str) -> flask.Response:
         try:
             task_id_uuid = _TransferStatusSchema().load({'task_id': task_id})
@@ -259,25 +268,32 @@ class _TransferStatus(flask_restful.Resource):
                              exc_info=True)
             internal_server_error()
         return ok_response({
-            'task_id': str(task_id_uuid),
-            'source_blockchain_id': find_transfer_response.source_blockchain.
-            value,
-            'destination_blockchain_id': find_transfer_response.
-            destination_blockchain.value,
-            'sender_address': find_transfer_response.sender_address,
-            'recipient_address': find_transfer_response.recipient_address,
-            'source_token_address': find_transfer_response.
-            source_token_address,
-            'destination_token_address': find_transfer_response.
-            destination_token_address,
-            'amount': find_transfer_response.amount,
-            'fee': find_transfer_response.fee,
-            'status': find_transfer_response.status.to_public_status().name.
-            lower(),
-            'transfer_id': '' if find_transfer_response.transfer_id is None
-            else find_transfer_response.transfer_id,
-            'transaction_id': '' if find_transfer_response.transaction_id
-            is None else find_transfer_response.transaction_id
+            'task_id':
+            str(task_id_uuid),
+            'source_blockchain_id':
+            find_transfer_response.source_blockchain.value,
+            'destination_blockchain_id':
+            find_transfer_response.destination_blockchain.value,
+            'sender_address':
+            find_transfer_response.sender_address,
+            'recipient_address':
+            find_transfer_response.recipient_address,
+            'source_token_address':
+            find_transfer_response.source_token_address,
+            'destination_token_address':
+            find_transfer_response.destination_token_address,
+            'amount':
+            find_transfer_response.amount,
+            'fee':
+            find_transfer_response.fee,
+            'status':
+            find_transfer_response.status.to_public_status().name.lower(),
+            'transfer_id':
+            '' if find_transfer_response.transfer_id is None else
+            find_transfer_response.transfer_id,
+            'transaction_id':
+            '' if find_transfer_response.transaction_id is None else
+            find_transfer_response.transaction_id
         })
 
 
@@ -285,6 +301,7 @@ class _Bids(flask_restful.Resource):
     """RESTful resource for token transfer bids.
 
     """
+
     def get(self) -> flask.Response:
         try:
             query_arguments = flask_restful.request.args

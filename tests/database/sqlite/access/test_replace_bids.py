@@ -2,8 +2,8 @@ import unittest.mock
 
 import sqlalchemy
 import sqlalchemy.exc
-
 from pantos.common.blockchains.enums import Blockchain
+
 from pantos.servicenode.database.access import create_bid
 from pantos.servicenode.database.access import replace_bids
 from pantos.servicenode.database.models import Bid

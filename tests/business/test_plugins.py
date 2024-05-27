@@ -2,8 +2,8 @@ import dataclasses
 import unittest
 
 import pytest
-
 from pantos.common.blockchains.enums import Blockchain
+
 from pantos.servicenode.business.plugins import BidPluginInteractor
 from pantos.servicenode.business.plugins import execute_bid_plugin
 from pantos.servicenode.plugins.base import Bid
@@ -11,6 +11,7 @@ from pantos.servicenode.plugins.base import BidPluginError
 
 
 class MockedBidPlugin:
+
     def __init__(self, raise_error=False):
         self.raise_error = raise_error
 
@@ -23,8 +24,8 @@ class MockedBidPlugin:
         ], 10
 
 
-@unittest.mock.patch(
-    'pantos.servicenode.business.plugins.execute_bid_plugin.apply_async')
+@unittest.mock.patch('pantos.servicenode.business.plugins.execute_bid_plugin.'
+                     'apply_async')
 @unittest.mock.patch.object(BidPluginInteractor, 'replace_bids')
 def test_execute_bid_plugin_correct(mocked_replace_bids, mocked_task):
     mocked_replace_bids.return_value = 1
@@ -38,26 +39,11 @@ def test_execute_bid_plugin_correct(mocked_replace_bids, mocked_task):
                                         countdown=1)
 
 
-@unittest.mock.patch(
-    'pantos.servicenode.business.plugins.execute_bid_plugin.apply_async')
-@unittest.mock.patch.object(BidPluginInteractor, 'replace_bids')
-def test_execute_bid_plugin_error(mocked_replace_bids, mocked_task):
-    mocked_replace_bids.side_effect = BidPluginError()
-
-    task = execute_bid_plugin.s(Blockchain.ETHEREUM.value).apply()
-
-    assert task is not None
-    assert task.status == 'SUCCESS'
-    mocked_replace_bids.assert_called_once_with(Blockchain.ETHEREUM)
-    mocked_task.assert_called_once_with(args=[Blockchain.ETHEREUM.value],
-                                        countdown=60)
-
-
-@unittest.mock.patch(
-    'pantos.servicenode.business.plugins.execute_bid_plugin.apply_async')
+@unittest.mock.patch('pantos.servicenode.business.plugins.execute_bid_plugin.'
+                     'apply_async')
 @unittest.mock.patch.object(BidPluginInteractor, 'replace_bids')
 def test_execute_bid_plugin_interactor_error(mocked_replace_bids, mocked_task):
-    mocked_replace_bids.side_effect = Exception
+    mocked_replace_bids.side_effect = Exception()
 
     task = execute_bid_plugin.s(Blockchain.ETHEREUM.value).apply()
 

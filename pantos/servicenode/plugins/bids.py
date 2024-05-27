@@ -4,6 +4,7 @@ import typing
 
 from pantos.common.blockchains.enums import Blockchain
 from pantos.common.configuration import Config
+
 from pantos.servicenode.plugins.base import Bid
 from pantos.servicenode.plugins.base import BidPlugin
 from pantos.servicenode.plugins.base import BidPluginError
@@ -60,6 +61,7 @@ class ConfigFileBidPlugin(BidPlugin):
     delay : int
         The delay in seconds until the next bid calculation.
     """
+
     def __init__(self):
         """Initializes the plugin.
         """

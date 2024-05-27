@@ -1,8 +1,8 @@
 import unittest.mock
 
 import pytest
-
 from pantos.common.blockchains.enums import Blockchain
+
 from pantos.servicenode.blockchains.solana import SolanaClient
 from pantos.servicenode.blockchains.solana import SolanaClientError
 

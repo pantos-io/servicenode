@@ -1,6 +1,6 @@
 import pytest
-
 from pantos.common.entities import ServiceNodeTransferStatus
+
 from pantos.servicenode.database.enums import TransferStatus
 
 

@@ -37,8 +37,8 @@ if [ -x /bin/systemctl ]; then
   if [ -n "$(systemctl list-units --type=service | grep postgresql)" ]; then
     systemctl start postgresql || true
   fi
-  if [ -n "$(systemctl list-units --type=service | grep rabbitmq)" ]; then
-    systemctl start rabbitmq || true
+  if [ -n "$(systemctl list-units --type=service | grep rabbitmq-server)" ]; then
+    systemctl start rabbitmq-server || true
   fi
   # Stop pantos services
   systemctl stop pantos-service-node-server || true

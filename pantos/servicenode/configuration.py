@@ -23,6 +23,10 @@ _VALIDATION_SCHEMA_BLOCKCHAIN = {
             'type': 'boolean',
             'default': True
         },
+        'registered': {
+            'type': 'boolean',
+            'default': True
+        },
         'unstaking_address': {
             'type': 'string',
             'required': True,
@@ -287,8 +291,10 @@ _VALIDATION_SCHEMA = {
         }
     },
     'blockchains': {
-        'type': 'dict',
-        'schema': dict(
+        'type':
+        'dict',
+        'schema':
+        dict(
             zip([b.name.lower() for b in Blockchain],
                 itertools.repeat(_VALIDATION_SCHEMA_BLOCKCHAIN)))
     }

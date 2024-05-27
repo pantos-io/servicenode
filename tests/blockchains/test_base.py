@@ -3,11 +3,11 @@ import unittest.mock
 import uuid
 
 import pytest
-
 from pantos.common.blockchains.base import BlockchainUtilities
 from pantos.common.blockchains.base import BlockchainUtilitiesError
 from pantos.common.blockchains.enums import Blockchain
 from pantos.common.entities import TransactionStatus
+
 from pantos.servicenode.blockchains.base import BlockchainClient
 from pantos.servicenode.blockchains.base import BlockchainClientError
 from pantos.servicenode.blockchains.base import \
@@ -36,9 +36,11 @@ _ON_CHAIN_TRANSFER_ID = 10512
 @pytest.fixture(scope='module')
 @unittest.mock.patch(
     'pantos.servicenode.blockchains.base.initialize_blockchain_utilities')
-@unittest.mock.patch.object(BlockchainClient, '_get_config',
+@unittest.mock.patch.object(BlockchainClient,
+                            '_get_config',
                             return_value=_MOCK_CONFIG)
-@unittest.mock.patch.object(BlockchainClient, 'get_blockchain',
+@unittest.mock.patch.object(BlockchainClient,
+                            'get_blockchain',
                             return_value=Blockchain(0))
 @unittest.mock.patch.object(BlockchainClient, '__abstractmethods__', set())
 def blockchain_client(mock_get_blockchain, mock_get_config,
@@ -48,9 +50,11 @@ def blockchain_client(mock_get_blockchain, mock_get_config,
 
 @unittest.mock.patch(
     'pantos.servicenode.blockchains.base.initialize_blockchain_utilities')
-@unittest.mock.patch.object(BlockchainClient, '_get_config',
+@unittest.mock.patch.object(BlockchainClient,
+                            '_get_config',
                             return_value=_MOCK_CONFIG)
-@unittest.mock.patch.object(BlockchainClient, 'get_blockchain',
+@unittest.mock.patch.object(BlockchainClient,
+                            'get_blockchain',
                             return_value=Blockchain(0))
 @unittest.mock.patch.object(BlockchainClient, '__abstractmethods__', set())
 def test_init_correct(mock_get_blockchain, mock_get_config,
@@ -62,11 +66,14 @@ def test_init_correct(mock_get_blockchain, mock_get_config,
 @unittest.mock.patch(
     'pantos.servicenode.blockchains.base.initialize_blockchain_utilities',
     side_effect=BlockchainUtilitiesError(''))
-@unittest.mock.patch.object(BlockchainClient, '_create_error',
+@unittest.mock.patch.object(BlockchainClient,
+                            '_create_error',
                             return_value=BlockchainClientError(''))
-@unittest.mock.patch.object(BlockchainClient, '_get_config',
+@unittest.mock.patch.object(BlockchainClient,
+                            '_get_config',
                             return_value=_MOCK_CONFIG)
-@unittest.mock.patch.object(BlockchainClient, 'get_blockchain',
+@unittest.mock.patch.object(BlockchainClient,
+                            'get_blockchain',
                             return_value=Blockchain(0))
 @unittest.mock.patch.object(BlockchainClient, '__abstractmethods__', set())
 def test_init_error(mock_get_blockchain, mock_get_config, mock_create_error,
@@ -90,7 +97,8 @@ def test_get_transfer_submission_status_not_completed(mock_get_utilities,
 @pytest.mark.parametrize(
     'transaction_status',
     [TransactionStatus.CONFIRMED, TransactionStatus.REVERTED])
-@unittest.mock.patch.object(BlockchainClient, '_read_on_chain_transfer_id',
+@unittest.mock.patch.object(BlockchainClient,
+                            '_read_on_chain_transfer_id',
                             return_value=_ON_CHAIN_TRANSFER_ID)
 @unittest.mock.patch.object(BlockchainClient, '_get_utilities')
 def test_get_transfer_submission_status_completed(
@@ -109,7 +117,8 @@ def test_get_transfer_submission_status_completed(
 
 
 @unittest.mock.patch.object(BlockchainClient, '_get_utilities')
-@unittest.mock.patch.object(BlockchainClient, 'get_error_class',
+@unittest.mock.patch.object(BlockchainClient,
+                            'get_error_class',
                             return_value=BlockchainClientError)
 def test_get_transfer_submission_status_error(mock_get_error_class,
                                               mock_get_utilities,

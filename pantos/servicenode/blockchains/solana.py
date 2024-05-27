@@ -5,6 +5,7 @@ import uuid
 
 from pantos.common.blockchains.enums import Blockchain
 from pantos.common.types import BlockchainAddress
+
 from pantos.servicenode.blockchains.base import BlockchainClient
 from pantos.servicenode.blockchains.base import BlockchainClientError
 
@@ -20,6 +21,7 @@ class SolanaClient(BlockchainClient):
     """Solana-specific blockchain client.
 
     """
+
     def __init__(self):
         # Docstring inherited
         pass  # pragma: no cover

@@ -116,7 +116,9 @@ class TokenContract(Base):
     blockchain = sqlalchemy.orm.relationship('Blockchain',
                                              back_populates='token_contracts')
     __table_args__ = (sqlalchemy.schema.Index(
-        'ux_token_contracts_blockchain_id_address', blockchain_id, address,
+        'ux_token_contracts_blockchain_id_address',
+        blockchain_id,
+        address,
         unique=True), )
 
 
@@ -145,12 +147,17 @@ class Bid(Base):
     """
     __tablename__ = 'bids'
     source_blockchain_id = sqlalchemy.Column(
-        sqlalchemy.Integer, sqlalchemy.ForeignKey('blockchains.id'),
-        nullable=False, primary_key=True)
+        sqlalchemy.Integer,
+        sqlalchemy.ForeignKey('blockchains.id'),
+        nullable=False,
+        primary_key=True)
     destination_blockchain_id = sqlalchemy.Column(
-        sqlalchemy.Integer, sqlalchemy.ForeignKey('blockchains.id'),
-        nullable=False, primary_key=True)
-    execution_time = sqlalchemy.Column(sqlalchemy.Integer, nullable=False,
+        sqlalchemy.Integer,
+        sqlalchemy.ForeignKey('blockchains.id'),
+        nullable=False,
+        primary_key=True)
+    execution_time = sqlalchemy.Column(sqlalchemy.Integer,
+                                       nullable=False,
                                        primary_key=True)
     valid_until = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
     fee = sqlalchemy.Column(
@@ -244,18 +251,22 @@ class Transfer(Base):
     __tablename__ = 'transfers'
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
     source_blockchain_id = sqlalchemy.Column(
-        sqlalchemy.Integer, sqlalchemy.ForeignKey('blockchains.id'),
+        sqlalchemy.Integer,
+        sqlalchemy.ForeignKey('blockchains.id'),
         nullable=False)
     destination_blockchain_id = sqlalchemy.Column(
-        sqlalchemy.Integer, sqlalchemy.ForeignKey('blockchains.id'),
+        sqlalchemy.Integer,
+        sqlalchemy.ForeignKey('blockchains.id'),
         nullable=False)
     sender_address = sqlalchemy.Column(sqlalchemy.Text, nullable=False)
     recipient_address = sqlalchemy.Column(sqlalchemy.Text, nullable=False)
     source_token_contract_id = sqlalchemy.Column(
-        sqlalchemy.Integer, sqlalchemy.ForeignKey('token_contracts.id'),
+        sqlalchemy.Integer,
+        sqlalchemy.ForeignKey('token_contracts.id'),
         nullable=False)
     destination_token_contract_id = sqlalchemy.Column(
-        sqlalchemy.Integer, sqlalchemy.ForeignKey('token_contracts.id'),
+        sqlalchemy.Integer,
+        sqlalchemy.ForeignKey('token_contracts.id'),
         nullable=False)
     amount = sqlalchemy.Column(
         # Large enough for a 256-bit unsigned integer
@@ -270,10 +281,12 @@ class Transfer(Base):
         sqlalchemy.Numeric(precision=78, scale=0))
     signature = sqlalchemy.Column(sqlalchemy.Text, nullable=False)
     hub_contract_id = sqlalchemy.Column(
-        sqlalchemy.Integer, sqlalchemy.ForeignKey('hub_contracts.id'),
+        sqlalchemy.Integer,
+        sqlalchemy.ForeignKey('hub_contracts.id'),
         nullable=False)
     forwarder_contract_id = sqlalchemy.Column(
-        sqlalchemy.Integer, sqlalchemy.ForeignKey('forwarder_contracts.id'),
+        sqlalchemy.Integer,
+        sqlalchemy.ForeignKey('forwarder_contracts.id'),
         nullable=False)
     task_id = sqlalchemy.Column(sqlalchemy.Text, unique=True)
     on_chain_transfer_id = sqlalchemy.Column(
@@ -284,7 +297,8 @@ class Transfer(Base):
     status_id = sqlalchemy.Column(sqlalchemy.Integer,
                                   sqlalchemy.ForeignKey('transfer_status.id'),
                                   nullable=False)
-    created = sqlalchemy.Column(sqlalchemy.DateTime, nullable=False,
+    created = sqlalchemy.Column(sqlalchemy.DateTime,
+                                nullable=False,
                                 default=datetime.datetime.utcnow)
     updated = sqlalchemy.Column(sqlalchemy.DateTime)
     source_blockchain = sqlalchemy.orm.relationship(
@@ -305,13 +319,17 @@ class Transfer(Base):
     forwarder_contract = sqlalchemy.orm.relationship('ForwarderContract')
     status = sqlalchemy.orm.relationship('TransferStatus')
     __table_args__ = (
-        sqlalchemy.UniqueConstraint(forwarder_contract_id, sender_address,
+        sqlalchemy.UniqueConstraint(forwarder_contract_id,
+                                    sender_address,
                                     sender_nonce,
                                     name=UNIQUE_SENDER_NONCE_CONSTRAINT),
         sqlalchemy.UniqueConstraint(hub_contract_id, on_chain_transfer_id),
         sqlalchemy.UniqueConstraint(source_blockchain_id, transaction_id),
         sqlalchemy.UniqueConstraint(
-            source_blockchain_id, nonce, status_id, deferrable=True,
+            source_blockchain_id,
+            nonce,
+            status_id,
+            deferrable=True,
             name='uq_transfers_source_blockchain_id_nonce_status_id'),
         sqlalchemy.schema.Index(
             'ix_transfers_source_blockchain_id_nonce_status_id',

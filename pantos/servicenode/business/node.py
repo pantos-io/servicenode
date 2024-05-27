@@ -4,7 +4,7 @@
 import logging
 
 from pantos.common.blockchains.enums import Blockchain
-from pantos.servicenode.blockchains.base import BlockchainClientError
+
 from pantos.servicenode.blockchains.factory import get_blockchain_client
 from pantos.servicenode.business.base import Interactor
 from pantos.servicenode.business.base import InteractorError
@@ -26,6 +26,7 @@ class NodeInteractor(Interactor):
     """Interactor for managing the service node itself.
 
     """
+
     def update_node_registrations(self) -> None:
         """Update the service node registrations on all supported
         blockchains.
@@ -41,24 +42,17 @@ class NodeInteractor(Interactor):
                          '{}'.format(blockchain.name))
             try:
                 blockchain_config = get_blockchain_config(blockchain)
-                active = blockchain_config['active']
-                try:
-                    blockchain_client = get_blockchain_client(blockchain)
-                    registered = blockchain_client.is_node_registered()
-                except BlockchainClientError:
-                    if active:
-                        raise
-                    else:
-                        # It is fine if we cannot interact with an
-                        # inactive blockchain (e.g. because of a
-                        # non-working blockchain node)
-                        continue
-                if active and registered:
+                if not blockchain_config['active']:
+                    continue
+                to_be_registered = blockchain_config['registered']
+                blockchain_client = get_blockchain_client(blockchain)
+                is_registered = blockchain_client.is_node_registered()
+                if to_be_registered and is_registered:
                     old_node_url = blockchain_client.read_node_url()
                     new_node_url = config['application']['url']
                     if old_node_url != new_node_url:
                         blockchain_client.update_node_url(new_node_url)
-                elif active:
+                elif to_be_registered:
                     is_unbonding = blockchain_client.is_unbonding()
                     if is_unbonding:
                         # Service node was unregistered but the stake
@@ -72,10 +66,10 @@ class NodeInteractor(Interactor):
                         node_stake = blockchain_config['stake']
                         blockchain_client.register_node(
                             node_url, node_stake, unstaking_address)
-                elif registered:
-                    # Not active anymore
+                elif is_registered:
+                    # Not to be registered anymore
                     blockchain_client.unregister_node()
-                # Do nothing if not active and not registered
+                # Do nothing if neither registered nor to be registered
             except Exception:
                 raise NodeInteractorError(
                     'unable to update the service node registration on '

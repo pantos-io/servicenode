@@ -5,9 +5,9 @@ import time
 import uuid
 
 import pytest
-
 from pantos.common.blockchains.enums import Blockchain
 from pantos.common.entities import ServiceNodeBid
+
 from pantos.servicenode.business.transfers import TransferInteractor
 from pantos.servicenode.database.enums import TransferStatus
 

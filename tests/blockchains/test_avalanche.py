@@ -1,8 +1,8 @@
 import unittest.mock
 
 import pytest
-
 from pantos.common.blockchains.enums import Blockchain
+
 from pantos.servicenode.blockchains.avalanche import AvalancheClient
 from pantos.servicenode.blockchains.avalanche import AvalancheClientError
 

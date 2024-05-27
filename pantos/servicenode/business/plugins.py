@@ -2,11 +2,12 @@ import collections.abc
 import dataclasses
 import logging
 
+import celery  # type: ignore
 from pantos.common.blockchains.enums import Blockchain
+
 from pantos.servicenode.blockchains.factory import get_blockchain_client
 from pantos.servicenode.business.base import Interactor
 from pantos.servicenode.business.base import InteractorError
-from pantos.servicenode.celery import celery_app as celery_app
 from pantos.servicenode.configuration import get_plugin_config
 from pantos.servicenode.database.access import replace_bids
 from pantos.servicenode.plugins import get_bid_plugin
@@ -30,6 +31,7 @@ class BidPluginInteractor(Interactor):
     """Interactor for handling the bid plugin operations.
 
     """
+
     def replace_bids(self, source_blockchain: Blockchain) -> int:
         """Replace the old bids with new bids given by the bid plugin.
         Additionally, the Validator fee is added to the bid fee.
@@ -97,7 +99,7 @@ class BidPluginInteractor(Interactor):
                 (bid.fee * total_factor) / source_blockchain_factor)
 
 
-@celery_app.task
+@celery.current_app.task
 def execute_bid_plugin(source_blockchain_id: int):
     """Celery task for executing the bid plugin.
 
@@ -107,11 +109,11 @@ def execute_bid_plugin(source_blockchain_id: int):
         The source blockchain for which the plugin is executed.
 
     """
+    source_blockchain = Blockchain(source_blockchain_id)
     bid_plugin_interactor = BidPluginInteractor()
     delay = _DEFAULT_DELAY
     try:
-        delay = bid_plugin_interactor.replace_bids(
-            Blockchain(source_blockchain_id))
+        delay = bid_plugin_interactor.replace_bids(source_blockchain)
     except Exception:
         _logger.critical('unable to replace the bids', exc_info=True)
     finally:
