@@ -28,7 +28,6 @@ class BidInteractor(Interactor):
     """Interactor for managing service node bids.
 
     """
-
     @dataclasses.dataclass
     class Bid:
         """Data for a transfer bid.

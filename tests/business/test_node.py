@@ -21,13 +21,11 @@ CONFIG_UNSTAKING_ADDRESS = '0xceb95Cb81e4f71c8Fc426a84fA29F2ac552AD752'
 
 
 class MockBlockchainClientError(BlockchainClientError):
-
     def __init__(self):
         super().__init__('')
 
 
 class MockBlockchainClient:
-
     def __init__(self, node_registered, is_unbonding, raise_error):
         self.node_registered = node_registered
         self.unbonding = is_unbonding

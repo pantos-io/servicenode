@@ -70,8 +70,8 @@ def upgrade() -> None:
             ['hub_contract_id'],
             ['hub_contracts.id'],
         ), sa.PrimaryKeyConstraint('id'))
-    alembic.op.create_index('ux_bids_hub_contract_id_on_chain_bid_id',
-                            'bids', ['hub_contract_id', 'on_chain_bid_id'],
+    alembic.op.create_index('ux_bids_hub_contract_id_on_chain_bid_id', 'bids',
+                            ['hub_contract_id', 'on_chain_bid_id'],
                             unique=True)
     alembic.op.create_table(
         'transfers', sa.Column('id', sa.Integer(), nullable=False),
@@ -80,20 +80,17 @@ def upgrade() -> None:
         sa.Column('sender_address', sa.Text(), nullable=False),
         sa.Column('recipient_address', sa.Text(), nullable=False),
         sa.Column('source_token_contract_id', sa.Integer(), nullable=False),
-        sa.Column('destination_token_contract_id',
-                  sa.Integer(),
+        sa.Column('destination_token_contract_id', sa.Integer(),
                   nullable=False),
         sa.Column('amount', sa.Numeric(precision=78, scale=0), nullable=False),
         sa.Column('bid_id', sa.Integer(), nullable=False),
-        sa.Column('sender_nonce',
-                  sa.Numeric(precision=78, scale=0),
+        sa.Column('sender_nonce', sa.Numeric(precision=78, scale=0),
                   nullable=True),
         sa.Column('signature', sa.Text(), nullable=False),
         sa.Column('hub_contract_id', sa.Integer(), nullable=False),
         sa.Column('forwarder_contract_id', sa.Integer(), nullable=False),
         sa.Column('task_id', sa.Text(), nullable=True),
-        sa.Column('on_chain_transfer_id',
-                  sa.Numeric(precision=78, scale=0),
+        sa.Column('on_chain_transfer_id', sa.Numeric(precision=78, scale=0),
                   nullable=True),
         sa.Column('transaction_id', sa.Text(), nullable=True),
         sa.Column('nonce', sa.BigInteger(), nullable=True),
@@ -130,19 +127,15 @@ def upgrade() -> None:
             ['status_id'],
             ['transfer_status.id'],
         ), sa.PrimaryKeyConstraint('id'),
-        sa.UniqueConstraint('forwarder_contract_id',
-                            'sender_address',
-                            'sender_nonce',
-                            name='unique_sender_nonce'),
+        sa.UniqueConstraint('forwarder_contract_id', 'sender_address',
+                            'sender_nonce', name='unique_sender_nonce'),
         sa.UniqueConstraint('hub_contract_id', 'on_chain_transfer_id'),
         sa.UniqueConstraint('source_blockchain_id', 'transaction_id'),
         sa.UniqueConstraint('task_id'))
     alembic.op.create_index(
-        'ux_transfers_source_blockchain_id_nonce_status_id',
-        'transfers',
+        'ux_transfers_source_blockchain_id_nonce_status_id', 'transfers',
         ['source_blockchain_id',
-         sa.text('nonce DESC'), 'status_id'],
-        unique=True)
+         sa.text('nonce DESC'), 'status_id'], unique=True)
     # ### end Alembic commands ###
 
 

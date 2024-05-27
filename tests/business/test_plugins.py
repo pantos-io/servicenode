@@ -11,7 +11,6 @@ from pantos.servicenode.plugins.base import BidPluginError
 
 
 class MockedBidPlugin:
-
     def __init__(self, raise_error=False):
         self.raise_error = raise_error
 

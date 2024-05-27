@@ -1,1 +1,9 @@
-submodules/common/.style.yapf
+[style]
+based_on_style = pep8
+spaces_before_comment = 2
+split_before_logical_operator = true
+column_limit = 79
+allow_split_before_dict_value = false
+blank_lines_between_top_level_imports_and_variables = 1
+blank_line_before_nested_class_or_def = false
+split_before_named_assigns = false

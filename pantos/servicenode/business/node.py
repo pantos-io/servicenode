@@ -26,7 +26,6 @@ class NodeInteractor(Interactor):
     """Interactor for managing the service node itself.
 
     """
-
     def update_node_registrations(self) -> None:
         """Update the service node registrations on all supported
         blockchains.

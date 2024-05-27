@@ -38,7 +38,6 @@ class Bid:
 
 
 class BidPlugin(abc.ABC):
-
     @abc.abstractmethod
     def get_bids(
             self, source_blockchain_id: int, destination_blockchain_id: int,

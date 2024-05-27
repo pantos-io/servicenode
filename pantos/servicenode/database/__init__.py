@@ -76,10 +76,8 @@ def initialize_package(is_flask_app: bool = False) -> None:
                        config['database']['url'])
 
     sql_engine = sqlalchemy.create_engine(
-        config['database']['url'],
-        pool_size=config['database']['pool_size'],
-        max_overflow=config['database']['max_overflow'],
-        pool_pre_ping=True,
+        config['database']['url'], pool_size=config['database']['pool_size'],
+        max_overflow=config['database']['max_overflow'], pool_pre_ping=True,
         echo=config['database']['echo'])
     global _session_maker
     _session_maker = sqlalchemy.orm.sessionmaker(bind=sql_engine)

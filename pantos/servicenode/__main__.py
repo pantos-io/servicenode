@@ -14,8 +14,5 @@ if __name__ == '__main__':
     ssl_context = (None if ssl_certificate is None or ssl_private_key is None
                    else (ssl_certificate, ssl_private_key))
     debug = config['application']['debug']
-    application.run(host=host,
-                    port=port,
-                    ssl_context=ssl_context,
-                    debug=debug,
+    application.run(host=host, port=port, ssl_context=ssl_context, debug=debug,
                     use_reloader=False)

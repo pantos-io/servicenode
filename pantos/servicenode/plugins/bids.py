@@ -61,7 +61,6 @@ class ConfigFileBidPlugin(BidPlugin):
     delay : int
         The delay in seconds until the next bid calculation.
     """
-
     def __init__(self):
         """Initializes the plugin.
         """

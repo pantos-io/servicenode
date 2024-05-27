@@ -21,7 +21,6 @@ class CronosClient(EthereumClient):
     """Cronos-specific blockchain client.
 
     """
-
     @classmethod
     def get_blockchain(cls) -> Blockchain:
         # Docstring inherited

@@ -178,8 +178,7 @@ def test_create_application_correct(mock_config, mock_flask_app,
     assert returned_flask_app == mock_flask_app
 
 
-@unittest.mock.patch.object(NodeInteractor,
-                            'update_node_registrations',
+@unittest.mock.patch.object(NodeInteractor, 'update_node_registrations',
                             side_effect=Exception)
 @unittest.mock.patch('pantos.servicenode.application.initialize_application')
 @unittest.mock.patch('pantos.servicenode.restapi.flask_app')
