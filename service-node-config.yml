@@ -1,0 +1,222 @@
+application:
+    debug: !ENV tag:yaml.org,2002:bool ${APP_DEBUG:false}
+    host: !ENV ${APP_HOST:127.0.0.1}
+    port: !ENV tag:yaml.org,2002:int ${APP_PORT:443}
+    url: !ENV ${APP_URL}
+    log:
+        format: !ENV ${APP_LOG_FORMAT:human_readable}
+        console:
+            enabled: !ENV tag:yaml.org,2002:bool ${APP_LOG_CONSOLE_ENABLED:true}
+        file:
+            enabled: !ENV tag:yaml.org,2002:bool ${APP_LOG_FILE_ENABLED:true}
+            name: !ENV ${APP_LOG_FILE_NAME:/var/log/pantos/service-node.log}
+            max_bytes: !ENV tag:yaml.org,2002:int ${APP_LOG_FILE_MAX_BYTES:104857600}
+            backup_count: !ENV tag:yaml.org,2002:int ${APP_LOG_FILE_BACKUP_COUNT:10}
+
+database:
+    url: !ENV ${DB_URL}
+    pool_size: !ENV tag:yaml.org,2002:int ${DB_POOL_SIZE:20}
+    max_overflow: !ENV tag:yaml.org,2002:int ${DB_MAX_OVERFLOW:50}
+    echo: !ENV tag:yaml.org,2002:bool ${DB_ECHO:false}
+    alembic_config: !ENV ${DB_ALEMBIC_CONFIG:/etc/pantos/service-node-alembic.ini}
+    apply_migrations: !ENV tag:yaml.org,2002:bool ${DB_APPLY_MIGRATIONS:true}
+
+celery:
+    broker: !ENV ${CELERY_BROKER}
+    backend: !ENV ${CELERY_BACKEND}
+    log:
+        format: !ENV ${CELERY_LOG_FORMAT:human_readable}
+        console:
+            enabled: !ENV tag:yaml.org,2002:bool ${CELERY_LOG_CONSOLE_ENABLED:true}
+        file:
+            enabled: !ENV tag:yaml.org,2002:bool ${CELERY_LOG_FILE_ENABLED:true}
+            name: !ENV ${CELERY_LOG_FILE_NAME:/var/log/pantos/service-node-worker.log}
+            max_bytes: !ENV tag:yaml.org,2002:int ${CELERY_LOG_FILE_MAX_BYTES:104857600}
+            backup_count: !ENV tag:yaml.org,2002:int ${CELERY_LOG_FILE_BACKUP_COUNT:10}
+
+tasks:
+    confirm_transfer:
+        interval: !ENV tag:yaml.org,2002:int ${TASKS_CONFIRM_TRANSFER_INTERVAL:30}
+        retry_interval_after_error: !ENV tag:yaml.org,2002:int ${TASKS_CONFIRM_TRANSFER_RETRY_INTERVAL_AFTER_ERROR:60}
+    execute_transfer:
+        retry_interval_after_error: !ENV tag:yaml.org,2002:int ${TASKS_EXECUTE_TRANSFER_RETRY_INTERVAL_AFTER_ERROR:30}
+
+plugins:
+    bids:
+        class: pantos.servicenode.plugins.bids.ConfigFileBidPlugin
+        arguments:
+            file_path: !ENV ${PLUGINS_BIDS_ARGUMENTS_FILE_PATH:/etc/pantos/service-node-bids.yml}
+
+signer:
+    pem: !ENV ${SIGNER_PEM:/etc/pantos/service-node-signer.pem}
+    pem_password: !ENV ${SIGNER_PEM_PASSWORD}
+
+blockchains:
+    avalanche:
+        active: !ENV tag:yaml.org,2002:bool ${AVALANCHE_ACTIVE:true}
+        registered: !ENV tag:yaml.org,2002:bool ${AVALANCHE_REGISTERED:true}
+        unstaking_address: !ENV ${AVALANCHE_UNSTAKING_ADDRESS:0x726265A9e352F2e9f15F255957840992803cED7d}
+        private_key: !ENV ${AVALANCHE_PRIVATE_KEY:/etc/pantos/service-node.keystore}
+        private_key_password: !ENV ${AVALANCHE_PRIVATE_KEY_PASSWORD:<fill me>}
+        provider: !ENV ${AVALANCHE_PROVIDER:https://api.avax-test.network/ext/bc/C/rpc}
+        fallback_providers:
+            - !ENV ${AVALANCHE_FALLBACK_PROVIDER:https://api.avax-test.network/ext/bc/C/rpc}
+        average_block_time: !ENV tag:yaml.org,2002:int ${AVALANCHE_AVERAGE_BLOCK_TIME:3}
+        provider_timeout: !ENV tag:yaml.org,2002:int ${AVALANCHE_PROVIDER_TIMEOUT:100}
+        chain_id: !ENV tag:yaml.org,2002:int ${AVALANCHE_CHAIN_ID:43113}
+        hub: !ENV ${AVALANCHE_HUB:0xbafFb84601BeC1FCb4B842f8917E3eA850781BE7}
+        forwarder: !ENV ${AVALANCHE_FORWARDER:0xfd7D081b7426aAb19CDc63E245313Ce9fF559cDC}
+        pan_token: !ENV ${AVALANCHE_PAN_TOKEN:0xC892F1D09a7BEF98d65e7f9bD4642d36BC506441}
+        confirmations: !ENV tag:yaml.org,2002:int ${AVALANCHE_CONFIRMATIONS:20}
+        min_adaptable_fee_per_gas: !ENV tag:yaml.org,2002:int ${AVALANCHE_MIN_ADAPTABLE_FEE_PER_GAS:1000000000}
+        #max_total_fee_per_gas: !ENV tag:yaml.org,2002:int ${AVALANCHE_MAX_TOTAL_FEE_PER_GAS: }
+        adaptable_fee_increase_factor: !ENV tag:yaml.org,2002:float ${AVALANCHE_ADAPTABLE_FEE_INCREASE_FACTOR:1.101}
+        blocks_until_resubmission: !ENV tag:yaml.org,2002:int ${AVALANCHE_BLOCKS_UNTIL_RESUBMISSION:20}
+        stake: !ENV tag:yaml.org,2002:int ${AVALANCHE_STAKE:10000000000000}
+    bnb_chain:
+        active: !ENV tag:yaml.org,2002:bool ${BNB_ACTIVE:true}
+        registered: !ENV tag:yaml.org,2002:bool ${BNB_REGISTERED:true}
+        unstaking_address: !ENV ${BNB_UNSTAKING_ADDRESS:0x726265A9e352F2e9f15F255957840992803cED7d}
+        private_key: !ENV ${BNB_PRIVATE_KEY:/etc/pantos/service-node.keystore}
+        private_key_password: !ENV ${BNB_PRIVATE_KEY_PASSWORD:<fill me>}
+        provider: !ENV ${BNB_PROVIDER:https://data-seed-prebsc-1-s1.binance.org:8545/}
+        fallback_providers:
+            - !ENV ${BNB_FALLBACK_PROVIDER:https://data-seed-prebsc-1-s1.binance.org:8545/}
+        average_block_time: !ENV tag:yaml.org,2002:int ${BNB_AVERAGE_BLOCK_TIME:3}
+        provider_timeout: !ENV tag:yaml.org,2002:int ${BNB_PROVIDER_TIMEOUT:100}
+        chain_id: !ENV tag:yaml.org,2002:int ${BNB_CHAIN_ID:97}
+        hub: !ENV ${BNB_HUB:0xFB37499DC5401Dc39a0734df1fC7924d769721d5}
+        forwarder: !ENV ${BNB_FORWARDER:0x8d1A4C7bc5f327f30895150c4596E3db6Eb48562}
+        pan_token: !ENV ${BNB_PAN_TOKEN:0xC892F1D09a7BEF98d65e7f9bD4642d36BC506441}
+        confirmations: !ENV tag:yaml.org,2002:int ${BNB_CONFIRMATIONS:20}
+        min_adaptable_fee_per_gas: !ENV tag:yaml.org,2002:int ${BNB_MIN_ADAPTABLE_FEE_PER_GAS:5000000000}
+        #max_total_fee_per_gas: !ENV tag:yaml.org,2002:int ${BNB_MAX_TOTAL_FEE_PER_GAS: }
+        adaptable_fee_increase_factor: !ENV tag:yaml.org,2002:float ${BNB_ADAPTABLE_FEE_INCREASE_FACTOR:1.101}
+        blocks_until_resubmission: !ENV tag:yaml.org,2002:int ${BNB_BLOCKS_UNTIL_RESUBMISSION:20}
+        stake: !ENV tag:yaml.org,2002:int ${BNB_STAKE:10000000000000}
+    celo:
+        active: !ENV tag:yaml.org,2002:bool ${CELO_ACTIVE:true}
+        registered: !ENV tag:yaml.org,2002:bool ${CELO_REGISTERED:true}
+        unstaking_address: !ENV ${CELO_UNSTAKING_ADDRESS:0x726265A9e352F2e9f15F255957840992803cED7d}
+        private_key: !ENV ${CELO_PRIVATE_KEY:/etc/pantos/service-node.keystore}
+        private_key_password: !ENV ${CELO_PRIVATE_KEY_PASSWORD:<fill me>}
+        provider: !ENV ${CELO_PROVIDER:https://alfajores-forno.celo-testnet.org}
+        fallback_providers:
+            - !ENV ${CELO_FALLBACK_PROVIDER:https://alfajores-forno.celo-testnet.org}
+        average_block_time: !ENV tag:yaml.org,2002:int ${CELO_AVERAGE_BLOCK_TIME:5}
+        provider_timeout: !ENV tag:yaml.org,2002:int ${CELO_PROVIDER_TIMEOUT:100}
+        chain_id: !ENV tag:yaml.org,2002:int ${CELO_CHAIN_ID:44787}
+        hub: !ENV ${CELO_HUB:0x8389B9A7608dbf52a699b998f309883257923C0E}
+        forwarder: !ENV ${CELO_FORWARDER:0x38dd7589fF20370b3BA5d9C09ac1d16Ed3496435}
+        pan_token: !ENV ${CELO_PAN_TOKEN:0x5538e600dc919f72858dd4D4F5E4327ec6f2af60}
+        confirmations: !ENV tag:yaml.org,2002:int ${CELO_CONFIRMATIONS:3}
+        min_adaptable_fee_per_gas: !ENV tag:yaml.org,2002:int ${CELO_MIN_ADAPTABLE_FEE_PER_GAS:1000000000}
+        #max_total_fee_per_gas: !ENV tag:yaml.org,2002:int ${CELO_MAX_TOTAL_FEE_PER_GAS: }
+        adaptable_fee_increase_factor: !ENV tag:yaml.org,2002:float ${CELO_ADAPTABLE_FEE_INCREASE_FACTOR:1.101}
+        blocks_until_resubmission: !ENV tag:yaml.org,2002:int ${CELO_BLOCKS_UNTIL_RESUBMISSION:20}
+        stake: !ENV tag:yaml.org,2002:int ${CELO_STAKE:10000000000000}
+    cronos:
+        active: !ENV tag:yaml.org,2002:bool ${CRONOS_ACTIVE:true}
+        registered: !ENV tag:yaml.org,2002:bool ${CRONOS_REGISTERED:true}
+        unstaking_address: !ENV ${CRONOS_UNSTAKING_ADDRESS:0x726265A9e352F2e9f15F255957840992803cED7d}
+        private_key: !ENV ${CRONOS_PRIVATE_KEY:/etc/pantos/service-node.keystore}
+        private_key_password: !ENV ${CRONOS_PRIVATE_KEY_PASSWORD:<fill me>}
+        provider: !ENV ${CRONOS_PROVIDER:https://evm-t3.cronos.org}
+        fallback_providers:
+            - !ENV ${CRONOS_FALLBACK_PROVIDER:https://cronos-testnet.crypto.org:8545/}
+        average_block_time: !ENV tag:yaml.org,2002:int ${CRONOS_AVERAGE_BLOCK_TIME:5}
+        provider_timeout: !ENV tag:yaml.org,2002:int ${CRONOS_PROVIDER_TIMEOUT:100}
+        chain_id: !ENV tag:yaml.org,2002:int ${CRONOS_CHAIN_ID:338}
+        hub: !ENV ${CRONOS_HUB:0x0Cfb3c7C11A33BEf124A9D86073e73932b9AbF90}
+        forwarder: !ENV ${CRONOS_FORWARDER:0x38dd7589fF20370b3BA5d9C09ac1d16Ed3496435}
+        pan_token: !ENV ${CRONOS_PAN_TOKEN:0x5538e600dc919f72858dd4D4F5E4327ec6f2af60}
+        confirmations: !ENV tag:yaml.org,2002:int ${CRONOS_CONFIRMATIONS:3}
+        min_adaptable_fee_per_gas: !ENV tag:yaml.org,2002:int ${CRONOS_MIN_ADAPTABLE_FEE_PER_GAS:1000000000}
+        #max_total_fee_per_gas: !ENV tag:yaml.org,2002:int ${CRONOS_MAX_TOTAL_FEE_PER_GAS: }
+        adaptable_fee_increase_factor: !ENV tag:yaml.org,2002:float ${CRONOS_ADAPTABLE_FEE_INCREASE_FACTOR:1.101}
+        blocks_until_resubmission: !ENV tag:yaml.org,2002:int ${CRONOS_BLOCKS_UNTIL_RESUBMISSION:20}
+        stake: !ENV tag:yaml.org,2002:int ${CRONOS_STAKE:10000000000000}
+    ethereum:
+        active: !ENV tag:yaml.org,2002:bool ${ETHEREUM_ACTIVE:true}
+        registered: !ENV tag:yaml.org,2002:bool ${ETHEREUM_REGISTERED:true}
+        unstaking_address: !ENV ${ETHEREUM_UNSTAKING_ADDRESS:0x726265A9e352F2e9f15F255957840992803cED7d}
+        private_key: !ENV ${ETHEREUM_PRIVATE_KEY:/etc/pantos/service-node.keystore}
+        private_key_password: !ENV ${ETHEREUM_PRIVATE_KEY_PASSWORD:<fill me>}
+        provider: !ENV ${ETHEREUM_PROVIDER:https://ethereum-holesky.publicnode.com}
+        fallback_providers:
+            - !ENV ${ETHEREUM_FALLBACK_PROVIDER:https://ethereum-holesky.publicnode.com}
+        average_block_time: !ENV tag:yaml.org,2002:int ${ETHEREUM_AVERAGE_BLOCK_TIME:14}
+        provider_timeout: !ENV tag:yaml.org,2002:int ${ETHEREUM_PROVIDER_TIMEOUT:100}
+        chain_id: !ENV tag:yaml.org,2002:int ${ETHEREUM_CHAIN_ID:17000}
+        hub: !ENV ${ETHEREUM_HUB:0x5e447968d4a177fE7bFB8877cA12aE20Bd60dD85}
+        forwarder: !ENV ${ETHEREUM_FORWARDER:0xce5FE7168424ED2246a3dd79214f2D69a7Edc0BB}
+        pan_token: !ENV ${ETHEREUM_PAN_TOKEN:0x7EFfCc0a130E452c2FB78bFEDBd02a33E03FD50d}
+        confirmations: !ENV tag:yaml.org,2002:int ${ETHEREUM_CONFIRMATIONS:20}
+        min_adaptable_fee_per_gas: !ENV tag:yaml.org,2002:int ${ETHEREUM_MIN_ADAPTABLE_FEE_PER_GAS:1000000000}
+        #max_total_fee_per_gas: !ENV tag:yaml.org,2002:int ${ETHEREUM_MAX_TOTAL_FEE_PER_GAS: }
+        adaptable_fee_increase_factor: !ENV tag:yaml.org,2002:float ${ETHEREUM_ADAPTABLE_FEE_INCREASE_FACTOR:1.101}
+        blocks_until_resubmission: !ENV tag:yaml.org,2002:int ${ETHEREUM_BLOCKS_UNTIL_RESUBMISSION:20}
+        stake: !ENV tag:yaml.org,2002:int ${ETHEREUM_STAKE:10000000000000}
+    fantom:
+        active: !ENV tag:yaml.org,2002:bool ${FANTOM_ACTIVE:true}
+        registered: !ENV tag:yaml.org,2002:bool ${FANTOM_REGISTERED:true}
+        unstaking_address: !ENV ${FANTOM_UNSTAKING_ADDRESS:0x726265A9e352F2e9f15F255957840992803cED7d}
+        private_key: !ENV ${FANTOM_PRIVATE_KEY:/etc/pantos/service-node.keystore}
+        private_key_password: !ENV ${FANTOM_PRIVATE_KEY_PASSWORD:<fill me>}
+        provider: !ENV ${FANTOM_PROVIDER:https://rpc.ankr.com/fantom_testnet}
+        fallback_providers:
+            - !ENV ${FANTOM_FALLBACK_PROVIDER:https://rpc.ankr.com/fantom_testnet}
+        average_block_time: !ENV tag:yaml.org,2002:int ${FANTOM_AVERAGE_BLOCK_TIME:1}
+        provider_timeout: !ENV tag:yaml.org,2002:int ${FANTOM_PROVIDER_TIMEOUT:100}
+        chain_id: !ENV tag:yaml.org,2002:int ${FANTOM_CHAIN_ID:4002}
+        hub: !ENV ${FANTOM_HUB:0x4BC6A71D4C3D6170d0Db849fE19b8DbA18f1a7F5}
+        forwarder: !ENV ${FANTOM_FORWARDER:0xbBbebAB1c109De08599ae17e2977cD7D91eA2D3b}
+        pan_token: !ENV ${FANTOM_PAN_TOKEN:0x5538e600dc919f72858dd4D4F5E4327ec6f2af60}
+        confirmations: !ENV tag:yaml.org,2002:int ${FANTOM_CONFIRMATIONS:6}
+        min_adaptable_fee_per_gas: !ENV tag:yaml.org,2002:int ${FANTOM_MIN_ADAPTABLE_FEE_PER_GAS:1000000000}
+        #max_total_fee_per_gas: !ENV tag:yaml.org,2002:int ${FANTOM_MAX_TOTAL_FEE_PER_GAS: }
+        adaptable_fee_increase_factor: !ENV tag:yaml.org,2002:float ${FANTOM_ADAPTABLE_FEE_INCREASE_FACTOR:1.101}
+        blocks_until_resubmission: !ENV tag:yaml.org,2002:int ${FANTOM_BLOCKS_UNTIL_RESUBMISSION:20}
+        stake: !ENV tag:yaml.org,2002:int ${FANTOM_STAKE:10000000000000}
+    polygon:
+        active: !ENV tag:yaml.org,2002:bool ${POLYGON_ACTIVE:true}
+        registered: !ENV tag:yaml.org,2002:bool ${POLYGON_REGISTERED:true}
+        unstaking_address: !ENV ${POLYGON_UNSTAKING_ADDRESS:0x726265A9e352F2e9f15F255957840992803cED7d}
+        private_key: !ENV ${POLYGON_PRIVATE_KEY:/etc/pantos/service-node.keystore}
+        private_key_password: !ENV ${POLYGON_PRIVATE_KEY_PASSWORD:<fill me>}
+        provider: !ENV ${POLYGON_PROVIDER:https://rpc.ankr.com/polygon_mumbai}
+        fallback_providers:
+            - !ENV ${POLYGON_FALLBACK_PROVIDER:https://rpc.ankr.com/polygon_mumbai}
+        average_block_time: !ENV tag:yaml.org,2002:int ${POLYGON_AVERAGE_BLOCK_TIME:3}
+        provider_timeout: !ENV tag:yaml.org,2002:int ${POLYGON_PROVIDER_TIMEOUT:100}
+        chain_id: !ENV tag:yaml.org,2002:int ${POLYGON_CHAIN_ID:80001}
+        hub: !ENV ${POLYGON_HUB:0x5C4B92cd0A956dedc14AF31fD474931540D8277B}
+        forwarder: !ENV ${POLYGON_FORWARDER:0xC458D148d1Cac769239629e744be37eDEf4F06A6}
+        pan_token: !ENV ${POLYGON_PAN_TOKEN:0xC892F1D09a7BEF98d65e7f9bD4642d36BC506441}
+        confirmations: !ENV tag:yaml.org,2002:int ${POLYGON_CONFIRMATIONS:200}
+        min_adaptable_fee_per_gas: !ENV tag:yaml.org,2002:int ${POLYGON_MIN_ADAPTABLE_FEE_PER_GAS:1000000000}
+        #max_total_fee_per_gas: !ENV tag:yaml.org,2002:int ${POLYGON_MAX_TOTAL_FEE_PER_GAS: }
+        adaptable_fee_increase_factor: !ENV tag:yaml.org,2002:float ${POLYGON_ADAPTABLE_FEE_INCREASE_FACTOR:1.101}
+        blocks_until_resubmission: !ENV tag:yaml.org,2002:int ${POLYGON_BLOCKS_UNTIL_RESUBMISSION:20}
+        stake: !ENV tag:yaml.org,2002:int ${POLYGON_STAKE:10000000000000}
+    solana:
+        active: !ENV tag:yaml.org,2002:bool ${SOLANA_ACTIVE:false}
+        registered: !ENV tag:yaml.org,2002:bool ${SOLANA_REGISTERED:true}
+        unstaking_address: !ENV ${SOLANA_UNSTAKING_ADDRESS:0x726265A9e352F2e9f15F255957840992803cED7d:' '}
+        private_key: !ENV ${SOLANA_PRIVATE_KEY:' '}
+        private_key_password: !ENV ${SOLANA_PRIVATE_KEY_PASSWORD:<fill me>}
+        provider: !ENV ${SOLANA_PROVIDER:<fill me>}
+        fallback_providers:
+            - !ENV ${SOLANA_FALLBACK_PROVIDER:<fill me>}
+        average_block_time: !ENV tag:yaml.org,2002:int ${SOLANA_AVERAGE_BLOCK_TIME:1}
+        chain_id: !ENV tag:yaml.org,2002:int ${SOLANA_CHAIN_ID:-1}
+        hub: !ENV ${SOLANA_HUB:' '}
+        forwarder: !ENV ${SOLANA_FORWARDER:' '}
+        pan_token: !ENV ${SOLANA_PAN_TOKEN:' '}
+        confirmations: !ENV tag:yaml.org,2002:int ${SOLANA_CONFIRMATIONS:1}
+        min_adaptable_fee_per_gas: !ENV tag:yaml.org,2002:int ${SOLANA_MIN_ADAPTABLE_FEE_PER_GAS:1000000000}
+        #max_total_fee_per_gas: !ENV tag:yaml.org,2002:int ${SOLANA_MAX_TOTAL_FEE_PER_GAS:' '}
+        adaptable_fee_increase_factor: !ENV tag:yaml.org,2002:float ${SOLANA_ADAPTABLE_FEE_INCREASE_FACTOR:1.101}
+        blocks_until_resubmission: !ENV tag:yaml.org,2002:int ${SOLANA_BLOCKS_UNTIL_RESUBMISSION:20}
+        stake: !ENV tag:yaml.org,2002:int ${SOLANA_STAKE:10000000000000}
+  

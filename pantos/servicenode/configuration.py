@@ -291,10 +291,8 @@ _VALIDATION_SCHEMA = {
         }
     },
     'blockchains': {
-        'type':
-        'dict',
-        'schema':
-        dict(
+        'type': 'dict',
+        'schema': dict(
             zip([b.name.lower() for b in Blockchain],
                 itertools.repeat(_VALIDATION_SCHEMA_BLOCKCHAIN)))
     }

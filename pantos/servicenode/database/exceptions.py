@@ -21,7 +21,6 @@ class SenderNonceNotUniqueError(DatabaseError):
     address.
 
     """
-
     def __init__(self, blockchain: Blockchain, sender_address: str,
                  sender_nonce: int, **kwargs: typing.Any):
         """Construct an error instance.
@@ -38,8 +37,6 @@ class SenderNonceNotUniqueError(DatabaseError):
             Additional information about the error as keyword arguments.
 
         """
-        super().__init__('sender nonce not unique',
-                         blockchain=blockchain,
+        super().__init__('sender nonce not unique', blockchain=blockchain,
                          sender_address=sender_address,
-                         sender_nonce=sender_nonce,
-                         **kwargs)
+                         sender_nonce=sender_nonce, **kwargs)

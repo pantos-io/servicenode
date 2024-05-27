@@ -25,7 +25,6 @@ class Bid:
 
 
 class MockDatabaseAccess:
-
     def create_bid(self, source_blockchain, destination_blockchain,
                    execution_time, valid_until, fee):
         assert isinstance(source_blockchain, Blockchain)
@@ -53,10 +52,7 @@ def bid_interactor():
     return BidInteractor()
 
 
-def generate_bids(blockchains,
-                  number_bids,
-                  only_active=True,
-                  bid_id_offset=0,
+def generate_bids(blockchains, number_bids, only_active=True, bid_id_offset=0,
                   extra_fee=0):
     all_bids = {}
     all_blockchain_ids = [blockchain.value for blockchain in Blockchain]
@@ -127,8 +123,7 @@ def test_get_cross_blockchain_bids_correct(mocked_get_signer, bid_interactor):
 
 @unittest.mock.patch(
     'pantos.servicenode.business.bids.database_access.'
-    'read_cross_blockchain_bids',
-    side_effect=BidInteractorError)
+    'read_cross_blockchain_bids', side_effect=BidInteractorError)
 def test_get_cross_blockchain_bids_error(mocked_db_read, bid_interactor):
     with pytest.raises(BidInteractorError):
         bid_interactor.get_cross_blockchain_bids(0, 1)

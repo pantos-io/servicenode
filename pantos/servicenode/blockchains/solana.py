@@ -21,7 +21,6 @@ class SolanaClient(BlockchainClient):
     """Solana-specific blockchain client.
 
     """
-
     def __init__(self):
         # Docstring inherited
         pass  # pragma: no cover

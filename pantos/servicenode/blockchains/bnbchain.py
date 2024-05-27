@@ -21,7 +21,6 @@ class BnbChainClient(EthereumClient):
     """BNB-Chain-specific blockchain client.
 
     """
-
     @classmethod
     def get_blockchain(cls) -> Blockchain:
         # Docstring inherited

@@ -54,8 +54,7 @@ def bid(source_blockchain_id, destination_blockchain_id, bid_execution_time,
         bid_valid_until, bid_fee):
     return Bid(source_blockchain_id=source_blockchain_id,
                destination_blockchain_id=destination_blockchain_id,
-               execution_time=bid_execution_time,
-               valid_until=bid_valid_until,
+               execution_time=bid_execution_time, valid_until=bid_valid_until,
                fee=bid_fee)
 
 
@@ -146,22 +145,18 @@ def transfer(source_blockchain_id, destination_blockchain_id,
              transfer_signature, hub_contract, forwarder_contract,
              transfer_task_id, on_chain_transfer_id, transfer_status_id,
              transfer_transaction_id):
-    return Transfer(source_blockchain_id=source_blockchain_id,
-                    destination_blockchain_id=destination_blockchain_id,
-                    sender_address=transfer_sender_address,
-                    recipient_address=transfer_recipient_address,
-                    source_token_contract=source_token_contract,
-                    destination_token_contract=destination_token_contract,
-                    amount=transfer_amount,
-                    fee=bid_fee,
-                    sender_nonce=transfer_sender_nonce,
-                    signature=transfer_signature,
-                    hub_contract=hub_contract,
-                    forwarder_contract=forwarder_contract,
-                    task_id=transfer_task_id,
-                    on_chain_transfer_id=on_chain_transfer_id,
-                    status_id=transfer_status_id,
-                    transaction_id=transfer_transaction_id)
+    return Transfer(
+        source_blockchain_id=source_blockchain_id,
+        destination_blockchain_id=destination_blockchain_id,
+        sender_address=transfer_sender_address,
+        recipient_address=transfer_recipient_address,
+        source_token_contract=source_token_contract,
+        destination_token_contract=destination_token_contract,
+        amount=transfer_amount, fee=bid_fee,
+        sender_nonce=transfer_sender_nonce, signature=transfer_signature,
+        hub_contract=hub_contract, forwarder_contract=forwarder_contract,
+        task_id=transfer_task_id, on_chain_transfer_id=on_chain_transfer_id,
+        status_id=transfer_status_id, transaction_id=transfer_transaction_id)
 
 
 @pytest.fixture(scope='module')

@@ -1,3 +1,10 @@
+<img src="https://raw.githubusercontent.com/pantos-io/servicenode/img/pantos-logo-full.svg" alt="Pantos logo" align="right" width="120" />
+
+[![CI](https://github.com/pantos-io/servicenode/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/pantos-io/servicenode/actions/workflows/ci.yaml) 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=pantos-io_servicenode&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=pantos-io_servicenode)
+
+
+
 # Pantos Service Node (reference implementation)
 
 ## 1. Introduction
@@ -159,4 +166,4 @@ sudo rabbitmqctl set_permissions -p pantos-service-node pantos-service-node ".*"
 
 ## 4. Contributing
 
-At the moment, contributing to this project is not available. 
+For contributions take a look at our [code of conduct](CODE_OF_CONDUCT.md).

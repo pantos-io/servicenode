@@ -21,7 +21,6 @@ class CeloClient(EthereumClient):
     """Celo-specific blockchain client.
 
     """
-
     @classmethod
     def get_blockchain(cls) -> Blockchain:
         # Docstring inherited

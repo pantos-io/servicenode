@@ -26,22 +26,19 @@ def is_celery_worker_process() -> bool:
 if is_celery_worker_process():
     initialize_application(False)  # pragma: no cover
 
-celery_app = celery.Celery('pantos.servicenode',
-                           broker=config['celery']['broker'],
-                           backend=config['celery']['backend'],
-                           include=[
-                               'pantos.common.blockchains.tasks',
-                               'pantos.servicenode.business.transfers',
-                               'pantos.servicenode.business.plugins'
-                           ])
+celery_app = celery.Celery(
+    'pantos.servicenode', broker=config['celery']['broker'],
+    backend=config['celery']['backend'], include=[
+        'pantos.common.blockchains.tasks',
+        'pantos.servicenode.business.transfers',
+        'pantos.servicenode.business.plugins'
+    ])
 """Celery application instance."""
 
 # Additional Celery configuration
 celery_app.conf.update(
-    result_expires=None,
-    task_default_exchange='pantos.servicenode',
-    task_default_queue='transfers',
-    task_routes={
+    result_expires=None, task_default_exchange='pantos.servicenode',
+    task_default_queue='transfers', task_routes={
         'pantos.servicenode.business.plugins.execute_bid_plugin': {
             'queue': _BIDS_QUEUE_NAME
         },
@@ -51,9 +48,7 @@ celery_app.conf.update(
         'pantos.common.blockchains.tasks.*': {
             'queue': _TRANSFERS_QUEUE_NAME
         }
-    },
-    task_track_started=True,
-    worker_enable_remote_control=False)
+    }, task_track_started=True, worker_enable_remote_control=False)
 
 if is_celery_worker_process():  # pragma: no cover
     # purge the bids queue at startup

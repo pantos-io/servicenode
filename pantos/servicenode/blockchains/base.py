@@ -38,7 +38,6 @@ class InsufficientBalanceError(BlockchainClientError):
     insufficient balance.
 
     """
-
     def __init__(self, **kwargs: typing.Any):
         # Docstring inherited
         super().__init__('insufficient balance', **kwargs)
@@ -49,7 +48,6 @@ class InvalidSignatureError(BlockchainClientError):
     invalid signature.
 
     """
-
     def __init__(self, **kwargs: typing.Any):
         # Docstring inherited
         super().__init__('invalid signature', **kwargs)
@@ -61,7 +59,6 @@ class UnresolvableTransferSubmissionError(BlockchainClientError):
     submission.
 
     """
-
     def __init__(self, **kwargs: typing.Any):
         # Docstring inherited
         super().__init__('unresolvable transfer/transferFrom submission error',
@@ -72,7 +69,6 @@ class BlockchainClient(BlockchainHandler, ErrorCreator[BlockchainClientError]):
     """Base class for all blockchain clients.
 
     """
-
     def __init__(self):
         """Construct a blockchain client instance.
 
@@ -95,10 +91,8 @@ class BlockchainClient(BlockchainHandler, ErrorCreator[BlockchainClientError]):
         try:
             initialize_blockchain_utilities(
                 self.get_blockchain(), [blockchain_node_url],
-                fallback_blockchain_nodes_urls,
-                average_block_time,
-                required_transaction_confirmations,
-                transaction_network_id,
+                fallback_blockchain_nodes_urls, average_block_time,
+                required_transaction_confirmations, transaction_network_id,
                 default_private_key=(private_key, private_key_password),
                 celery_tasks_enabled=True)
         except BlockchainUtilitiesError:
@@ -417,9 +411,10 @@ class BlockchainClient(BlockchainHandler, ErrorCreator[BlockchainClientError]):
         except BlockchainUtilitiesError:
             raise self._create_unresolvable_transfer_submission_error(
                 internal_transaction_id=internal_transaction_id)
-        _logger.info('transfer/transferFrom transaction submission status',
-                     extra=vars(status_response)
-                     | {'internal_transaction_id': internal_transaction_id})
+        _logger.info(
+            'transfer/transferFrom transaction submission status',
+            extra=vars(status_response)
+            | {'internal_transaction_id': internal_transaction_id})
         if not status_response.transaction_submission_completed:
             return BlockchainClient.TransferSubmissionStatusResponse(False)
         transaction_status = status_response.transaction_status
@@ -433,8 +428,7 @@ class BlockchainClient(BlockchainHandler, ErrorCreator[BlockchainClientError]):
                                 self._read_on_chain_transfer_id(
                                     transaction_id, destination_blockchain))
         return BlockchainClient.TransferSubmissionStatusResponse(
-            True,
-            transaction_status=transaction_status,
+            True, transaction_status=transaction_status,
             transaction_id=transaction_id,
             on_chain_transfer_id=on_chain_transfer_id)
 

@@ -21,7 +21,6 @@ class PolygonClient(EthereumClient):
     """Polygon-specific blockchain client.
 
     """
-
     @classmethod
     def get_blockchain(cls) -> Blockchain:
         # Docstring inherited
