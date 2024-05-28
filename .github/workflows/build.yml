@@ -1,0 +1,72 @@
+name: Build Debian Package
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: 'Version to build'
+        required: false
+        type: string
+        default: "1.0.0"
+      revision:
+        description: 'Revision to build'
+        required: false
+        type: string
+        default: ${{ github.run_attempt }}
+    secrets:
+      GPG_PRIVATE_KEY:
+        description: 'GPG private key'
+        required: false
+      GPG_PASSPHRASE:
+        description: 'GPG passphrase'
+        required: false
+
+jobs:
+  build-deb:
+    name: Build and attach .deb and .whl packages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Poetry
+        uses: pantos-io/ci-workflows/.github/actions/install-poetry@v1
+
+      - name: Check secrets
+        id: is-signed-build
+        run: |
+          echo "HAS_SECRETS=$(if [ -n "$GPG_PRIVATE_KEY" ] && [ -n "$GPG_PASSPHRASE" ]; then echo 'true'; else echo 'false'; fi)" >> $GITHUB_OUTPUT
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+      
+      - name: Import GPG key
+        if: steps.is-signed-build.outputs.HAS_SECRETS == 'true'
+        id: import-gpg
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+
+      - name: Install signing dependencies
+        if: steps.is-signed-build.outputs.HAS_SECRETS == 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y debsigs
+
+      - name: Build package
+        run: |
+          make debian
+          make wheel
+        env:
+          PANTOS_SERVICE_NODE_VERSION: ${{ inputs.version }}
+          PANTOS_SERVICE_NODE_REVISION: ${{ inputs.revision }}
+
+      - name: Sign package
+        if: steps.is-signed-build.outputs.HAS_SECRETS == 'true'
+        run: |
+          debsigs --sign=origin -k ${{ steps.import-gpg.outputs.keyid }} dist/*.deb
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build
+          path: dist/*
