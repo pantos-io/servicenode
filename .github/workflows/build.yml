@@ -12,6 +12,10 @@ on:
         required: false
         type: string
         default: ${{ github.run_attempt }}
+      environment:
+        description: 'Environment where the secrets are stored'
+        required: false
+        type: string
     secrets:
       GPG_PRIVATE_KEY:
         description: 'GPG private key'
@@ -24,6 +28,7 @@ jobs:
   build-deb:
     name: Build and attach .deb and .whl packages
     runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
     steps:
       - uses: actions/checkout@v4
 

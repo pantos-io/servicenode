@@ -136,13 +136,12 @@ jobs:
     name: Build and attach .deb and .whl package
     needs: [define-environment]
     uses: ./.github/workflows/build.yml
-    secrets:
-      GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-      GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+    secrets: 'inherit'
     with:
       # We need to use a semver that doesn't start with a v as debian will remove it anyways
       version: ${{ needs.define-environment.outputs.deployment_version }}
       revision: "${{ github.event.release.prerelease && 'rc' || '' }}${{ github.run_attempt }}"
+      environment: debian-release
 
   add-assets:
     name: Add Assets to the ${{ github.event.release.tag_name }} Release
