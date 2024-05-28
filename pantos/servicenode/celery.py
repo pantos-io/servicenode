@@ -5,6 +5,7 @@ import logging
 import pathlib
 import sys
 
+import amqp  # type: ignore
 import celery  # type: ignore
 from pantos.common.logging import LogFile
 from pantos.common.logging import LogFormat
@@ -16,6 +17,9 @@ from pantos.servicenode.plugins import initialize_plugins
 
 _TRANSFERS_QUEUE_NAME = 'transfers'
 _BIDS_QUEUE_NAME = 'bids'
+
+_logger = logging.getLogger(__name__)
+"""Logger for this module."""
 
 
 def is_celery_worker_process() -> bool:
@@ -53,7 +57,10 @@ celery_app.conf.update(
 if is_celery_worker_process():  # pragma: no cover
     # purge the bids queue at startup
     with celery_app.connection_for_write() as connection:
-        connection.default_channel.queue_purge(_BIDS_QUEUE_NAME)
+        try:
+            connection.default_channel.queue_purge(_BIDS_QUEUE_NAME)
+        except amqp.exceptions.NotFound as error:
+            _logger.warning(str(error))
     initialize_plugins(start_worker=True)
 
 
