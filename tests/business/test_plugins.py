@@ -23,10 +23,13 @@ class MockedBidPlugin:
         ], 10
 
 
+@unittest.mock.patch('pantos.servicenode.business.plugins.'
+                     'get_blockchain_config')
 @unittest.mock.patch('pantos.servicenode.business.plugins.execute_bid_plugin.'
                      'apply_async')
 @unittest.mock.patch.object(BidPluginInteractor, 'replace_bids')
-def test_execute_bid_plugin_correct(mocked_replace_bids, mocked_task):
+def test_execute_bid_plugin_correct(mocked_replace_bids, mocked_task,
+                                    mocked_get_blockchain_config):
     mocked_replace_bids.return_value = 1
 
     task = execute_bid_plugin.s(Blockchain.ETHEREUM.value).apply()
@@ -38,10 +41,13 @@ def test_execute_bid_plugin_correct(mocked_replace_bids, mocked_task):
                                         countdown=1)
 
 
+@unittest.mock.patch('pantos.servicenode.business.plugins.'
+                     'get_blockchain_config')
 @unittest.mock.patch('pantos.servicenode.business.plugins.execute_bid_plugin.'
                      'apply_async')
 @unittest.mock.patch.object(BidPluginInteractor, 'replace_bids')
-def test_execute_bid_plugin_interactor_error(mocked_replace_bids, mocked_task):
+def test_execute_bid_plugin_interactor_error(mocked_replace_bids, mocked_task,
+                                             mocked_get_blockchain_config):
     mocked_replace_bids.side_effect = Exception()
 
     task = execute_bid_plugin.s(Blockchain.ETHEREUM.value).apply()

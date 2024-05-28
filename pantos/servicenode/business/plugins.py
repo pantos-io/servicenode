@@ -8,6 +8,7 @@ from pantos.common.blockchains.enums import Blockchain
 from pantos.servicenode.blockchains.factory import get_blockchain_client
 from pantos.servicenode.business.base import Interactor
 from pantos.servicenode.business.base import InteractorError
+from pantos.servicenode.configuration import get_blockchain_config
 from pantos.servicenode.configuration import get_plugin_config
 from pantos.servicenode.database.access import replace_bids
 from pantos.servicenode.plugins import get_bid_plugin
@@ -116,5 +117,6 @@ def execute_bid_plugin(source_blockchain_id: int):
     except Exception:
         _logger.critical('unable to replace the bids', exc_info=True)
     finally:
+        assert get_blockchain_config(source_blockchain)['active']
         execute_bid_plugin.apply_async(args=[source_blockchain_id],
                                        countdown=delay)
