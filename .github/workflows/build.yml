@@ -30,6 +30,10 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     steps:
+      - uses: step-security/harden-runner@v2
+        with:
+          disable-sudo: false
+          egress-policy: audit
       - uses: actions/checkout@v4
 
       - name: Set up Poetry
