@@ -21,6 +21,10 @@ jobs:
       deployment_pypi_environment: ${{ steps.get-environment.outputs.deployment_pypi_environment }}
       deployment_url: ${{ steps.get-environment.outputs.deployment_url }}
     steps:
+      - uses: step-security/harden-runner@v2
+        with:
+          disable-sudo: true
+          egress-policy: audit
       - name: Configure Environment
         id: get-environment
         run: |
@@ -56,11 +60,12 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: step-security/harden-runner@v2
         with:
-          fetch-depth: 0
-          submodules: recursive
-          token: ${{ secrets.GH_TOKEN }}
+          disable-sudo: true
+          egress-policy: audit
+      - uses: actions/checkout@v4
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
@@ -151,6 +156,10 @@ jobs:
       contents: write
       id-token: write
     steps:
+      - uses: step-security/harden-runner@v2
+        with:
+          disable-sudo: true
+          egress-policy: audit
       - uses: actions/download-artifact@v4
         with:
           name: build
@@ -216,11 +225,11 @@ jobs:
     permissions:
       id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
     steps:
-      - uses: actions/checkout@v4
+      - uses: step-security/harden-runner@v2
         with:
-          fetch-depth: 0
-          submodules: recursive
-          token: ${{ secrets.GH_TOKEN }}
+          disable-sudo: true
+          egress-policy: audit
+      - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -245,10 +254,20 @@ jobs:
 
   publish-ppa:
     name: Publishes assets to the PPA as ${{ github.event.release.tag_name }}
+    environment: 
+      name: debian-release
+      url: ${{ steps.create-release.outputs.deployment_ppa_url }}
+    permissions:
+      contents: write
+      pages: write
     needs: [add-assets]
     # Disable the job for the moment being
     runs-on: ubuntu-latest
     steps:
+      - uses: step-security/harden-runner@v2
+        with:
+          disable-sudo: true
+          egress-policy: audit
       - uses: actions/download-artifact@v4
         with:
           name: build
@@ -301,22 +320,22 @@ jobs:
         working-directory: release
 
       - name: Create Release files
+        id: create-release
         run: |
           apt-ftparchive release . > Release
           gpg -abs -o - Release > Release.gpg
           gpg --clearsign -o - Release > InRelease
           url="$(gh api "repos/pantos-io/servicenode/pages" --jq '.html_url')"
           echo "Using URL: $url"
+          echo "deployment_ppa_url=$url" >> $GITHUB_OUTPUT
           echo "deb [signed-by=/etc/apt/trusted.gpg.d/servicenode.gpg] $url ./" > pantos-servicenode.list
         working-directory: release
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
       - name: Publish to GH Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
-          personal_token: ${{ secrets.GH_TOKEN }}
           publish_dir: release
           publish_branch: ppa
-          external_repository: pantos-io/servicenode
           full_commit_message: "Publishing ${{ github.event.release.tag_name }} to the PPA"
