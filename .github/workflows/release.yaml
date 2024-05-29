@@ -336,6 +336,7 @@ jobs:
       - name: Publish to GH Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: release
           publish_branch: ppa
           full_commit_message: "Publishing ${{ github.event.release.tag_name }} to the PPA"
