@@ -163,7 +163,7 @@ blockchains:
         unstaking_address: !ENV ${FANTOM_UNSTAKING_ADDRESS:0x726265A9e352F2e9f15F255957840992803cED7d}
         private_key: !ENV ${FANTOM_PRIVATE_KEY:/etc/pantos/service-node.keystore}
         private_key_password: !ENV ${FANTOM_PRIVATE_KEY_PASSWORD:<fill me>}
-        provider: !ENV ${FANTOM_PROVIDER:https://rpc.ankr.com/fantom_testnet}
+        provider: !ENV ${FANTOM_PROVIDER:https://rpc.testnet.fantom.network}
         fallback_providers:
             - !ENV ${FANTOM_FALLBACK_PROVIDER:https://rpc.ankr.com/fantom_testnet}
         average_block_time: !ENV tag:yaml.org,2002:int ${FANTOM_AVERAGE_BLOCK_TIME:1}

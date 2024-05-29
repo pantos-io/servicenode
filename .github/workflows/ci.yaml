@@ -10,3 +10,66 @@ jobs:
   shared:
     uses: pantos-io/ci-workflows/.github/workflows/python-ci.yml@v1
     secrets: inherit  
+
+  docker-build:
+    name: Build Docker images
+    runs-on: ubuntu-latest
+    needs: [shared]
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        id: buildx
+
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-v1.0-service-node-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-v1.0-service-node-
+
+      - name: Build and load
+        run: |
+          docker buildx bake \
+            --set "*.cache-from=type=local,src=/tmp/.buildx-cache" \
+            --set "*.cache-to=type=local,dest=/tmp/.buildx-cache-new" \
+            --set "*.platform=linux/amd64" \
+            --builder ${{ steps.buildx.outputs.name }} \
+            -f docker-compose.yml \
+            --load
+
+      - name: Create local keystore
+        run: |
+          echo "1234" >> password.keystore
+          mkdir keystore_folder
+          docker run --rm -v=.:/local ethereum/client-go account new --keystore /local/keystore_folder --password /local/password.keystore
+          sudo chmod -R 777 keystore_folder
+          mv keystore_folder/UTC* ./keystore
+
+      - name: Create local signer_key
+        run: |
+          echo "1234" >> password.key
+          python3 -m venv .venv
+          source .venv/bin/activate
+          pip3 install pycryptodome==3.18.0
+          chmod +x scripts/generate-signer-key.py
+          cat password.key | ./scripts/generate-signer-key.py
+          mv signer-key*.pem signer_key.pem
+
+      # - name: Test image
+      #   run: |
+      #     docker compose up -d
+
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+  build:
+    needs: [shared]
+    uses: ./.github/workflows/build.yml

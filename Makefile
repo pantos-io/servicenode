@@ -66,9 +66,9 @@ coverage-all:
 .PHONY: tar
 tar: dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION).tar.gz
 
-dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION).tar.gz: pantos/ service-node-config.yml service-node-config.publish.env bids.yml alembic.ini pantos-service-node.sh pantos-service-node-worker.sh
+dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION).tar.gz: pantos/ service-node-config.yml service-node-config.env bids.yml alembic.ini pantos-service-node.sh pantos-service-node-worker.sh
 	cp service-node-config.yml pantos/service-node-config.yml
-	cp service-node-config.publish.env pantos/service-node-config.env
+	cp service-node-config.env pantos/service-node-config.env
 	cp bids.yml pantos/bids.yml
 	cp alembic.ini pantos/alembic.ini
 	cp pantos-service-node.sh pantos/pantos-service-node.sh
@@ -86,9 +86,9 @@ dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION).tar.gz: pantos/ service-
 .PHONY: wheel
 wheel: dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION)-py3-none-any.whl
 
-dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION)-py3-none-any.whl: pantos/ service-node-config.yml service-node-config.publish.env bids.yml alembic.ini
+dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION)-py3-none-any.whl: pantos/ service-node-config.yml service-node-config.env bids.yml alembic.ini
 	cp service-node-config.yml pantos/service-node-config.yml
-	cp service-node-config.publish.env pantos/service-node-config.env
+	cp service-node-config.env pantos/service-node-config.env
 	cp bids.yml pantos/bids.yml
 	cp alembic.ini pantos/alembic.ini
 	poetry build -f wheel
