@@ -1,4 +1,4 @@
-name: build
+name: DockerVulnerabilities
 on:
   push:
     branches:
@@ -64,8 +64,3 @@ jobs:
     #     uses: github/codeql-action/upload-sarif@v3
     #     with:
     #       sarif_file: 'trivy-image-scan-results.sarif'
-
-      - name: Move cache
-        run: |
-          rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
