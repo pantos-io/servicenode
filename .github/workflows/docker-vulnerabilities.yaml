@@ -4,25 +4,68 @@ on:
     branches:
       - main
   pull_request:
-    
+       
 jobs:
-  analysis:
-    name: Trivy vulnerabilities
-    runs-on: ubuntu-20.04
+  docker-build:
+    name: Docker vulnerabilities
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    #   - uses: step-security/harden-runner@v2
+    #     with:
+    #       disable-sudo: false
+    #       egress-policy: audit
+      - uses: actions/checkout@v4
+      
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
-      - name: Run Trivy vulnerability scanner in repo mode
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        id: buildx
+
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-v1.0-service-node-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-v1.0-service-node-
+
+      - name: Build and load
+        run: |
+          docker buildx bake \
+            --set "*.cache-from=type=local,src=/tmp/.buildx-cache" \
+            --set "*.cache-to=type=local,dest=/tmp/.buildx-cache-new" \
+            --set "*.platform=linux/amd64" \
+            --builder ${{ steps.buildx.outputs.name }} \
+            -f docker-compose.yml \
+            -t service-node-${{ github.sha }} \
+            --load
+
+      - name: Run Trivy Image Docker vulnerability scanner
         uses: aquasecurity/trivy-action@0.20.0
         with:
-          scan-type: 'fs'
-          ignore-unfixed: true
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-          severity: 'CRITICAL'
+          image-ref: 'service-node-${{ github.sha }}'
+          format: 'table'
+          output: 'trivy-image-scan-results.output'
+          severity: 'CRITICAL,HIGH'
+    
+      - name: Store Trivy scan results in env
+        run: |
+            echo 'TRIVY_IMAGE_RESULTS<<EOF' >> $GITHUB_ENV
+            cat trivy-image-scan-results.output >> $GITHUB_ENV
+            echo 'EOF' >> $GITHUB_ENV
 
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: 'trivy-results.sarif'
+    #   - name: Upload Trivy scan results to GitHub Security tab
+    #     uses: github/codeql-action/upload-sarif@v3
+    #     with:
+    #       sarif_file: 'trivy-image-scan-results.sarif'
+
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+  build:
+    needs: [shared]
+    uses: ./.github/workflows/build.yml
