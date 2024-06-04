@@ -65,19 +65,14 @@ jobs:
         with:
             message: |
               ## Trivy scan results
-                
-              ### fs scan
-              ```
-              ${{ env.TRIVY_FS_RESULTS }}
-              ```
-                
+                  
               ### Docker image scan
               ```
               ${{ env.TRIVY_IMAGE_RESULTS }}
               ```
-              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
               
-              
+
     #   - name: Upload Trivy scan results to GitHub Security tab
     #     uses: github/codeql-action/upload-sarif@v3
     #     with:
