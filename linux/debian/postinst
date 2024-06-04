@@ -95,17 +95,19 @@ else
 fi
 
 # Signer key
-if [ ! -e "${signer_key_file}" || -z "$SIGNER_KEY_PASSWORD" ]; then
-  if [ ! command -v ssh-keygen ]; then
-    echo "ssh-keygen is not installed, please install the package with the recommended dependencies to generate the key"
-    exit 1
-  fi
-  echo "Signer key does not exist, generating new one"
-  read -s -p "Please enter your password for your pem file: " passwd
-  ssh-keygen -t ed25519 -f "$signer_key_file" -N "$passwd" >/dev/null 2>&1
-  echo "SIGNER_KEY_PASSWORD='$passwd'" >> ${env_file}
+if [ ! -e ${signer_key_file} ] || [ -z ${SIGNER_KEY_PASSWORD} ]; then
+    # Check if ssh-keygen is installed
+    if command -v ssh-keygen &>/dev/null; then
+      echo "Signer key does not exist; generating a new one"
+      read -s -p "Please enter your password for your PEM file: " passwd
+      ssh-keygen -t ed25519 -f "$signer_key_file" -N "$passwd" >/dev/null 2>&1
+      echo "SIGNER_KEY_PASSWORD='$passwd'" >> "${env_file}"
+    else
+      echo -e "\033[1;32mssh-keygen is not installed, please reinstall the"\
+      "package with the recommended dependencies or make sure that the signer"\
+      "key is provided as an environment variable at run time\033[0m"
+    fi
 fi
-
 
 # Offchain bids
 if [ ! -e "${offchain_bids_default_file}" ]; then
