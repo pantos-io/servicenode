@@ -12,6 +12,7 @@ jobs:
     permissions: 
         contents: write
         pull-requests: write
+        repository-projects: write
     steps:
     #   - uses: step-security/harden-runner@v2
     #     with:
