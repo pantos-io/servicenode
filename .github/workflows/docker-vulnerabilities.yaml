@@ -62,17 +62,28 @@ jobs:
             cat trivy-image-scan-results.output >> $GITHUB_ENV
             echo 'EOF' >> $GITHUB_ENV
 
-      - name: Comment Trivy scan results in PR
-        uses: thollander/actions-comment-pull-request@v2
+      - uses: actions/github-script@v6
         with:
-            GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-            message: |
-              ## Trivy scan results
+            script: |
+                github.rest.issues.createComment({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: '${{ env.TRIVY_IMAGE_RESULTS }}'
+                })
+    
+
+    #   - name: Comment Trivy scan results in PR
+    #     uses: thollander/actions-comment-pull-request@v2
+    #     with:
+    #         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+    #         message: |
+    #           ## Trivy scan results
                   
-              ### Docker image scan
-              ```
-              ${{ env.TRIVY_IMAGE_RESULTS }}
-              ```
+    #           ### Docker image scan
+    #           ```
+    #           ${{ env.TRIVY_IMAGE_RESULTS }}
+    #           ```
             
               
 
