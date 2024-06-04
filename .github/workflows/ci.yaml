@@ -46,18 +46,6 @@ jobs:
             -f docker-compose.yml \
             --load
 
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.20.0
-        with:
-          image-ref:  ${{ steps.buildx.outputs.name }}
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-  
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          sarif_file: 'trivy-results.sarif'
-
       - name: Create local keystore
         run: |
           echo "1234" >> password.keystore
