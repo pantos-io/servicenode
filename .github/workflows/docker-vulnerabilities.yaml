@@ -60,23 +60,24 @@ jobs:
             cat trivy-image-scan-results.output >> $GITHUB_ENV
             echo 'EOF' >> $GITHUB_ENV
 
-            - name: Comment Trivy scan results in PR
-            uses: thollander/actions-comment-pull-request@v1
-            with:
-              message: |
-                ## Trivy scan results
+      - name: Comment Trivy scan results in PR
+        uses: thollander/actions-comment-pull-request@v1
+        with:
+            message: |
+              ## Trivy scan results
                 
-                ### fs scan
-                ```
-                ${{ env.TRIVY_FS_RESULTS }}
-                ```
+              ### fs scan
+              ```
+              ${{ env.TRIVY_FS_RESULTS }}
+              ```
                 
-                ### Docker image scan
-                ```
-                ${{ env.TRIVY_IMAGE_RESULTS }}
-                ```
+              ### Docker image scan
+              ```
+              ${{ env.TRIVY_IMAGE_RESULTS }}
+              ```
               GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+              
+              
     #   - name: Upload Trivy scan results to GitHub Security tab
     #     uses: github/codeql-action/upload-sarif@v3
     #     with:
