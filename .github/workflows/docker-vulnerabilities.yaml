@@ -10,7 +10,8 @@ jobs:
     name: Docker vulnerabilities
     runs-on: ubuntu-latest
     permissions: 
-        pull-requests: write 
+        contents: write
+        pull-requests: write
     steps:
     #   - uses: step-security/harden-runner@v2
     #     with:
