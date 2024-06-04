@@ -9,6 +9,8 @@ jobs:
   docker-build:
     name: Docker vulnerabilities
     runs-on: ubuntu-latest
+    permissions: 
+        pull-requests: write 
     steps:
     #   - uses: step-security/harden-runner@v2
     #     with:
@@ -63,6 +65,7 @@ jobs:
       - name: Comment Trivy scan results in PR
         uses: thollander/actions-comment-pull-request@v2
         with:
+            GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
             message: |
               ## Trivy scan results
                   
@@ -70,7 +73,7 @@ jobs:
               ```
               ${{ env.TRIVY_IMAGE_RESULTS }}
               ```
-            GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+            
               
 
     #   - name: Upload Trivy scan results to GitHub Security tab
