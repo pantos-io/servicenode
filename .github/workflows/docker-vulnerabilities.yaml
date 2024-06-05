@@ -58,6 +58,7 @@ jobs:
               uses: github/codeql-action/upload-sarif@v3
               if: always()
               with:
+                category: 'service-node-app'
                 sarif_file: 'trivy-app-results.sarif'
 
             - name: Scan vulnerabilities worker image
@@ -72,7 +73,8 @@ jobs:
               uses: github/codeql-action/upload-sarif@v3
               if: always()
               with:
-                sarif_file: 'trivy-app-results.sarif'
+                category: 'service-node-worker'
+                sarif_file: 'trivy-worker-results.sarif'
 
             - name: Move cache
               if: always()
