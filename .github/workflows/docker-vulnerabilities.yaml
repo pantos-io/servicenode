@@ -43,6 +43,7 @@ jobs:
                     --set "*.platform=linux/amd64" \
                     --builder ${{ steps.buildx.outputs.name }} \
                     -f docker-compose.yml \
+                    --load \
                     app worker
               env:
                 DOCKER_TAG: analysis-latest
