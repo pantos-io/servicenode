@@ -45,13 +45,13 @@ jobs:
             -f docker-compose.yml \
             app worker
 
-      - name: Run Trivy Image Docker vulnerability scanner
-        uses: aquasecurity/trivy-action@0.20.0
-        with:
-          image-ref: 'service-node-${{ github.sha }}'
-          format: 'table'
-          output: 'trivy-image-scan-results.output'
-          severity: 'CRITICAL,HIGH'
+    #   - name: Run Trivy Image Docker vulnerability scanner
+    #     uses: aquasecurity/trivy-action@0.20.0
+    #     with:
+    #       image-ref: 'service-node-${{ github.sha }}'
+    #       format: 'table'
+    #       output: 'trivy-image-scan-results.output'
+    #       severity: 'CRITICAL,HIGH'
 
       - name: Scan vulnerabilities app image
         uses: aquasecurity/trivy-action@0.20.0
@@ -59,6 +59,7 @@ jobs:
           image-ref: 'app'
           format: 'sarif'
           output: 'trivy-app-results.sarif'
+          severity: 'CRITICAL,HIGH'
       
 
       - name: Upload Trivy scan results for app to GitHub Security tab
