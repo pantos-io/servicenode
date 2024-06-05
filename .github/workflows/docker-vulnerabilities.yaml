@@ -64,11 +64,12 @@ jobs:
         #       severity: 'CRITICAL,HIGH'
             - name: Sign the images
               run: |
-                for app in $(docker buildx bake -f docker-compose.yml --print --progress "plain" | jq -r '.target[].tags | add'); do
-                    for image in $(docker buildx imagetools inspect $app --raw | jq -r '.manifests[].digest'); do
-                        echo "Check $image from $app";
-                    done;
-                done;
+                docker images
+                # for app in $(docker buildx bake -f docker-compose.yml --print --progress "plain" | jq -r '.target[].tags | add'); do
+                #     for image in $(docker buildx imagetools inspect $app --raw | jq -r '.manifests[].digest'); do
+                #         echo "Check $image from $app";
+                #     done;
+                # done;
         
             - name: Scan vulnerabilities app image
               uses: aquasecurity/trivy-action@0.20.0
