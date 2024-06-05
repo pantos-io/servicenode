@@ -42,6 +42,7 @@ jobs:
             --set "*.cache-to=type=local,dest=/tmp/.buildx-cache-new" \
             --set "*.platform=linux/amd64" \
             --builder ${{ steps.buildx.outputs.name }} \
+            --output type=docker \
             -f docker-compose.yml \
             app worker
 
