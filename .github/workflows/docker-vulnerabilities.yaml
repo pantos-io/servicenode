@@ -47,29 +47,6 @@ jobs:
                     app worker
               env:
                 DOCKER_TAG: analysis-latest
-
-            # - name: Set output url
-            #   id: set-output-url
-            #   run: |
-            #         echo "deployment_dockerhub_url=https://hub.docker.com/r/pantosio/service-node/tags?name=analysis" >> $GITHUB_OUTPUT
-            
-            
-
-        #   - name: Run Trivy Image Docker vulnerability scanner
-        #     uses: aquasecurity/trivy-action@0.20.0
-        #     with:
-        #       image-ref: 'service-node-${{ github.sha }}'
-        #       format: 'table'
-        #       output: 'trivy-image-scan-results.output'
-        #       severity: 'CRITICAL,HIGH'
-            - name: Sign the images
-              run: |
-                docker images
-                # for app in $(docker buildx bake -f docker-compose.yml --print --progress "plain" | jq -r '.target[].tags | add'); do
-                #     for image in $(docker buildx imagetools inspect $app --raw | jq -r '.manifests[].digest'); do
-                #         echo "Check $image from $app";
-                #     done;
-                # done;
         
             - name: Scan vulnerabilities app image
               uses: aquasecurity/trivy-action@0.20.0
@@ -79,19 +56,25 @@ jobs:
                 output: 'trivy-app-results.sarif'
                 severity: 'CRITICAL,HIGH'
             
-
             - name: Upload Trivy scan results for app to GitHub Security tab
-              uses: github/codeql-action/upload-sarif@v2
+              uses: github/codeql-action/upload-sarif@v3
               if: always()
               with:
                 sarif_file: 'trivy-app-results.sarif'
 
-        #   - name: Store Trivy scan results in env
-        #     run: |
-        #         echo 'TRIVY_IMAGE_RESULTS<<EOF' >> $GITHUB_ENV
-        #         cat trivy-image-scan-results.output >> $GITHUB_ENV
-        #         echo 'EOF' >> $GITHUB_ENV
-
+            - name: Scan vulnerabilities worker image
+              uses: aquasecurity/trivy-action@0.20.0
+              with:           
+                image-ref: 'pantosio/service-node-worker:analysis-latest'
+                format: 'sarif'
+                output: 'trivy-worker-results.sarif'
+                severity: 'CRITICAL,HIGH'
+            
+            - name: Upload Trivy scan results for worker to GitHub Security tab
+              uses: github/codeql-action/upload-sarif@v3
+              if: always()
+              with:
+                sarif_file: 'trivy-app-results.sarif'
 
             - name: Move cache
               if: always()
@@ -99,37 +82,4 @@ jobs:
                 rm -rf /tmp/.buildx-cache
                 mv /tmp/.buildx-cache-new /tmp/.buildx-cache
             
-        #   - name: Add comment to PR
-        #     uses: actions/github-script@v6
-        #     if: always()
-        #     with:
-        #         script: |
-        #             const name = '${{ github.workflow   }}';
-        #             const url = '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}';
-        #             const success = '${{ job.status }}' === 'success';
-
-        #             await github.rest.issues.createComment({
-        #                 issue_number: context.issue.number,
-        #                 owner: context.repo.owner,
-        #                 repo: context.repo.repo,
-        #                 body: `${{ env.TRIVY_IMAGE_RESULTS }}`
-        #             })
-
-        #   - name: Comment Trivy scan results in PR
-        #     uses: thollander/actions-comment-pull-request@v2
-        #     with:
-        #         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        #         message: |
-        #           ## Trivy scan results
-                        
-        #           ### Docker image scan
-        #           ```
-        #           ${{ env.TRIVY_IMAGE_RESULTS }}
-        #           ```
-                
-                    
-
-        #   - name: Upload Trivy scan results to GitHub Security tab
-        #     uses: github/codeql-action/upload-sarif@v3
-        #     with:
-        #       sarif_file: 'trivy-image-scan-results.sarif'
+        
