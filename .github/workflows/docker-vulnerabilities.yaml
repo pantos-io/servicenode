@@ -73,8 +73,8 @@ jobs:
         
             - name: Scan vulnerabilities app image
               uses: aquasecurity/trivy-action@0.20.0
-              with:
-                image-ref: 'pantosio/service-node-app'
+              with:           
+                image-ref: 'pantosio/service-node-app:analysis-latest'
                 format: 'sarif'
                 output: 'trivy-app-results.sarif'
                 severity: 'CRITICAL,HIGH'
