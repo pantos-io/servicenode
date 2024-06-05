@@ -43,7 +43,7 @@ jobs:
                     --set "*.platform=linux/amd64" \
                     --builder ${{ steps.buildx.outputs.name }} \
                     -f docker-compose.yml \
-                    --load \
+                    --push \
                     app worker
               env:
                 DOCKER_TAG: analysis-latest
@@ -73,7 +73,7 @@ jobs:
             - name: Scan vulnerabilities app image
               uses: aquasecurity/trivy-action@0.20.0
               with:
-                image-ref: 'service-node-app:analysis-latest'
+                image-ref: 'pantosio/service-node-app'
                 format: 'sarif'
                 output: 'trivy-app-results.sarif'
                 severity: 'CRITICAL,HIGH'
