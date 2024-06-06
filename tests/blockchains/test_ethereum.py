@@ -610,7 +610,7 @@ def test_unregister_node_correct(mock_start_transaction_submission,
     mock_start_transaction_submission.assert_called_once()
     unregister_request = mock_start_transaction_submission.call_args.args[0]
     assert unregister_request.contract_abi is ContractAbi.PANTOS_HUB
-    assert unregister_request.function_args == (service_node_address)
+    assert unregister_request.function_args == (service_node_address, )
 
 
 @unittest.mock.patch.object(EthereumClient, '_start_transaction_submission',
@@ -933,7 +933,7 @@ def test_cancel_unregistration_correct(mock_start_transaction_submission,
     mock_start_transaction_submission.assert_called_once()
     cancel_request = mock_start_transaction_submission.call_args.args[0]
     assert cancel_request.contract_abi is ContractAbi.PANTOS_HUB
-    assert cancel_request.function_args == (service_node_address)
+    assert cancel_request.function_args == (service_node_address, )
 
 
 @unittest.mock.patch.object(EthereumClient, '_start_transaction_submission',

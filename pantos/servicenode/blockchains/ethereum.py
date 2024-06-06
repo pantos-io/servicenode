@@ -214,7 +214,7 @@ class EthereumClient(BlockchainClient):
             request = BlockchainClient._TransactionSubmissionStartRequest(
                 ContractAbi.PANTOS_HUB,
                 _HUB_UNREGISTER_SERVICE_NODE_FUNCTION_SELECTOR,
-                (self.__address), _HUB_UNREGISTER_SERVICE_NODE_GAS, None,
+                (self.__address, ), _HUB_UNREGISTER_SERVICE_NODE_GAS, None,
                 nonce)
             internal_transaction_id = self._start_transaction_submission(
                 request, node_connections)
@@ -269,8 +269,8 @@ class EthereumClient(BlockchainClient):
             request = BlockchainClient._TransactionSubmissionStartRequest(
                 ContractAbi.PANTOS_HUB,
                 _HUB_CANCEL_SERVICE_NODE_UNREGISTRATION_FUNCTION_SELECTOR,
-                (self.__address), _HUB_CANCEL_SERVICE_NODE_UNREGISTRATION_GAS,
-                None, nonce)
+                (self.__address, ),
+                _HUB_CANCEL_SERVICE_NODE_UNREGISTRATION_GAS, None, nonce)
             internal_transaction_id = self._start_transaction_submission(
                 request, node_connections)
             extra_info |= {'internal_transaction_id': internal_transaction_id}
