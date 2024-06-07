@@ -2072,13 +2072,13 @@ files = [
 
 [[package]]
 name = "pantos-common"
-version = "1.4.0"
+version = "1.4.1"
 description = "Common code for Pantos off-chain components."
 optional = false
 python-versions = "<4.0,>=3.10"
 files = [
-    {file = "pantos_common-1.4.0-py3-none-any.whl", hash = "sha256:fdb21359b78968a08a8ba5ce8f9d124b0be71269a594a859bc9ca512d394b4b3"},
-    {file = "pantos_common-1.4.0.tar.gz", hash = "sha256:2cbbdf342832f222394157143b39aeb5b1f4af01331f994f0fed780e538bfe44"},
+    {file = "pantos_common-1.4.1-py3-none-any.whl", hash = "sha256:c311c1b852e64bdd61af05a327e329b5106325ab3f5767ea0049a4eab798d260"},
+    {file = "pantos_common-1.4.1.tar.gz", hash = "sha256:b71fc9a54036f98e83e7bb9d9645269ee5c10ac79a6ae51bd33dfcb2a7cec745"},
 ]
 
 [package.dependencies]
@@ -3532,4 +3532,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "jaraco.test", "more
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "f8b97c0ab8c28161998ab27c6d8f9e9622dd91478b54614ab9e36892c7dfd18c"
+content-hash = "97924feee240ccb9ae1696e3305e261b5cf17d74ea03d0eb055a98bd4cefdda1"
