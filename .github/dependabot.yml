@@ -9,3 +9,20 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "daily"
+    groups:
+      pantos-dependencies:
+        # All the pantos team libraries should be updated for patches
+        patterns:
+          - "pantos-*"
+        update-types:
+          - "minor"
+          - "patch"
+      other-dependencies:
+        # For other dependencies we only look for minor-major updates
+        exclude-patterns:
+          - "pantos-*"
+        update-types:
+          - "minor"
+          - "major"
+
+        
