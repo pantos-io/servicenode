@@ -22,7 +22,7 @@ eth-tester = "0.9.0b1"
 web3 = {extras = ["tester"], version = "^6.5.0"}
 
 [tool.poetry.group.lint.dependencies]
-bandit = "1.7.5"
+bandit = "1.7.8"
 flake8 = "7.0.0"
 isort = "5.13.2"
 mypy = "1.0.1"
