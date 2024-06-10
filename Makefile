@@ -110,13 +110,12 @@ dist/pantos-service-node-$(PANTOS_SERVICE_NODE_VERSION)-$(PANTOS_SERVICE_NODE_RE
 	cp linux/pantos-service-node-server.service $(build_directory)/etc/systemd/system/
 	cp linux/pantos-service-node-celery.service $(build_directory)/etc/systemd/system/
 	mkdir -p $(build_directory)/DEBIAN
+	cp linux/debian/* $(build_directory)/DEBIAN
 	cat linux/debian/control | sed -e 's/VERSION/$(PANTOS_SERVICE_NODE_VERSION)/g' > $(build_directory)/DEBIAN/control
-	cat linux/debian/postinst | sed -e 's/VERSION/$(PANTOS_SERVICE_NODE_VERSION)/g' > $(build_directory)/DEBIAN/postinst
-	cp linux/debian/prerm $(build_directory)/DEBIAN/prerm
-	cp linux/debian/postrm $(build_directory)/DEBIAN/postrm
 	chmod 755 $(build_directory)/DEBIAN/postinst
 	chmod 755 $(build_directory)/DEBIAN/prerm
 	chmod 755 $(build_directory)/DEBIAN/postrm
+	chmod 755 $(build_directory)/DEBIAN/config
 	cd build/debian/; \
 		dpkg-deb --build --root-owner-group -Zgzip $(debian_package)
 	mv build/debian/$(debian_package).deb dist/

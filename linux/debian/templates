@@ -1,0 +1,42 @@
+Template: pantos/service-node/create_signer_key
+Type: boolean
+Default: false
+Description: No signer key detected. Create a new signer key?
+ You can always create your own signer key later following the gitbook instructions.
+
+Template: pantos/service-node/signer_key_password
+Type: password
+Description: Please provide the signer key password:
+
+Template: pantos/common/create_backups
+Type: boolean
+Default: true
+Description: Create a backup of your environment file, alembic and core configuration?
+
+Template: pantos/common/configure_postgresql
+Type: boolean
+Default: true
+Description: Local PostgreSQL detected, configure?
+
+Template: pantos/common/configure_rabbitmq
+Type: boolean
+Default: true
+Description: Local RabbitMQ detected, configure?
+
+Template: pantos/common/reset_users
+Type: boolean
+Default: true
+Description: Reset PostregSQL and RabbitMQ user passwords if they are not detected?
+
+Template: pantos/common/start_services
+Type: boolean
+Default: true
+Description: Do you want to start the services after install?
+
+Template: pantos/common/finish_note
+Type: note
+Description: |
+  The configuration of the services has been completed.
+  You can always reconfigure the services by running the following command:
+  sudo dpkg-reconfigure -plow <package>
+  where <package> is the name of the package you want to reconfigure.

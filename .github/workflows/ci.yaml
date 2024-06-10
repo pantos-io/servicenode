@@ -76,3 +76,40 @@ jobs:
   build:
     needs: [shared]
     uses: ./.github/workflows/build.yml
+
+  install:
+    needs: [build]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-20.04
+          - ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build
+          path: build
+
+      - name: Preconfigure package
+        run: |
+          echo 'pantos-service-node pantos/service-node/create_signer_key boolean true' | sudo debconf-set-selections;
+          echo 'pantos-service-node pantos/service-node/signer_key_password string 1234' | sudo debconf-set-selections;
+          echo 'pantos-service-node pantos/common/create_backups boolean true' | sudo debconf-set-selections;
+          echo 'pantos-service-node pantos/common/configure_postgresql boolean true' | sudo debconf-set-selections;
+          echo 'pantos-service-node pantos/common/configure_rabbitmq boolean true' | sudo debconf-set-selections;
+          echo 'pantos-service-node pantos/common/reset_users boolean true' | sudo debconf-set-selections;
+          echo 'pantos-service-node pantos/common/start_services boolean true' | sudo debconf-set-selections;
+
+      - name: Install Debian package
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ./build/*.deb
+
+      # Check service is running
+      - name: Check service is running
+        run: |
+          sudo systemctl status pantos-service-node-server
+          sudo systemctl status pantos-service-node-celery

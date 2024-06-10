@@ -2,8 +2,25 @@
 
 configuration_file='/etc/pantos/service-node-config.yml'
 
-if [ $1 = 'purge' ]
-then
-  rm --force ${configuration_file}
-  # TODO: remove everything else
-fi
+
+case "$1" in
+    purge)
+        rm --force ${configuration_file}
+        if [ -e /usr/share/debconf/confmodule ]
+        then
+                # Source debconf library and purge db
+                . /usr/share/debconf/confmodule
+                db_purge
+        fi
+        ;;
+
+    remove|upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
+        ;;
+
+    *)
+        echo "postrm called with unknown argument \`$1'" >&2
+        exit 1
+        ;;
+esac
+
+#DEBHELPER#

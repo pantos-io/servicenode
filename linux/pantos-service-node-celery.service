@@ -4,12 +4,17 @@ After=network.target postgresql.service rabbitmq-server.service
 StartLimitIntervalSec=0
 
 [Service]
-Type=forking
+Type=simple
 Restart=always
 RestartSec=1
 KillMode=mixed
 TimeoutStopSec=600
-ExecStart=runuser -u pantos -- bash -c "source /opt/pantos/service-node/virtual-environment/bin/activate; nohup celery -A pantos.servicenode worker -l INFO -n pantos.servicenode -Q transfers,bids >> /var/log/pantos/service-node-celery.log 2>&1 &"
+User=pantos
+WorkingDirectory=/opt/pantos/service-node
+Environment="PATH=/opt/pantos/service-node/virtual-environment/bin"
+ExecStart=/opt/pantos/service-node/virtual-environment/bin/celery -A pantos.servicenode worker -l INFO -n pantos.servicenode -Q transfers,bids
+StandardOutput=append:/var/log/pantos/service-node-celery.log
+StandardError=inherit
 
 [Install]
 WantedBy=multi-user.target
