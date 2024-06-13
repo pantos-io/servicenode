@@ -1,7 +1,7 @@
 PANTOS_SERVICE_NODE_VERSION := $(shell poetry version -s)
 PANTOS_SERVICE_NODE_REVISION ?= 1
 PANTOS_SERVICE_NODE_SSH_HOST ?= bdev-service-node
-PYTHON_FILES_WITHOUT_TESTS := pantos/servicenode
+PYTHON_FILES_WITHOUT_TESTS := pantos/servicenode linux/start-web-server
 PYTHON_FILES := $(PYTHON_FILES_WITHOUT_TESTS) tests
 
 .PHONY: dist
@@ -105,8 +105,7 @@ dist/pantos-service-node-$(PANTOS_SERVICE_NODE_VERSION)-$(PANTOS_SERVICE_NODE_RE
 	$(eval build_directory := build/debian/$(debian_package))
 	mkdir -p $(build_directory)/opt/pantos/service-node
 	cp dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION)-py3-none-any.whl $(build_directory)/opt/pantos/service-node/
-	mkdir -p $(build_directory)/usr/local/bin
-	cp linux/pantos-service-node-server $(build_directory)/usr/local/bin/
+	cp linux/start-web-server $(build_directory)/opt/pantos/service-node/
 	mkdir -p $(build_directory)/etc/systemd/system
 	cp linux/pantos-service-node-server.service $(build_directory)/etc/systemd/system/
 	cp linux/pantos-service-node-celery.service $(build_directory)/etc/systemd/system/
