@@ -16,7 +16,7 @@ offchain_bids_default_file="${base_directory}/service-node-bids.yml"
 old_offchain_bids_default_file="${offchain_bids_default_file}.old_$(date +%Y%m%d_%H%M%S)"
 alembic_file="${base_directory}/service-node-alembic.ini"
 old_alembic_file="${alembic_file}.old_$(date +%Y%m%d_%H%M%S)"
-startup_script_file='/usr/local/bin/pantos-service-node-server'
+startup_script_file="${application_directory}/start-web-server"
 signer_key_file="${base_directory}/service-node-signer.pem"
 
 # User names
@@ -95,7 +95,7 @@ else
 fi
 
 # Signer key
-if [ ! -e ${signer_key_file} ] || [ -z ${SIGNER_KEY_PASSWORD} ]; then
+if [ ! -e ${signer_key_file} ]; then
     # Check if ssh-keygen is installed
     if command -v ssh-keygen &>/dev/null; then
       echo "Signer key does not exist; generating a new one"
