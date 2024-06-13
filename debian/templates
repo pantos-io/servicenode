@@ -8,11 +8,6 @@ Template: pantos/service-node/signer_key_password
 Type: password
 Description: Please provide the signer key password:
 
-Template: pantos/common/create_backups
-Type: boolean
-Default: true
-Description: Create a backup of your environment file, alembic and core configuration?
-
 Template: pantos/common/configure_postgresql
 Type: boolean
 Default: true
@@ -26,12 +21,7 @@ Description: Local RabbitMQ detected, configure?
 Template: pantos/common/reset_users
 Type: boolean
 Default: true
-Description: Reset PostregSQL and RabbitMQ user passwords if they are not detected?
-
-Template: pantos/common/start_services
-Type: boolean
-Default: true
-Description: Do you want to start the services after install?
+Description: Either PostgreSQL or RabbitMQ have been detected. Reset user passwords?
 
 Template: pantos/common/finish_note
 Type: note

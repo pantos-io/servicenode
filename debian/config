@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 set -e # Exit on error
 #set -x # Enable debugging
@@ -15,8 +15,6 @@ default_signer_key_file="${base_directory}/service-node-signer.pem"
 
 if [ -f "${env_file}" ]; then
     . "${env_file}"
-else
-    echo "Environment file ${env_file} not found." >&2
 fi
 
 if [ ! -f "${default_signer_key_file}" ] && [ -z "${SIGNER_KEY_PASSWORD}" ]; then
@@ -30,28 +28,28 @@ if [ ! -f "${default_signer_key_file}" ] && [ -z "${SIGNER_KEY_PASSWORD}" ]; the
         db_input high pantos/service-node/signer_key_password || true
     fi
 fi
+
 if [ -n "${POSTGRESQL_INSTALLED}" ]; then
-    echo "PostgreSQL is installed. Configuring PostgreSQL." >&2
     db_fset pantos/common/configure_postgresql seen false
     db_input high pantos/common/configure_postgresql || true
 fi
+
 if [ -n "${RABBITMQ_INSTALLED}" ]; then
-    echo "RabbitMQ is installed. Configuring RabbitMQ." >&2
     db_fset pantos/common/configure_rabbitmq seen false
     db_input high pantos/common/configure_rabbitmq || true
 fi
+
 db_go
+
 db_get pantos/common/configure_postgresql
 configure_postgresql=$RET
+
 db_get pantos/common/configure_rabbitmq
 configure_rabbitmq=$RET
-if [ $configure_postgresql != "false" ] || [ $configure_rabbitmq != "false" ]; then
-    echo "Configuring user reset due to existing PostgreSQL or RabbitMQ." >&2
+
+if [ "$configure_postgresql" != "false" ] || [ "$configure_rabbitmq" != "false" ]; then
     db_fset pantos/common/reset_users seen false
     db_input high pantos/common/reset_users || true
 fi
 
-
-db_input high pantos/common/create_backups || true
-db_input high pantos/common/start_services || true
 db_go

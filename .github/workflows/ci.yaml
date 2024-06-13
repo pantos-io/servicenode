@@ -60,8 +60,8 @@ jobs:
           python3 -m venv .venv
           source .venv/bin/activate
           pip3 install pycryptodome==3.18.0
-          chmod +x scripts/generate-signer-key.py
-          cat password.key | ./scripts/generate-signer-key.py
+          chmod +x ./.github/workflows/scripts/generate-signer-key.py
+          cat password.key | ./.github/workflows/scripts/generate-signer-key.py
           mv signer-key*.pem signer_key.pem
 
       # - name: Test image
@@ -74,7 +74,6 @@ jobs:
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
   build:
-    needs: [shared]
     uses: ./.github/workflows/build.yml
 
   install:
@@ -85,6 +84,7 @@ jobs:
         os:
           - ubuntu-20.04
           - ubuntu-22.04
+      fail-fast: false
     steps:
       - uses: actions/checkout@v4
       - name: Download artifact

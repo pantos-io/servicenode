@@ -1,0 +1,8 @@
+#!/usr/bin/dh-exec
+service-node-config.yml opt/pantos/pantos-service-node
+bids.yml => etc/pantos/service-node-bids.yml
+alembic.ini opt/pantos/pantos-service-node
+service-node-config.env etc/pantos
+linux/etc/default/* etc/default
+linux/scripts/* usr/bin
+linux/etc/systemd/*.service lib/systemd/system

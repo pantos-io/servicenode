@@ -7,11 +7,6 @@ on:
         required: false
         type: string
         default: "1.0.0"
-      revision:
-        description: 'Revision to build'
-        required: false
-        type: string
-        default: ${{ github.run_attempt }}
       environment:
         description: 'Environment where the secrets are stored'
         required: false
@@ -55,11 +50,22 @@ jobs:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
 
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install build-essential debhelper devscripts equivs dh-virtualenv python3-venv dh-sysuser dh-exec -y
+          sudo make debian-build-deps
+
       - name: Install signing dependencies
         if: steps.is-signed-build.outputs.HAS_SECRETS == 'true'
         run: |
           sudo apt-get update
           sudo apt-get install -y debsigs
+
+      - name: Ensure version
+        if: steps.is-signed-build.outputs.HAS_SECRETS == 'true'
+        run: |
+          make check-version VERSION=${{ inputs.version }}
 
       - name: Build package
         run: |
@@ -67,7 +73,6 @@ jobs:
           make wheel
         env:
           PANTOS_SERVICE_NODE_VERSION: ${{ inputs.version }}
-          PANTOS_SERVICE_NODE_REVISION: ${{ inputs.revision }}
 
       - name: Sign package
         if: steps.is-signed-build.outputs.HAS_SECRETS == 'true'

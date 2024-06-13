@@ -9,8 +9,8 @@ from pantos.servicenode.configuration import load_config
 
 load_config()
 
-WSGI_FILE = '/opt/pantos/service-node/wsgi.py'
-MOD_WSGI_LOGS = '/var/log/pantos/service-node-mod_wsgi.log'
+WSGI_FILE = '/opt/pantos/pantos-service-node/wsgi.py'
+MOD_WSGI_LOGS = '/var/log/pantos/service-node/mod_wsgi.log'
 NON_ROOT_DEFAULT_HTTPS_PORT = 8443
 NON_ROOT_DEFAULT_HTTP_PORT = 8080
 application_config = config['application']

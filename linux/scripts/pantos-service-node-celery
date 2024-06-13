@@ -1,0 +1,9 @@
+#! /bin/bash
+#
+# Helper to launch the celery worker
+
+
+. /etc/default/pantos-service-node
+. /opt/pantos/pantos-service-node/bin/activate
+
+celery -A pantos.servicenode worker -l INFO -n pantos.servicenode -Q transfers,bids

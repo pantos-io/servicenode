@@ -13,3 +13,9 @@ find.sh
 local/
 postgresql_data
 rabbitmq_data
+debian/.debhelper
+debian/pantos-service-node
+debian/tmp
+debian/*debhelper*
+debian/files
+debian/*substvars

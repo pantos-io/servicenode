@@ -10,10 +10,10 @@ RestartSec=1
 KillMode=mixed
 TimeoutStopSec=600
 User=pantos
-WorkingDirectory=/opt/pantos/service-node
-Environment="PATH=/opt/pantos/service-node/virtual-environment/bin"
-ExecStart=/opt/pantos/service-node/virtual-environment/bin/celery -A pantos.servicenode worker -l INFO -n pantos.servicenode -Q transfers,bids
-StandardOutput=append:/var/log/pantos/service-node-celery.log
+WorkingDirectory=/opt/pantos/pantos-service-node
+EnvironmentFile=/etc/default/pantos-service-node
+ExecStart=/usr/bin/pantos-service-node-celery
+StandardOutput=append:/var/log/pantos/service-node/celery.log
 StandardError=inherit
 
 [Install]

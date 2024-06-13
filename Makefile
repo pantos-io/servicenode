@@ -1,8 +1,21 @@
 PANTOS_SERVICE_NODE_VERSION := $(shell poetry version -s)
-PANTOS_SERVICE_NODE_REVISION ?= 1
 PANTOS_SERVICE_NODE_SSH_HOST ?= bdev-service-node
-PYTHON_FILES_WITHOUT_TESTS := pantos/servicenode linux/start-web-server
+PYTHON_FILES_WITHOUT_TESTS := pantos/servicenode linux/scripts/pantos-service-node-server
 PYTHON_FILES := $(PYTHON_FILES_WITHOUT_TESTS) tests
+
+.PHONY: check-version
+check-version:
+	@if [ -z "$(VERSION)" ]; then \
+		echo "Error: VERSION is not set"; \
+		exit 1; \
+	fi
+	@VERSION_FROM_POETRY=$$(poetry version -s) ; \
+	if test "$$VERSION_FROM_POETRY" != "$(VERSION)"; then \
+		echo "Version mismatch: expected $(VERSION), got $$VERSION_FROM_POETRY" ; \
+		exit 1 ; \
+	else \
+		echo "Version check passed" ; \
+	fi
 
 .PHONY: dist
 dist: tar wheel debian
@@ -83,8 +96,19 @@ dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION).tar.gz: pantos/ service-
 	rm pantos/pantos-service-node.sh
 	rm pantos/pantos-service-node-worker.sh
 
+check-poetry-plugin:
+	@if poetry self show plugins | grep -q poetry-plugin-freeze; then \
+		echo "poetry-plugin-freeze is already added."; \
+	else \
+		echo "poetry-plugin-freeze is not added. Adding now..."; \
+		poetry self add poetry-plugin-freeze; \
+	fi
+
+freeze-wheel: check-poetry-plugin
+	poetry freeze-wheel
+
 .PHONY: wheel
-wheel: dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION)-py3-none-any.whl
+wheel: dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION)-py3-none-any.whl freeze-wheel
 
 dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION)-py3-none-any.whl: pantos/ service-node-config.yml service-node-config.env bids.yml alembic.ini
 	cp service-node-config.yml pantos/service-node-config.yml
@@ -97,32 +121,23 @@ dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION)-py3-none-any.whl: pantos
 	rm pantos/bids.yml
 	rm pantos/alembic.ini
 
-.PHONY: debian
-debian: dist/pantos-service-node-$(PANTOS_SERVICE_NODE_VERSION)-$(PANTOS_SERVICE_NODE_REVISION)_all.deb
+.PHONY: debian-build-deps
+debian-build-deps:
+	mk-build-deps --install debian/control --remove
 
-dist/pantos-service-node-$(PANTOS_SERVICE_NODE_VERSION)-$(PANTOS_SERVICE_NODE_REVISION)_all.deb: linux/ dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION)-py3-none-any.whl
-	$(eval debian_package := pantos-service-node-$(PANTOS_SERVICE_NODE_VERSION)-$(PANTOS_SERVICE_NODE_REVISION)_all)
-	$(eval build_directory := build/debian/$(debian_package))
-	mkdir -p $(build_directory)/opt/pantos/service-node
-	cp dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION)-py3-none-any.whl $(build_directory)/opt/pantos/service-node/
-	cp linux/start-web-server $(build_directory)/opt/pantos/service-node/
-	mkdir -p $(build_directory)/etc/systemd/system
-	cp linux/pantos-service-node-server.service $(build_directory)/etc/systemd/system/
-	cp linux/pantos-service-node-celery.service $(build_directory)/etc/systemd/system/
-	mkdir -p $(build_directory)/DEBIAN
-	cp linux/debian/* $(build_directory)/DEBIAN
-	cat linux/debian/control | sed -e 's/VERSION/$(PANTOS_SERVICE_NODE_VERSION)/g' > $(build_directory)/DEBIAN/control
-	chmod 755 $(build_directory)/DEBIAN/postinst
-	chmod 755 $(build_directory)/DEBIAN/prerm
-	chmod 755 $(build_directory)/DEBIAN/postrm
-	chmod 755 $(build_directory)/DEBIAN/config
-	cd build/debian/; \
-		dpkg-deb --build --root-owner-group -Zgzip $(debian_package)
-	mv build/debian/$(debian_package).deb dist/
+.PHONY: debian
+debian:
+	$(eval debian_package := pantos-service-node_$(PANTOS_SERVICE_NODE_VERSION)_all)
+	dpkg-buildpackage -uc -us -g
+	mkdir -p dist
+	mv ../$(debian_package).deb dist/
+
+dist/pantos-service-node_$(PANTOS_SERVICE_NODE_VERSION)_all.deb: debian
+	
 
 .PHONY: remote-install
-remote-install: dist/pantos-service-node-$(PANTOS_SERVICE_NODE_VERSION)-$(PANTOS_SERVICE_NODE_REVISION)_all.deb
-	$(eval deb_file := pantos-service-node-$(PANTOS_SERVICE_NODE_VERSION)-$(PANTOS_SERVICE_NODE_REVISION)_all.deb)
+remote-install: dist/pantos-service-node_$(PANTOS_SERVICE_NODE_VERSION)_all.deb
+	$(eval deb_file := pantos-service-node_$(PANTOS_SERVICE_NODE_VERSION)_all.deb)
 	scp dist/$(deb_file) $(PANTOS_SERVICE_NODE_SSH_HOST):
 	ssh -t $(PANTOS_SERVICE_NODE_SSH_HOST) "\
 		sudo systemctl stop pantos-service-node-celery;\

@@ -1,0 +1,3 @@
+# Environment file for pantos-service-node systemd units and cron jobs
+# Set a custom Config path
+# PANTOS_CONFIG=
