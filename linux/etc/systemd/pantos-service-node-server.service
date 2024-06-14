@@ -11,7 +11,7 @@ KillMode=mixed
 WorkingDirectory=/opt/pantos/pantos-service-node
 EnvironmentFile=/etc/default/pantos-service-node
 ExecStart=/usr/bin/pantos-service-node-server
-StandardOutput=append:/var/log/pantos/service-node/server.log
+StandardOutput=append:/var/log/pantos/service-node/server-service.log
 StandardError=inherit
 
 [Install]

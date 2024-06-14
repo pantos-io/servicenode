@@ -1,6 +1,6 @@
 PANTOS_SERVICE_NODE_VERSION := $(shell poetry version -s)
 PANTOS_SERVICE_NODE_SSH_HOST ?= bdev-service-node
-PYTHON_FILES_WITHOUT_TESTS := pantos/servicenode linux/scripts/pantos-service-node-server
+PYTHON_FILES_WITHOUT_TESTS := pantos/servicenode linux/scripts/start-web.py
 PYTHON_FILES := $(PYTHON_FILES_WITHOUT_TESTS) tests
 
 .PHONY: check-version
@@ -125,6 +125,12 @@ dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION)-py3-none-any.whl: pantos
 debian-build-deps:
 	mk-build-deps --install debian/control --remove
 
+debian-configurator:
+	mkdir -p dist
+	sed 's/VERSION_PLACEHOLDER/$(PANTOS_SERVICE_NODE_VERSION)/' configurator/DEBIAN/control.template > configurator/DEBIAN/control
+	dpkg-deb --build configurator dist/pantos-service-node-configurator_$(PANTOS_SERVICE_NODE_VERSION)_all.deb
+	rm configurator/DEBIAN/control
+
 .PHONY: debian
 debian:
 	$(eval debian_package := pantos-service-node_$(PANTOS_SERVICE_NODE_VERSION)_all)
@@ -132,12 +138,12 @@ debian:
 	mkdir -p dist
 	mv ../$(debian_package).deb dist/
 
-dist/pantos-service-node_$(PANTOS_SERVICE_NODE_VERSION)_all.deb: debian
+dist/pantos-service-node_$(PANTOS_SERVICE_NODE_VERSION)_all.deb: debian debian-configurator
 	
 
 .PHONY: remote-install
 remote-install: dist/pantos-service-node_$(PANTOS_SERVICE_NODE_VERSION)_all.deb
-	$(eval deb_file := pantos-service-node_$(PANTOS_SERVICE_NODE_VERSION)_all.deb)
+	$(eval deb_file := pantos-service-node*_$(PANTOS_SERVICE_NODE_VERSION)_all.deb)
 	scp dist/$(deb_file) $(PANTOS_SERVICE_NODE_SSH_HOST):
 	ssh -t $(PANTOS_SERVICE_NODE_SSH_HOST) "\
 		sudo systemctl stop pantos-service-node-celery;\

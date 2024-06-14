@@ -4,7 +4,7 @@
 # see: dh_installdeb(1)
 
 set -e
-set -x  # Enable debugging
+#set -x  # Enable debugging
 APP_ID="${DPKG_MAINTSCRIPT_PACKAGE:?DPKG_MAINTSCRIPT_PACKAGE is not set as it should be}"
 APP_ID="${APP_ID%.io}"
 RUN_AS="$APP_ID"
@@ -25,199 +25,6 @@ RUN_AS="$APP_ID"
 
 # Source debconf library.
 . /usr/share/debconf/confmodule
-
-# Directory and file paths
-application_directory='/opt/pantos/pantos-service-node'
-base_directory='/etc/pantos'
-env_file="${base_directory}/service-node-config.env"
-signer_key_file="${base_directory}/service-node-signer.pem"
-
-db_get pantos/common/reset_users
-RESET_USERS=1
-if [ "$RET" = "false" ]; then
-  echo "Not resetting users"
-  RESET_USERS=0
-fi
-
-# User names
-postgresql_user=${RUN_AS}
-rabbitmq_user=${RUN_AS}
-
-# Database and virtual host names
-application_database=${RUN_AS}
-celery_database="${RUN_AS}-celery"
-virtual_host=${RUN_AS}
-
-# These are optional dependencies, so we don't want to fail the installation if they are not installed
-POSTGRESQL_INSTALLED=$(dpkg-query -W --showformat='${Status}\n' postgresql | grep "install ok installed" || true)
-RABBITMQ_INSTALLED=$(dpkg-query -W --showformat='${Status}\n' rabbitmq-server | grep "install ok installed" || true)
-
-_install_env() {
-  if [ -e ${env_file} ]; then
-    echo "${DPKG_MAINTSCRIPT_PACKAGE} Sourcing previous environment file"
-    . ${env_file}
-  else
-    echo "${DPKG_MAINTSCRIPT_PACKAGE} Previous environment file doesn't exist. Skipping."
-  fi
-}
-
-_create_signer_key() {
-  # Signer key
-  if [ ! -e ${signer_key_file} ] || [ -z ${SIGNER_KEY_PASSWORD} ]; then
-    db_get pantos/service-node/create_signer_key
-    # Only ask for the password if the above is positive
-    if [ "$RET" = "false" ]; then
-      echo "${DPKG_MAINTSCRIPT_PACKAGE} Not creating a new signer key"
-      return
-    fi
-    db_get pantos/service-node/signer_key_password
-    # Check if ssh-keygen is installed
-    if command -v ssh-keygen &>/dev/null; then
-      echo "${DPKG_MAINTSCRIPT_PACKAGE} Signer key does not exist; generating a new one"
-      ssh-keygen -t ed25519 -f "$signer_key_file" -N "$RET" >/dev/null 2>&1
-      echo "SIGNER_KEY_PASSWORD='$RET'" >> "${env_file}"
-    else
-      echo -e "\033[1;32m${DPKG_MAINTSCRIPT_PACKAGE} ssh-keygen is not installed, please reinstall the"\
-      "package with the recommended dependencies or make sure that the signer"\
-      "key is provided as an environment variable at run time\033[0m"
-    fi
-  fi
-}
-
-_configure_postgresql() {
-  db_get pantos/common/configure_postgresql
-  # If Postgresql doesn't exist, check for the configuration to exist and otherwise show a big warning
-  if [ "$RET" != "false" ] && [ -n "$POSTGRESQL_INSTALLED" ]; then
-    # Try to connect to the database and break otherwise
-    if ! timeout 10 runuser -u postgres -- psql --quiet --command "SELECT 1" >/dev/null 2>&1; then
-      echo "Error connecting to PostgreSQL. Please configure it manually"
-    else
-      # If Postgresql exists, we check if the user and database exists and create them if not
-      # We also check if the old configuration file exists and copy the old database URLs to the new configuration file
-      echo -e "\033[1;32mPostgreSQL is installed\033[0m"
-      postgresql_user_exists=$(runuser -u postgres -- psql --no-align --no-psqlrc --tuples-only --quiet --command "SELECT 1 FROM pg_roles WHERE rolname='${postgresql_user}'" | grep --quiet --word-regexp ^1; echo $?)
-      if [ "${postgresql_user_exists}" -eq 0 ]; then
-        echo "${DPKG_MAINTSCRIPT_PACKAGE} PostgreSQL user '${postgresql_user}' already exists"
-        if [ -z "${DB_URL}" ] && [ $RESET_USERS -eq 1 ]; then
-          echo "${DPKG_MAINTSCRIPT_PACKAGE} DB_URL does not exist, generating new PostgreSQL password"
-          # config doesn't exist but the database user exists, so we generate a new password
-          postgresql_password=$(< /dev/urandom tr -dc 'A-Za-z0-9' | fold -w 32 | head -n 1)
-          runuser -u postgres -- psql --quiet --command "ALTER ROLE \"${postgresql_user}\" WITH PASSWORD '${postgresql_password}'"
-          echo "DB_URL='postgresql://${postgresql_user}:${postgresql_password}@localhost/pantos-service-node'" >> "${env_file}"
-          echo "CELERY_BACKEND='db+postgresql://${postgresql_user}:${postgresql_password}@localhost/pantos-service-node-celery'" >> "${env_file}"
-        fi
-      else
-        echo "${DPKG_MAINTSCRIPT_PACKAGE} PostgreSQL user does not exist, generating new PostgreSQL user and password"
-        postgresql_password=$(< /dev/urandom tr -dc 'A-Za-z0-9' | fold -w 32 | head -n 1)
-        runuser -u postgres -- psql --quiet --command "CREATE ROLE \"${postgresql_user}\" WITH LOGIN PASSWORD '${postgresql_password}'"
-        echo "DB_URL='postgresql://${postgresql_user}:${postgresql_password}@localhost/pantos-service-node'" >> "${env_file}"
-        echo "CELERY_BACKEND='db+postgresql://${postgresql_user}:${postgresql_password}@localhost/pantos-service-node-celery'" >> "${env_file}"
-        echo "${DPKG_MAINTSCRIPT_PACKAGE} PostgreSQL user '${postgresql_user}' created"
-      fi
-      application_database_exists=$(runuser -u postgres -- psql --no-align --no-psqlrc --tuples-only --quiet --list | cut --delimiter \| --fields 1 | grep --quiet --word-regexp "^${application_database}"; echo $?)
-      if [ "${application_database_exists}" -eq 0 ]; then
-        echo "${DPKG_MAINTSCRIPT_PACKAGE} PostgreSQL application database '${application_database}' already exists"
-      else
-        runuser -u postgres -- psql --quiet --command "CREATE DATABASE \"${application_database}\" WITH OWNER \"${postgresql_user}\""
-        echo "${DPKG_MAINTSCRIPT_PACKAGE} PostgreSQL application database '${application_database}' created"
-      fi
-      celery_database_exists=$(runuser -u postgres -- psql --no-align --no-psqlrc --tuples-only --quiet --list | cut --delimiter \| --fields 1 | grep --quiet --word-regexp "^${celery_database}"; echo $?)
-      if [ "${celery_database_exists}" -eq 0 ]; then
-        echo "${DPKG_MAINTSCRIPT_PACKAGE} PostgreSQL Celery database '${celery_database}' already exists"
-      else
-        runuser -u postgres -- psql --quiet --command "CREATE DATABASE \"${celery_database}\" WITH OWNER \"${postgresql_user}\""
-        echo "${DPKG_MAINTSCRIPT_PACKAGE} PostgreSQL Celery database '${celery_database}' created"
-      fi
-    fi
-  else
-    echo -e "\033[1;31m${DPKG_MAINTSCRIPT_PACKAGE} PostgreSQL is not installed or configuration has been manually skipped.\033[0m"
-  fi
-}
-
-_configure_rabbitmq() {
-  db_get pantos/common/configure_rabbitmq
-  if [ "$RET" != "false" ] && [ -n "$RABBITMQ_INSTALLED" ]; then
-    # Try to connect to the RabbitMQ server and break otherwise
-    if ! timeout 10 rabbitmqctl list_users >/dev/null 2>&1; then
-      echo "${DPKG_MAINTSCRIPT_PACKAGE} Error checking if RabbitMQ user exists. Please configure it manually"
-    else
-      echo -e "\033[1;32mRabbitMQ is installed\033[0m"
-      echo "${DPKG_MAINTSCRIPT_PACKAGE} Checking if the user and virtual host exist and creating them if not"
-      # RabbitMQ
-      rabbitmq_user_exists=$(rabbitmqctl list_users | grep --quiet --word-regexp "^${rabbitmq_user}"; echo $?)
-      if [ "${rabbitmq_user_exists}" -eq 0 ]; then
-        echo "${DPKG_MAINTSCRIPT_PACKAGE} RabbitMQ user '${rabbitmq_user}' already exists"
-        if [ -z "${CELERY_BROKER}" ]; then
-          if [ $RESET_USERS -eq 1 ]; then
-            # old config does not exist but the rabbitmq user exists, so we generate a new password
-            # and change the password of the user
-            echo "${DPKG_MAINTSCRIPT_PACKAGE} Env variable CELERY_BROKER is not defined, generating new RabbitMQ password"
-            rabbitmq_password=$(< /dev/urandom tr -dc 'A-Za-z0-9' | fold -w 32 | head -n 1)
-            rabbitmqctl change_password "${rabbitmq_user}" "${rabbitmq_password}"
-            echo "CELERY_BROKER='amqp://${rabbitmq_user}:${rabbitmq_password}@localhost:5672/pantos-service-node'" >> "${env_file}"
-          else
-            echo "${DPKG_MAINTSCRIPT_PACKAGE} RabbitMQ user exists, but no password is defined in ${env_file}"
-            echo "${DPKG_MAINTSCRIPT_PACKAGE} Please define CELERY_BROKER in ${env_file}"
-          fi
-        fi
-      else
-        echo "${DPKG_MAINTSCRIPT_PACKAGE} RabbitMQ user does not exist, generating new RabbitMQ user and password"
-        rabbitmq_password=$(< /dev/urandom tr -dc 'A-Za-z0-9' | fold -w 32 | head -n 1)
-        rabbitmqctl add_user "${rabbitmq_user}" "${rabbitmq_password}"
-        echo "CELERY_BROKER='amqp://${rabbitmq_user}:${rabbitmq_password}@localhost:5672/pantos-service-node'" >> "${env_file}"
-      fi
-      virtual_host_exists=$(rabbitmqctl list_vhosts | grep --quiet --word-regexp "^${virtual_host}"; echo $?)
-      if [ "${virtual_host_exists}" -eq 0 ]; then
-        echo "${DPKG_MAINTSCRIPT_PACKAGE} RabbitMQ virtual host '${virtual_host}' already exists"
-      else
-        echo "${DPKG_MAINTSCRIPT_PACKAGE} RabbitMQ virtual host does not exist, creating new RabbitMQ virtual host"
-        rabbitmqctl add_vhost ${virtual_host}
-        rabbitmqctl set_permissions -p ${virtual_host} ${rabbitmq_user} ".*" ".*" ".*"
-        echo "${DPKG_MAINTSCRIPT_PACKAGE} RabbitMQ virtual host '${virtual_host}' added"
-      fi
-    fi
-  else
-    echo -e "\033[1;31mRabbitMQ is not installed or configuration has been manually skipped.\033[0m"
-  fi
-}
-
-_check_systemd_active() {
-  if ! systemctl --version >/dev/null 2>&1; then
-    echo "Systemd is not active, skipping service start"
-    return 1
-  fi
-  return 0
-}
-
-_start_and_wait_for_service() {
-  local service_name="$1"
-  
-  if _check_systemd_active; then
-    if ! systemctl start "$service_name"; then
-      echo "Failed to start $service_name. Please start it manually"
-      return
-    fi
-    echo "Waiting for $service_name to be ready..."
-    while ! systemctl is-active --quiet "$service_name"; do
-      sleep 1
-    done
-    echo "$service_name is now active."
-  else
-    return
-  fi
-}
-
-_wait_for_rabbitmq() {
-  if [ -n "$RABBITMQ_INSTALLED" ]; then
-    _start_and_wait_for_service "rabbitmq-server"
-  fi
-}
-
-_wait_for_postgresql() {
-  if [ -n "$POSTGRESQL_INSTALLED" ]; then
-    _start_and_wait_for_service "postgresql"
-  fi
-}
 
 
 case "$1" in
@@ -247,19 +54,15 @@ esac
 
 # Protect configuration files (containing passwords)
 chmod 0640 /etc/pantos/service-node*
-chgrp daemon /etc/pantos/service-node*
+chmod 755 /opt/pantos/"$APP_ID"/bin/*
 
 # Data and log directory permissions
-chown -RPh "$RUN_AS":daemon /var/log/pantos/service-node/. /opt/pantos/"$APP_ID"/.
+chown -RPh "$RUN_AS":daemon /var/log/pantos/service-node /opt/pantos/"$APP_ID"/ /etc/pantos/service-node*
 
 # Run upgrade / start service AFTER permissions etc. are fixed
 if [ "$1" = "configure" ]; then
-    _install_env "$2"
-    _create_signer_key "$2"
-    _wait_for_rabbitmq "$2"
-    _wait_for_postgresql "$2"
-    _configure_postgresql "$2"
-    _configure_rabbitmq "$2"
+    db_input high pantos/common/finish_note || true
+    db_go || true
 fi
 
 exit 0

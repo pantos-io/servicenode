@@ -9,11 +9,11 @@ Restart=always
 RestartSec=1
 KillMode=mixed
 TimeoutStopSec=600
-User=pantos
+User=pantos-service-node
 WorkingDirectory=/opt/pantos/pantos-service-node
 EnvironmentFile=/etc/default/pantos-service-node
 ExecStart=/usr/bin/pantos-service-node-celery
-StandardOutput=append:/var/log/pantos/service-node/celery.log
+StandardOutput=append:/var/log/pantos/service-node/worker-service.log
 StandardError=inherit
 
 [Install]

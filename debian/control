@@ -10,6 +10,5 @@ Package: pantos-service-node
 Architecture: all
 Pre-Depends: dpkg (>= 1.16.1), python3, python3-venv, ${misc:Pre-Depends}
 Depends: ${python:Depends}, ${misc:Depends}, libpq-dev, apache2, apache2-dev, debconf
-Recommends: iptables, postgresql, rabbitmq-server, openssh-client
+Recommends: iptables
 Description: Service Node reference implementation for the Pantos multi-blockchain system.
-

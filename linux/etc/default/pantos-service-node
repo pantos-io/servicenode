@@ -1,3 +1,5 @@
 # Environment file for pantos-service-node systemd units and cron jobs
 # Set a custom Config path
 # PANTOS_CONFIG=
+PANTOS_ENV_FILE=/etc/pantos/service-node-config.env
+PYTHONPATH=/opt/pantos/pantos-service-node/lib/python3/site-packages

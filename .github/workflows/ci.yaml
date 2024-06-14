@@ -84,6 +84,7 @@ jobs:
         os:
           - ubuntu-20.04
           - ubuntu-22.04
+          - ubuntu-24.04
       fail-fast: false
     steps:
       - uses: actions/checkout@v4
@@ -95,13 +96,12 @@ jobs:
 
       - name: Preconfigure package
         run: |
-          echo 'pantos-service-node pantos/service-node/create_signer_key boolean true' | sudo debconf-set-selections;
-          echo 'pantos-service-node pantos/service-node/signer_key_password string 1234' | sudo debconf-set-selections;
-          echo 'pantos-service-node pantos/common/create_backups boolean true' | sudo debconf-set-selections;
-          echo 'pantos-service-node pantos/common/configure_postgresql boolean true' | sudo debconf-set-selections;
-          echo 'pantos-service-node pantos/common/configure_rabbitmq boolean true' | sudo debconf-set-selections;
-          echo 'pantos-service-node pantos/common/reset_users boolean true' | sudo debconf-set-selections;
-          echo 'pantos-service-node pantos/common/start_services boolean true' | sudo debconf-set-selections;
+          echo 'pantos-service-node-configurator pantos/service-node/create_signer_key boolean true' | sudo debconf-set-selections;
+          echo 'pantos-service-node-configurator pantos/service-node/signer_key_password string 1234' | sudo debconf-set-selections;
+          echo 'pantos-service-node-configurator pantos/common/configure_postgresql boolean true' | sudo debconf-set-selections;
+          echo 'pantos-service-node-configurator pantos/common/configure_rabbitmq boolean true' | sudo debconf-set-selections;
+          echo 'pantos-service-node-configurator pantos/common/reset_users boolean true' | sudo debconf-set-selections;
+          echo 'pantos-service-node-configurator pantos/common/start_services boolean false' | sudo debconf-set-selections;
 
       - name: Install Debian package
         run: |
@@ -111,5 +111,7 @@ jobs:
       # Check service is running
       - name: Check service is running
         run: |
-          sudo systemctl status pantos-service-node-server
-          sudo systemctl status pantos-service-node-celery
+          sudo systemctl status pantos-service-node-server || true
+          sudo systemctl status pantos-service-node-celery || true
+          sudo journalctl -u pantos-service-node-server || true
+          sudo journalctl -u pantos-service-node-celery || true

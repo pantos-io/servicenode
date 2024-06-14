@@ -21,9 +21,6 @@ RUN apt-get update
 
 COPY --from=dev /app/dist/*.deb .
 
-RUN echo "pantos-service-node pantos/common/create_backups boolean false" | debconf-set-selections; \
-    echo "pantos-service-node pantos/common/start_services boolean false" | debconf-set-selections
-
 RUN if [ -f ./*-signed.deb ]; then \
         apt-get install -y --no-install-recommends ./*-signed.deb; \
     else \

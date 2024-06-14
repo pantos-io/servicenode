@@ -9,7 +9,7 @@ application:
             enabled: !ENV tag:yaml.org,2002:bool ${APP_LOG_CONSOLE_ENABLED:true}
         file:
             enabled: !ENV tag:yaml.org,2002:bool ${APP_LOG_FILE_ENABLED:true}
-            name: !ENV ${APP_LOG_FILE_NAME:/var/log/pantos/service-node.log}
+            name: !ENV ${APP_LOG_FILE_NAME:/var/log/pantos/service-node/app.log}
             max_bytes: !ENV tag:yaml.org,2002:int ${APP_LOG_FILE_MAX_BYTES:104857600}
             backup_count: !ENV tag:yaml.org,2002:int ${APP_LOG_FILE_BACKUP_COUNT:10}
 
@@ -30,7 +30,7 @@ celery:
             enabled: !ENV tag:yaml.org,2002:bool ${CELERY_LOG_CONSOLE_ENABLED:true}
         file:
             enabled: !ENV tag:yaml.org,2002:bool ${CELERY_LOG_FILE_ENABLED:true}
-            name: !ENV ${CELERY_LOG_FILE_NAME:/var/log/pantos/service-node-worker.log}
+            name: !ENV ${CELERY_LOG_FILE_NAME:/var/log/pantos/service-node/worker.log}
             max_bytes: !ENV tag:yaml.org,2002:int ${CELERY_LOG_FILE_MAX_BYTES:104857600}
             backup_count: !ENV tag:yaml.org,2002:int ${CELERY_LOG_FILE_BACKUP_COUNT:10}
 

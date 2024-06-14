@@ -1,9 +1,17 @@
-#! /bin/bash
+#! /bin/sh
 #
 # Helper to launch the celery worker
 
+APP_NAME=pantos-service-node
+APP_DIR=/opt/pantos/"$APP_NAME"
+set -a
+. /etc/default/"$APP_NAME"
+. "$APP_DIR"/bin/activate
 
-. /etc/default/pantos-service-node
-. /opt/pantos/pantos-service-node/bin/activate
+if [ -f "$PANTOS_ENV_FILE" ]; then
+    echo "Sourcing $PANTOS_ENV_FILE"
+    . $PANTOS_ENV_FILE
+fi
+set +a
 
 celery -A pantos.servicenode worker -l INFO -n pantos.servicenode -Q transfers,bids

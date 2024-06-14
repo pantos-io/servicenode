@@ -69,7 +69,7 @@ jobs:
 
       - name: Build package
         run: |
-          make debian
+          make debian debian-configurator
           make wheel
         env:
           PANTOS_SERVICE_NODE_VERSION: ${{ inputs.version }}

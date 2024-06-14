@@ -4,5 +4,5 @@ bids.yml => etc/pantos/service-node-bids.yml
 alembic.ini opt/pantos/pantos-service-node
 service-node-config.env etc/pantos
 linux/etc/default/* etc/default
-linux/scripts/* usr/bin
+linux/scripts/* opt/pantos/pantos-service-node/bin
 linux/etc/systemd/*.service lib/systemd/system

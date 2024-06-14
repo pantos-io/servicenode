@@ -1,0 +1,7 @@
+.debhelper
+pantos-service-node
+tmp
+*.debhelper
+*.substvars
+debhelper*
+files
