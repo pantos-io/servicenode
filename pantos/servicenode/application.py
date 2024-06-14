@@ -9,11 +9,13 @@ import flask
 from pantos.common.logging import LogFile
 from pantos.common.logging import LogFormat
 from pantos.common.logging import initialize_logger
+from pantos.common.signer import get_signer
 
 from pantos.servicenode.blockchains.factory import \
     initialize_blockchain_clients
 from pantos.servicenode.business.node import NodeInteractor
 from pantos.servicenode.configuration import config
+from pantos.servicenode.configuration import get_signer_config
 from pantos.servicenode.configuration import load_config
 from pantos.servicenode.database import \
     initialize_package as initialize_database_package
@@ -73,6 +75,12 @@ def initialize_application(is_flask_app: bool = False) -> None:
         initialize_database_package(is_flask_app)
     except Exception:
         _logger.critical('unable to initialize the database', exc_info=True)
+        sys.exit(1)
+    try:
+        signer_config = get_signer_config()
+        get_signer(signer_config['pem'], signer_config['pem_password'])
+    except Exception:
+        _logger.critical('unable to use the signer object', exc_info=True)
         sys.exit(1)
     try:
         initialize_blockchain_clients()
