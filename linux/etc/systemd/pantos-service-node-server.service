@@ -12,7 +12,7 @@ WorkingDirectory=/opt/pantos/pantos-service-node
 EnvironmentFile=/etc/default/pantos-service-node
 ExecStart=/usr/bin/pantos-service-node-server
 StandardOutput=append:/var/log/pantos/service-node/server-service.log
-StandardError=inherit
+StandardError=append:/var/log/pantos/service-node/server-service.log
 
 [Install]
 WantedBy=multi-user.target

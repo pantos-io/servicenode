@@ -89,7 +89,8 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: build
+          merge-multiple: true
+          pattern: build-
           path: dist
 
       - name: Rename built artifacts
@@ -146,6 +147,7 @@ jobs:
       # We need to use a semver that doesn't start with a v as debian will remove it anyways
       version: ${{ needs.define-environment.outputs.deployment_version }}
       environment: debian-release
+      architecture: amd64
 
   add-assets:
     name: Add Assets to the ${{ github.event.release.tag_name }} Release
@@ -161,7 +163,8 @@ jobs:
           egress-policy: audit
       - uses: actions/download-artifact@v4
         with:
-          name: build
+          merge-multiple: true
+          pattern: build-
           path: dist
 
       # We need to upload some artifacts, any, so that the download action works
@@ -263,7 +266,8 @@ jobs:
           egress-policy: audit
       - uses: actions/download-artifact@v4
         with:
-          name: build
+          merge-multiple: true
+          pattern: build-
           path: dist
 
       - name: List directory

@@ -133,17 +133,17 @@ debian-configurator:
 
 .PHONY: debian
 debian:
-	$(eval debian_package := pantos-service-node_$(PANTOS_SERVICE_NODE_VERSION)_all)
+	$(eval debian_package := pantos-service-node_$(PANTOS_SERVICE_NODE_VERSION)_*.deb)
 	dpkg-buildpackage -uc -us -g
 	mkdir -p dist
-	mv ../$(debian_package).deb dist/
+	mv ../$(debian_package) dist/
 
-dist/pantos-service-node_$(PANTOS_SERVICE_NODE_VERSION)_all.deb: debian debian-configurator
+debian-all: debian debian-configurator
 	
 
 .PHONY: remote-install
-remote-install: dist/pantos-service-node_$(PANTOS_SERVICE_NODE_VERSION)_all.deb
-	$(eval deb_file := pantos-service-node*_$(PANTOS_SERVICE_NODE_VERSION)_all.deb)
+remote-install: debian-all
+	$(eval deb_file := pantos-service-node*_$(PANTOS_SERVICE_NODE_VERSION)_*.deb)
 	scp dist/$(deb_file) $(PANTOS_SERVICE_NODE_SSH_HOST):
 	ssh -t $(PANTOS_SERVICE_NODE_SSH_HOST) "\
 		sudo systemctl stop pantos-service-node-celery;\

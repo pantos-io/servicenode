@@ -12,6 +12,7 @@ load_config()
 USER_NAME = 'pantos-service-node'
 APP_DIRECTORY = '/opt/pantos/pantos-service-node'
 WSGI_FILE = f'{APP_DIRECTORY}/wsgi.py'
+MOD_WSGI_LOGS = '/var/log/pantos/service-node/mod_wsgi.log'
 NON_ROOT_DEFAULT_HTTPS_PORT = 8443
 NON_ROOT_DEFAULT_HTTP_PORT = 8080
 application_config = config['application']
@@ -66,7 +67,8 @@ else:
     port_command = f'--port {port}'
 
 server_run_command = (
-    f'runuser -u {USER_NAME} -- bash -c "source {APP_DIRECTORY}/bin/activate; nohup mod_wsgi-express start-server --host {host} {port_command} '
-    f'{WSGI_FILE}"')
+    f'runuser -u {USER_NAME} -- bash -c "source {APP_DIRECTORY}/bin/activate; '
+    f'nohup mod_wsgi-express start-server --host {host} {port_command} '
+    f'{WSGI_FILE} >> {MOD_WSGI_LOGS} 2>&1 &"')
 subprocess.run(server_run_command, check=True, text=True,
                shell=True)  # nosec B602

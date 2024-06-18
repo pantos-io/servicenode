@@ -10,10 +10,11 @@
 # all files needed for a release build.
 
 # Increase trace logging, see debhelper(7) (uncomment to enable)
-#DH_VERBOSE=1
+DH_VERBOSE=1
 
 export DH_VIRTUALENV_INSTALL_ROOT=/opt/pantos
-SNAKE=/usr/bin/python3
+export POETRY_VIRTUALENVS_CREATE=false
+SNAKE=debian/$(PACKAGE)$(DH_VIRTUALENV_INSTALL_ROOT)/$(PACKAGE)/bin/python3
 EXTRA_REQUIREMENTS=--upgrade-pip --preinstall "setuptools>=38" --preinstall "poetry" --preinstall "dh-poetry"
 DH_VENV_ARGS=--builtin-venv --python=$(SNAKE) $(EXTRA_REQUIREMENTS) \
             --extra-pip-arg=--progress-bar=on \
@@ -21,6 +22,7 @@ DH_VENV_ARGS=--builtin-venv --python=$(SNAKE) $(EXTRA_REQUIREMENTS) \
 PACKAGE=$(shell dh_listpackages)
 VERSION=$(shell poetry version -s)
 SDIST_DIR=debian/$(PACKAGE)-$(VERSION)
+export POETRY_VIRTUALENVS_PATH=debian/$(PACKAGE)$(DH_VIRTUALENV_INSTALL_ROOT)/$(PACKAGE)
 
 
 .PHONY: clean build-arch override_dh_virtualenv override_dh_strip
@@ -41,6 +43,9 @@ build-arch:
 	dh $@ --with python-virtualenv,sysuser
 
 override_dh_virtualenv:
+	. $$(conda info --base)/etc/profile.d/conda.sh && \
+	conda create -y --prefix $(POETRY_VIRTUALENVS_PATH) python=3.10 && \
+	conda activate $(POETRY_VIRTUALENVS_PATH) && \
 	dh_virtualenv $(DH_VENV_ARGS)
 
 override_dh_strip:

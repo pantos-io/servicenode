@@ -4,14 +4,14 @@
 
 APP_NAME=pantos-service-node
 APP_DIR=/opt/pantos/"$APP_NAME"
-set -a
 . /etc/default/"$APP_NAME"
 . "$APP_DIR"/bin/activate
 
 if [ -f "$PANTOS_ENV_FILE" ]; then
     echo "Sourcing $PANTOS_ENV_FILE"
+    set -a
     . $PANTOS_ENV_FILE
+    set +a
 fi
-set +a
 
-celery -A pantos.servicenode worker -l INFO -n pantos.servicenode -Q transfers,bids
+exec "$APP_DIR"/bin/celery -A pantos.servicenode worker -l INFO -n pantos.servicenode -Q transfers,bids

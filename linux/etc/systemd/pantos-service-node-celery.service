@@ -10,11 +10,12 @@ RestartSec=1
 KillMode=mixed
 TimeoutStopSec=600
 User=pantos-service-node
+Group=daemon
 WorkingDirectory=/opt/pantos/pantos-service-node
 EnvironmentFile=/etc/default/pantos-service-node
 ExecStart=/usr/bin/pantos-service-node-celery
 StandardOutput=append:/var/log/pantos/service-node/worker-service.log
-StandardError=inherit
+StandardError=append:/var/log/pantos/service-node/worker-service.log
 
 [Install]
 WantedBy=multi-user.target

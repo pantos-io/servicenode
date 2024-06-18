@@ -75,6 +75,8 @@ jobs:
 
   build:
     uses: ./.github/workflows/build.yml
+    with:
+      architecture: amd64
 
   install:
     needs: [build]
@@ -91,7 +93,7 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: build
+          name: build-amd64
           path: build
 
       - name: Preconfigure package

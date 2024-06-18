@@ -5,6 +5,21 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+ENV PATH="/root/miniconda3/bin:${PATH}"
+RUN ARCH=$(uname -m) && \
+    if [ "$ARCH" = "x86_64" ]; then \
+        MINICONDA_URL="https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh"; \
+    elif [ "$ARCH" = "aarch64" ]; then \
+        MINICONDA_URL="https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-aarch64.sh"; \
+    else \
+        echo "Unsupported architecture: $ARCH"; \
+        exit 1; \
+    fi && \
+    wget "$MINICONDA_URL" -O miniconda.sh && \
+    mkdir /root/.conda && \
+    bash miniconda.sh -b && \
+    rm -f miniconda.sh
+
 RUN python3 -m pip install poetry
 
 WORKDIR /app
