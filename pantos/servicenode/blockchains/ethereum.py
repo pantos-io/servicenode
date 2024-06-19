@@ -18,6 +18,7 @@ from pantos.common.blockchains.enums import ContractAbi
 from pantos.common.blockchains.ethereum import EthereumUtilities
 from pantos.common.types import BlockchainAddress
 
+from pantos.servicenode.blockchains.base import VERSIONED_CONTRACTS_ABI
 from pantos.servicenode.blockchains.base import BlockchainClient
 from pantos.servicenode.blockchains.base import BlockchainClientError
 from pantos.servicenode.database import access as database_access
@@ -136,7 +137,8 @@ class EthereumClient(BlockchainClient):
             if node_stake > 0:
                 spender_address = self._get_config()['hub']
                 request = BlockchainClient._TransactionSubmissionStartRequest(
-                    ContractAbi.PANTOS_TOKEN, _TOKEN_APPROVE_FUNCTION_SELECTOR,
+                    VERSIONED_CONTRACTS_ABI[ContractAbi.PANTOS_TOKEN],
+                    _TOKEN_APPROVE_FUNCTION_SELECTOR,
                     (spender_address, node_stake), _TOKEN_APPROVE_GAS, None,
                     nonce)
                 internal_transaction_id = self._start_transaction_submission(
@@ -148,7 +150,7 @@ class EthereumClient(BlockchainClient):
                              extra=extra_info)
                 nonce += 1
             request = BlockchainClient._TransactionSubmissionStartRequest(
-                ContractAbi.PANTOS_HUB,
+                VERSIONED_CONTRACTS_ABI[ContractAbi.PANTOS_HUB],
                 _HUB_REGISTER_SERVICE_NODE_FUNCTION_SELECTOR,
                 (self.__address, node_url, node_stake, unstaking_address),
                 _HUB_REGISTER_SERVICE_NODE_GAS, None, nonce)
@@ -212,7 +214,7 @@ class EthereumClient(BlockchainClient):
             nonce = node_connections.eth.get_transaction_count(
                 self.__address).get()
             request = BlockchainClient._TransactionSubmissionStartRequest(
-                ContractAbi.PANTOS_HUB,
+                VERSIONED_CONTRACTS_ABI[ContractAbi.PANTOS_HUB],
                 _HUB_UNREGISTER_SERVICE_NODE_FUNCTION_SELECTOR,
                 (self.__address, ), _HUB_UNREGISTER_SERVICE_NODE_GAS, None,
                 nonce)
@@ -234,7 +236,7 @@ class EthereumClient(BlockchainClient):
             nonce = node_connections.eth.get_transaction_count(
                 self.__address).get()
             request = BlockchainClient._TransactionSubmissionStartRequest(
-                ContractAbi.PANTOS_HUB,
+                VERSIONED_CONTRACTS_ABI[ContractAbi.PANTOS_HUB],
                 _HUB_UPDATE_SERVICE_NODE_URL_FUNCTION_SELECTOR, (node_url, ),
                 _HUB_UPDATE_SERVICE_NODE_URL_GAS, None, nonce)
             internal_transaction_id = self._start_transaction_submission(
@@ -267,7 +269,7 @@ class EthereumClient(BlockchainClient):
             nonce = node_connections.eth.get_transaction_count(
                 self.__address).get()
             request = BlockchainClient._TransactionSubmissionStartRequest(
-                ContractAbi.PANTOS_HUB,
+                VERSIONED_CONTRACTS_ABI[ContractAbi.PANTOS_HUB],
                 _HUB_CANCEL_SERVICE_NODE_UNREGISTRATION_FUNCTION_SELECTOR,
                 (self.__address, ),
                 _HUB_CANCEL_SERVICE_NODE_UNREGISTRATION_GAS, None, nonce)
@@ -300,7 +302,7 @@ class EthereumClient(BlockchainClient):
             -> NodeConnections.Wrapper[web3.contract.Contract]:
         return self._get_utilities().create_contract(
             BlockchainAddress(self._get_config()['hub']),
-            ContractAbi.PANTOS_HUB, node_connections)
+            VERSIONED_CONTRACTS_ABI[ContractAbi.PANTOS_HUB], node_connections)
 
     def _get_utilities(self) -> EthereumUtilities:
         # Docstring inherited
@@ -362,7 +364,7 @@ class EthereumClient(BlockchainClient):
                                               self.get_blockchain(), nonce)
         nonce = database_access.read_transfer_nonce(internal_transfer_id)
         request = BlockchainClient._TransactionSubmissionStartRequest(
-            ContractAbi.PANTOS_HUB, function_selector,
+            VERSIONED_CONTRACTS_ABI[ContractAbi.PANTOS_HUB], function_selector,
             (on_chain_request, signature), gas, None, nonce)
         try:
             return self._start_transaction_submission(request,

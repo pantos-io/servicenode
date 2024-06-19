@@ -125,6 +125,7 @@ dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION)-py3-none-any.whl: pantos
 debian-build-deps:
 	mk-build-deps --install --tool "apt-get --no-install-recommends -y" debian/control --remove
 
+.PHONY: debian-full
 debian-full:
 	mkdir -p dist
 	sed 's/VERSION_PLACEHOLDER/$(PANTOS_SERVICE_NODE_VERSION)/' configurator/DEBIAN/control.template > configurator/DEBIAN/control
@@ -145,6 +146,19 @@ debian-all: debian debian-full
 remote-install: debian-all
 	$(eval deb_file := pantos-service-node*_$(PANTOS_SERVICE_NODE_VERSION)_*.deb)
 	scp dist/$(deb_file) $(PANTOS_SERVICE_NODE_SSH_HOST):
+ifdef DEV_PANTOS_COMMON
+	scp -r $(DEV_PANTOS_COMMON) $(PANTOS_SERVICE_NODE_SSH_HOST):
+	ssh -t $(PANTOS_SERVICE_NODE_SSH_HOST) "\
+		sudo systemctl stop pantos-service-node-celery;\
+		sudo systemctl stop pantos-service-node-server;\
+		sudo apt install -y ./$(deb_file);\
+		sudo rm -rf /opt/pantos/pantos-service-node/lib/python3.*/site-packages/pantos/common/;\
+		sudo cp -r common/ /opt/pantos/pantos-service-node/lib/python3.*/site-packages/pantos/;\
+		sudo systemctl start pantos-service-node-server;\
+		sudo systemctl start pantos-service-node-celery;\
+		rm -rf common;\
+		rm $(deb_file)"
+else
 	ssh -t $(PANTOS_SERVICE_NODE_SSH_HOST) "\
 		sudo systemctl stop pantos-service-node-celery;\
 		sudo systemctl stop pantos-service-node-server;\
@@ -152,6 +166,20 @@ remote-install: debian-all
 		sudo systemctl start pantos-service-node-server;\
 		sudo systemctl start pantos-service-node-celery;\
 		rm $(deb_file)"
+endif
+
+.PHONY: local-common
+local-common:
+ifndef DEV_PANTOS_COMMON
+	$(error Please define DEV_PANTOS_COMMON variable)
+endif
+	$(eval CURRENT_COMMON := $(shell echo .venv/lib/python3.*/site-packages/pantos/common))
+	@if [ -d "$(CURRENT_COMMON)" ]; then \
+		rm -rf "$(CURRENT_COMMON)"; \
+		ln -s "$(DEV_PANTOS_COMMON)" "$(CURRENT_COMMON)"; \
+	else \
+		echo "Directory $(CURRENT_COMMON) does not exist"; \
+	fi
 
 .PHONY: install
 install: dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION)-py3-none-any.whl
