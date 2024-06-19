@@ -14,4 +14,10 @@ if [ -f "$PANTOS_ENV_FILE" ]; then
     set +a
 fi
 
+# Install mod_wsgi
+if ! pip list | grep -q mod_wsgi; then
+    echo "Installing mod_wsgi"
+    pip install mod_wsgi
+fi
+
 exec "$APP_DIR"/bin/start-web.py
