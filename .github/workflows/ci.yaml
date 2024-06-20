@@ -98,12 +98,12 @@ jobs:
 
       - name: Preconfigure package
         run: |
-          echo 'pantos-service-node-configurator pantos/service-node/create_signer_key boolean true' | sudo debconf-set-selections;
-          echo 'pantos-service-node-configurator pantos/service-node/signer_key_password string 1234' | sudo debconf-set-selections;
-          echo 'pantos-service-node-configurator pantos/common/configure_postgresql boolean true' | sudo debconf-set-selections;
-          echo 'pantos-service-node-configurator pantos/common/configure_rabbitmq boolean true' | sudo debconf-set-selections;
-          echo 'pantos-service-node-configurator pantos/common/reset_users boolean true' | sudo debconf-set-selections;
-          echo 'pantos-service-node-configurator pantos/common/start_services boolean false' | sudo debconf-set-selections;
+          echo 'pantos-service-node-full pantos/service-node/create_signer_key boolean true' | sudo debconf-set-selections;
+          echo 'pantos-service-node-full pantos/service-node/signer_key_password string 1234' | sudo debconf-set-selections;
+          echo 'pantos-service-node-full pantos/common/configure_postgresql boolean true' | sudo debconf-set-selections;
+          echo 'pantos-service-node-full pantos/common/configure_rabbitmq boolean true' | sudo debconf-set-selections;
+          echo 'pantos-service-node-full pantos/common/reset_users boolean true' | sudo debconf-set-selections;
+          echo 'pantos-service-node-full pantos/common/start_services boolean false' | sudo debconf-set-selections;
 
       - name: Install Debian package
         run: |
@@ -117,3 +117,10 @@ jobs:
           sudo systemctl status pantos-service-node-celery || true
           sudo journalctl -u pantos-service-node-server || true
           sudo journalctl -u pantos-service-node-celery || true
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: install-logs-${{ matrix.os }}
+          path: /var/log/pantos

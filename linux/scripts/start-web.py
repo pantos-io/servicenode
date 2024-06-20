@@ -3,6 +3,7 @@
 import re
 import subprocess
 import sys
+from importlib import resources
 
 from pantos.servicenode.configuration import config
 from pantos.servicenode.configuration import load_config
@@ -13,7 +14,7 @@ print('Configuration loaded')
 
 USER_NAME = 'pantos-service-node'
 APP_DIRECTORY = '/opt/pantos/pantos-service-node'
-WSGI_FILE = f'{APP_DIRECTORY}/lib/python3.10/site-packages/pantos/servicenode/wsgi.py'
+WSGI_FILE = str(resources.path('pantos.servicenode', 'wsgi.py'))
 NON_ROOT_DEFAULT_HTTPS_PORT = 8443
 NON_ROOT_DEFAULT_HTTP_PORT = 8080
 application_config = config['application']
@@ -47,7 +48,8 @@ if port < 1024:
         '{ type nat hook prerouting priority -100 \\; } '
         f'&& nft add rule ip nat prerouting tcp dport {port} '
         f'redirect to :{default_port}')  # noqa E203
-    print(f'Port {port} is a privileged port, redirecting to {default_port}...')
+    print(
+        f'Port {port} is a privileged port, redirecting to {default_port}...')
     port = default_port
     try:
         completed_process = subprocess.run(port_redirect_command, text=True,

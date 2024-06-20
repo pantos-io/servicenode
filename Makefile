@@ -123,12 +123,12 @@ dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION)-py3-none-any.whl: pantos
 
 .PHONY: debian-build-deps
 debian-build-deps:
-	mk-build-deps --install debian/control --remove
+	mk-build-deps --install --tool "apt-get --no-install-recommends -y" debian/control --remove
 
-debian-configurator:
+debian-full:
 	mkdir -p dist
 	sed 's/VERSION_PLACEHOLDER/$(PANTOS_SERVICE_NODE_VERSION)/' configurator/DEBIAN/control.template > configurator/DEBIAN/control
-	dpkg-deb --build configurator dist/pantos-service-node-configurator_$(PANTOS_SERVICE_NODE_VERSION)_all.deb
+	dpkg-deb --build configurator dist/pantos-service-node-full_$(PANTOS_SERVICE_NODE_VERSION)_all.deb
 	rm configurator/DEBIAN/control
 
 .PHONY: debian
@@ -138,7 +138,7 @@ debian:
 	mkdir -p dist
 	mv ../$(debian_package) dist/
 
-debian-all: debian debian-configurator
+debian-all: debian debian-full
 	
 
 .PHONY: remote-install

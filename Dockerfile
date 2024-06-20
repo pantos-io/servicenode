@@ -1,9 +1,9 @@
 FROM python:3.12-bookworm AS dev
 
 RUN apt-get update && \
-    apt-get install build-essential debhelper devscripts equivs dh-virtualenv python3-venv dh-sysuser dh-exec -y && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    apt-get install build-essential debhelper devscripts \
+    equivs dh-virtualenv python3-venv dh-sysuser dh-exec \
+    -y --no-install-recommends
 
 ENV PATH="/root/miniconda3/bin:${PATH}"
 RUN ARCH=$(uname -m) && \
@@ -34,7 +34,8 @@ FROM bitnami/minideb:bookworm AS prod
 
 RUN apt-get update
 
-COPY --from=dev /app/dist/*.deb .
+# Do not copy the configurator package
+COPY --from=dev /app/dist/pantos-service-node_*.deb .
 
 RUN if [ -f ./*-signed.deb ]; then \
         apt-get install -y --no-install-recommends ./*-signed.deb; \

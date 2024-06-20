@@ -1,10 +1,10 @@
-Source: pantos-service-node-configurator
+Source: pantos-service-node-full
 Section: contrib/python
 Priority: extra
 Maintainer: Pantos GmbH <contact@pantos.io>
 Standards-Version: 3.9.5
 Homepage: https://github.com/pantos-io/servicenode
-Package: pantos-service-node-configurator
+Package: pantos-service-node-full
 Version: VERSION_PLACEHOLDER
 Architecture: all
 Pre-Depends: debhelper (>=10), dpkg (>= 1.16.1)
