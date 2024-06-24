@@ -1,0 +1,6 @@
+Template: pantos/common/finish_note
+Type: note
+Description: |
+  The configuration of the services has been completed.
+  Please check the gitbook documentation for further information on how to use the services.
+  Or install the configurator package to configure the services.

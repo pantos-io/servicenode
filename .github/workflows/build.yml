@@ -7,15 +7,15 @@ on:
         required: false
         type: string
         default: "1.0.0"
-      revision:
-        description: 'Revision to build'
-        required: false
-        type: string
-        default: ${{ github.run_attempt }}
       environment:
         description: 'Environment where the secrets are stored'
         required: false
         type: string
+      architecture:
+        description: 'Architecture to build'
+        required: false
+        type: string
+        default: "amd64"
     secrets:
       GPG_PRIVATE_KEY:
         description: 'GPG private key'
@@ -27,8 +27,13 @@ on:
 jobs:
   build-deb:
     name: Build and attach .deb and .whl packages
-    runs-on: ubuntu-latest
+    # TODO: Change ubuntu-20.04 for the ARM public runner
+    runs-on: ${{ inputs.architecture == 'amd64' && 'ubuntu-latest' || 'ubuntu-20.04' }}
     environment: ${{ inputs.environment }}
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10"]
     steps:
       - uses: step-security/harden-runner@v2
         with:
@@ -38,6 +43,9 @@ jobs:
 
       - name: Set up Poetry
         uses: pantos-io/ci-workflows/.github/actions/install-poetry@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+          runner-os: ${{ inputs.architecture == 'amd64' && 'ubuntu-latest' || 'ubuntu-20.04' }}
 
       - name: Check secrets
         id: is-signed-build
@@ -55,19 +63,46 @@ jobs:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
 
+      - name: Install conda dependencies
+        run: |
+          ARCH=$(uname -m)
+          if [ "$ARCH" = "x86_64" ]; then
+              MINICONDA_URL="https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh";
+          elif [ "$ARCH" = "aarch64" ]; then
+              MINICONDA_URL="https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-aarch64.sh";
+          else
+              echo "Unsupported architecture: $ARCH";
+              exit 1;
+          fi
+          wget "$MINICONDA_URL" -O miniconda.sh
+          bash miniconda.sh -b
+          rm -f miniconda.sh
+        shell: sh
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install build-essential debhelper devscripts equivs dh-virtualenv python3-venv dh-sysuser dh-exec -y
+          sudo make debian-build-deps
+
       - name: Install signing dependencies
         if: steps.is-signed-build.outputs.HAS_SECRETS == 'true'
         run: |
           sudo apt-get update
           sudo apt-get install -y debsigs
 
+      - name: Ensure version
+        if: steps.is-signed-build.outputs.HAS_SECRETS == 'true'
+        run: |
+          make check-version VERSION=${{ inputs.version }}
+
       - name: Build package
         run: |
-          make debian
+          make debian debian-full
           make wheel
         env:
           PANTOS_SERVICE_NODE_VERSION: ${{ inputs.version }}
-          PANTOS_SERVICE_NODE_REVISION: ${{ inputs.revision }}
+        shell: sh
 
       - name: Sign package
         if: steps.is-signed-build.outputs.HAS_SECRETS == 'true'
@@ -77,5 +112,5 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: build
+          name: build-${{ inputs.architecture }}
           path: dist/*

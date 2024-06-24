@@ -1,0 +1,21 @@
+[Unit]
+Description=Service Node celery worker reference implementation for the Pantos multi-blockchain system
+After=network.target postgresql.service rabbitmq-server.service
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+KillMode=mixed
+TimeoutStopSec=600
+User=pantos-service-node
+Group=daemon
+WorkingDirectory=/opt/pantos/pantos-service-node
+EnvironmentFile=/etc/default/pantos-service-node
+ExecStart=/usr/bin/pantos-service-node-celery
+StandardOutput=append:/var/log/pantos/service-node/worker-service.log
+StandardError=append:/var/log/pantos/service-node/worker-service.log
+
+[Install]
+WantedBy=multi-user.target

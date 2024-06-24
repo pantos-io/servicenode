@@ -1,0 +1,23 @@
+#! /bin/sh
+#
+# Helper to launch the celery worker
+
+APP_NAME=pantos-service-node
+APP_DIR=/opt/pantos/"$APP_NAME"
+. /etc/default/"$APP_NAME"
+. "$APP_DIR"/bin/activate
+
+if [ -f "$PANTOS_ENV_FILE" ]; then
+    echo "Sourcing $PANTOS_ENV_FILE"
+    set -a
+    . $PANTOS_ENV_FILE
+    set +a
+fi
+
+# Install mod_wsgi
+if ! pip list | grep -q mod_wsgi; then
+    echo "Installing mod_wsgi"
+    pip install mod_wsgi
+fi
+
+exec "$APP_DIR"/bin/start-web.py

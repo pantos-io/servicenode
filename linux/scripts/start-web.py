@@ -3,14 +3,18 @@
 import re
 import subprocess
 import sys
+from importlib import resources
 
 from pantos.servicenode.configuration import config
 from pantos.servicenode.configuration import load_config
 
+print('Loading the configuration...')
 load_config()
+print('Configuration loaded')
 
-WSGI_FILE = '/opt/pantos/service-node/wsgi.py'
-MOD_WSGI_LOGS = '/var/log/pantos/service-node-mod_wsgi.log'
+USER_NAME = 'pantos-service-node'
+APP_DIRECTORY = '/opt/pantos/pantos-service-node'
+WSGI_FILE = str(resources.path('pantos.servicenode', 'wsgi.py'))
 NON_ROOT_DEFAULT_HTTPS_PORT = 8443
 NON_ROOT_DEFAULT_HTTP_PORT = 8080
 application_config = config['application']
@@ -19,15 +23,20 @@ port = application_config['port']
 ssl_certificate = application_config.get('ssl_certificate')
 if ssl_certificate:
     ssl_private_key = application_config['ssl_private_key']
+    print('SSL certificate found')
 
 # apache2 should stop if already running
 completed_process = subprocess.run('systemctl list-units --type=service',
                                    check=True, text=True, shell=True,
                                    capture_output=True)  # nosec B602
 if 'apache2' in completed_process.stdout:
+    print('Stopping apache2...')
     subprocess.run('systemctl stop apache2', check=True, text=True, shell=True,
                    capture_output=True)  # nosec B602
+else:
+    print('apache2 is not running')
 
+print(f'Starting the server on {host}:{port}...')
 # the server should not run on a priviledged port (<1024)
 if port < 1024:
     if ssl_certificate:
@@ -39,11 +48,14 @@ if port < 1024:
         '{ type nat hook prerouting priority -100 \\; } '
         f'&& nft add rule ip nat prerouting tcp dport {port} '
         f'redirect to :{default_port}')  # noqa E203
+    print(
+        f'Port {port} is a privileged port, redirecting to {default_port}...')
     port = default_port
     try:
         completed_process = subprocess.run(port_redirect_command, text=True,
                                            shell=True, check=True,
                                            capture_output=True)  # nosec B602
+        print(completed_process.stdout)
     except subprocess.CalledProcessError as error:
         if 'command not found' in error.stderr:
             print(
@@ -65,7 +77,9 @@ else:
     port_command = f'--port {port}'
 
 server_run_command = (
+    f'runuser -u {USER_NAME} -- bash -c "source {APP_DIRECTORY}/bin/activate; '
     f'nohup mod_wsgi-express start-server --host {host} {port_command} '
-    f'{WSGI_FILE} >> {MOD_WSGI_LOGS} 2>&1 &')
+    f'{WSGI_FILE} --log-to-terminal &"')
+print(f'Starting the server with the command: {server_run_command}...')
 subprocess.run(server_run_command, check=True, text=True,
                shell=True)  # nosec B602

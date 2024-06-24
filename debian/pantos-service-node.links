@@ -1,0 +1,2 @@
+opt/pantos/pantos-service-node/bin/pantos-service-node-server usr/bin/pantos-service-node-server
+opt/pantos/pantos-service-node/bin/pantos-service-node-celery usr/bin/pantos-service-node-celery

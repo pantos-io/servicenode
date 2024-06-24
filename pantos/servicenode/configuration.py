@@ -40,8 +40,7 @@ _VALIDATION_SCHEMA_BLOCKCHAIN = {
         },
         'private_key_password': {
             'type': 'string',
-            'required': True,
-            'empty': False
+            'required': True
         },
         'provider': {
             'type': 'string',

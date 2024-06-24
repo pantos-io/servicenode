@@ -60,8 +60,8 @@ jobs:
           python3 -m venv .venv
           source .venv/bin/activate
           pip3 install pycryptodome==3.18.0
-          chmod +x scripts/generate-signer-key.py
-          cat password.key | ./scripts/generate-signer-key.py
+          chmod +x ./.github/workflows/scripts/generate-signer-key.py
+          cat password.key | ./.github/workflows/scripts/generate-signer-key.py
           mv signer-key*.pem signer_key.pem
 
       # - name: Test image
@@ -74,5 +74,53 @@ jobs:
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
   build:
-    needs: [shared]
     uses: ./.github/workflows/build.yml
+    with:
+      architecture: amd64
+
+  install:
+    needs: [build]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-20.04
+          - ubuntu-22.04
+          - ubuntu-24.04
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-amd64
+          path: build
+
+      - name: Preconfigure package
+        run: |
+          echo 'pantos-service-node-full pantos/service-node/create_signer_key boolean true' | sudo debconf-set-selections;
+          echo 'pantos-service-node-full pantos/service-node/signer_key_password string 1234' | sudo debconf-set-selections;
+          echo 'pantos-service-node-full pantos/common/configure_postgresql boolean true' | sudo debconf-set-selections;
+          echo 'pantos-service-node-full pantos/common/configure_rabbitmq boolean true' | sudo debconf-set-selections;
+          echo 'pantos-service-node-full pantos/common/reset_users boolean true' | sudo debconf-set-selections;
+          echo 'pantos-service-node-full pantos/common/start_services boolean false' | sudo debconf-set-selections;
+
+      - name: Install Debian package
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ./build/*.deb
+
+      # Check service is running
+      - name: Check service is running
+        run: |
+          sudo systemctl status pantos-service-node-server || true
+          sudo systemctl status pantos-service-node-celery || true
+          sudo journalctl -u pantos-service-node-server || true
+          sudo journalctl -u pantos-service-node-celery || true
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: install-logs-${{ matrix.os }}
+          path: /var/log/pantos

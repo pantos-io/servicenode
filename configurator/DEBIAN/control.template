@@ -1,0 +1,12 @@
+Source: pantos-service-node-full
+Section: contrib/python
+Priority: extra
+Maintainer: Pantos GmbH <contact@pantos.io>
+Standards-Version: 3.9.5
+Homepage: https://github.com/pantos-io/servicenode
+Package: pantos-service-node-full
+Version: VERSION_PLACEHOLDER
+Architecture: all
+Pre-Depends: debhelper (>=10), dpkg (>= 1.16.1)
+Depends: pantos-service-node, postgresql, rabbitmq-server, openssh-client
+Description: Configurator package for the Service Node reference implementation for the Pantos multi-blockchain system.
