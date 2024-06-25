@@ -209,6 +209,10 @@ _wait_for_postgresql() {
 
 SERVICES="pantos-service-node-celery pantos-service-node-server"
 
+_stop_services() {
+  systemctl stop $SERVICES
+}
+
 _start_services() {
   db_get pantos/common/start_services
   if [ $RET != "false" ] && _check_systemd_active; then
@@ -253,6 +257,7 @@ chown -RPh "$RUN_AS":daemon /var/log/pantos/service-node/. /opt/pantos/"$APP_ID"
 
 # Run upgrade / start service AFTER permissions etc. are fixed
 if [ "$1" = "configure" ]; then
+    _stop_services "$2"
     _install_env "$2"
     _create_signer_key "$2"
     _wait_for_postgresql "$2"

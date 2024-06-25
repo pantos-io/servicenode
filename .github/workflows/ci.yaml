@@ -41,7 +41,12 @@ jobs:
             repo.anaconda.com:443
         
       - uses: actions/checkout@v4
-      
+
+      - uses: actions/checkout@v4
+        with:
+          repository: pantos-io/ethereum-contracts
+          sparse-checkout: docker-compose.yml
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@68827325e0b33c7199eb31dd4e31fbe9023e06e3 # v3.0.0
 
@@ -57,6 +62,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-v1.0-service-node-
 
+      - name: Run Docker
+        run: |
+          docker compose -f ethereum-contracts/docker-compose.yml up -d --no-build --wait
+
       - name: Build and load
         run: |
           docker buildx bake \
@@ -67,23 +76,14 @@ jobs:
             -f docker-compose.yml \
             --load
 
-      - name: Create local keystore
-        run: |
-          echo "1234" >> password.keystore
-          mkdir keystore_folder
-          docker run --rm -v=.:/local ethereum/client-go account new --keystore /local/keystore_folder --password /local/password.keystore
-          sudo chmod -R 777 keystore_folder
-          mv keystore_folder/UTC* ./keystore
-
       - name: Create local signer_key
         run: |
-          echo "1234" >> password.key
-          python3 -m venv .venv
-          source .venv/bin/activate
-          pip3 install pycryptodome==3.18.0
-          chmod +x ./.github/workflows/scripts/generate-signer-key.py
-          cat password.key | ./.github/workflows/scripts/generate-signer-key.py
-          mv signer-key*.pem signer_key.pem
+          make signer-key
+
+      - name: Test image
+        run: |
+          docker compose up -d --no-build --wait
+          docker compose down
 
       - name: Move cache
         run: |
@@ -107,6 +107,23 @@ jobs:
       fail-fast: false
     steps:
       - uses: actions/checkout@v4
+
+      - uses: actions/checkout@v4
+        with:
+          repository: pantos-io/ethereum-contracts
+          sparse-checkout: docker-compose.yml
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        id: buildx
+
+      - name: Run Docker
+        run: |
+          docker compose -f ethereum-contracts/docker-compose.yml up -d --no-build --wait
+
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:

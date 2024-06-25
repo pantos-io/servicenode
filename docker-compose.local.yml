@@ -1,0 +1,81 @@
+name: service-node
+
+networks:
+  pantos-service-node:
+    name: pantos-service-node
+    attachable: true
+  pantos-ethereum:
+    name: pantos-ethereum
+    external: true
+
+services:
+  app:
+    networks:
+      pantos-service-node:
+      pantos-ethereum:
+    entrypoint: sh -c ". /etc/pantos/eth-data/ETHEREUM.env && . /etc/pantos/bnb-data/BNB.env && exec /usr/bin/pantos-service-node-server"
+    env_file:
+      - service-node-config.docker.env
+    environment:
+      APP_HOST: 0.0.0.0
+      APP_PORT: 8080
+      APP_URL: http://app:8080
+      APP_LOG_FILE_ENABLED: false
+      APP_LOG_FORMAT: human_readable
+      DB_URL: postgresql://pantos-service-node:pantos@db/pantos-service-node
+      CELERY_BROKER: amqp://pantos-service-node:pantos@broker:5672/pantos-service-node
+      CELERY_BACKEND: db+postgresql://pantos-service-node:pantos@db/pantos-service-node-celery
+      BNB_PRIVATE_KEY: /etc/pantos/bnb-data/keystore
+      ETH_PRIVATE_KEY: /etc/pantos/eth-data/keystore
+    volumes:
+      - type: volume
+        source: bnb-data
+        target: /etc/pantos/bnb-data
+        read_only: true
+      - type: volume
+        source: eth-data
+        target: /etc/pantos/eth-data
+        read_only: true
+      - type: bind
+        source: ./signer_key.pem
+        target: /etc/pantos/service-node-signer.pem
+        read_only: true
+  worker:
+    networks:
+      pantos-service-node:
+      pantos-ethereum:
+    entrypoint: sh -c ". /etc/pantos/eth-data/ETHEREUM.env && . /etc/pantos/bnb-data/BNB.env && exec /usr/bin/pantos-service-node-celery"
+    env_file:
+      - service-node-config.docker.env
+    environment:
+      APP_HOST: 0.0.0.0
+      APP_PORT: 8080
+      APP_URL: http://app:8080
+      CELERY_LOG_FORMAT: human_readable
+      CELERY_LOG_FILE_ENABLED: false
+      DB_URL: postgresql://pantos-service-node:pantos@db/pantos-service-node
+      CELERY_BROKER: amqp://pantos-service-node:pantos@broker:5672/pantos-service-node
+      CELERY_BACKEND: db+postgresql://pantos-service-node:pantos@db/pantos-service-node-celery
+      BNB_PRIVATE_KEY: /etc/pantos/bnb-data/keystore
+      ETH_PRIVATE_KEY: /etc/pantos/eth-data/keystore
+    volumes:
+      - type: volume
+        source: bnb-data
+        target: /etc/pantos/bnb-data
+        read_only: true
+      - type: volume
+        source: eth-data
+        target: /etc/pantos/eth-data
+        read_only: true
+      - type: bind
+        source: ./signer_key.pem
+        target: /etc/pantos/service-node-signer.pem
+        read_only: true
+
+volumes:
+  bnb-data:
+    name: bnb-data
+    external: true
+  eth-data:
+    name: eth-data
+    external: true

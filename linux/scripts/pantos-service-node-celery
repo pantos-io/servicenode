@@ -4,14 +4,25 @@
 
 APP_NAME=pantos-service-node
 APP_DIR=/opt/pantos/"$APP_NAME"
-. /etc/default/"$APP_NAME"
-. "$APP_DIR"/bin/activate
+export PYTHONHOME=$APP_DIR
+export PATH=$APP_DIR/bin:$PATH
 
+source_if_not_set() {
+    [ ! -f "$1" ] && return
+    echo "Sourcing $1"
+    while IFS= read -r line || [ -n "$line" ]; do
+        [ -z "$line" ] || [ "${line#\#}" != "$line" ] && continue
+        key="${line%%=*}"
+        eval currentValue=\$$key
+        [ -n "$currentValue" ] && continue
+        export "$line"
+    done < "$1"
+}
+
+source_if_not_set /etc/default/"$APP_NAME"
 if [ -f "$PANTOS_ENV_FILE" ]; then
-    echo "Sourcing $PANTOS_ENV_FILE"
-    set -a
-    . $PANTOS_ENV_FILE
-    set +a
+    source_if_not_set "$PANTOS_ENV_FILE"
 fi
 
-exec "$APP_DIR"/bin/celery -A pantos.servicenode worker -l INFO -n pantos.servicenode -Q transfers,bids
+cd "$APP_DIR"
+exec ./bin/python -m celery -A pantos.servicenode worker --uid $(id -u "$APP_NAME") --gid $(id -g "$APP_NAME") -l INFO -n pantos.servicenode -Q transfers,bids
