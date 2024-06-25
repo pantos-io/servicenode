@@ -13,5 +13,6 @@ local/
 postgresql_data
 rabbitmq_data
 Dockerfile
-docker-compose.yml
+docker-compose*
 .dockerignore
+signer_key*

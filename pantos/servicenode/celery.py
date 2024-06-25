@@ -2,6 +2,7 @@
 
 """
 import logging
+import os
 import pathlib
 import sys
 
@@ -11,7 +12,7 @@ from pantos.common.logging import LogFile
 from pantos.common.logging import LogFormat
 from pantos.common.logging import initialize_logger
 
-from pantos.servicenode.application import initialize_application
+from pantos.servicenode.application import initialize_application, initialize_base
 from pantos.servicenode.configuration import config
 from pantos.servicenode.plugins import initialize_plugins
 
@@ -23,12 +24,13 @@ _logger = logging.getLogger(__name__)
 
 
 def is_celery_worker_process() -> bool:
-    return (len(sys.argv) > 0 and sys.argv[0].endswith('celery')
-            and 'worker' in sys.argv)
+    return os.environ.get('CELERY_WORKER') is not None
 
 
 if is_celery_worker_process():
-    initialize_application(False)  # pragma: no cover
+    initialize_application(False)
+else:
+    initialize_base()
 
 celery_app = celery.Celery(
     'pantos.servicenode', broker=config['celery']['broker'],

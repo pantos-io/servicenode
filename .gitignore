@@ -19,3 +19,4 @@ debian/tmp
 debian/*debhelper*
 debian/files
 debian/*substvars
+signer_key*

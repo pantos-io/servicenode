@@ -4,12 +4,6 @@ networks:
   pantos-service-node:
     name: pantos-service-node
     attachable: true
-  pantos-validator-node:
-    name: pantos-validator-node
-    external: true
-  pantos-ethereum:
-    name: pantos-ethereum
-    external: true
 
 services:
   app:
@@ -84,7 +78,9 @@ services:
         target: /etc/pantos/service-node-signer.pem
         read_only: true
     depends_on:
-      app:
+      broker:
+        condition: service_healthy
+      db:
         condition: service_healthy
   db:
     image: postgres:latest
@@ -101,7 +97,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
     volumes:
-      - ./postgresql_data:/postgresql_data
+      - postgresql_data:/postgresql_data
       - type: bind
         source: ./db_init.sh
         target: /docker-entrypoint-initdb.d/init-user-db.sh
@@ -122,4 +118,8 @@ services:
       RABBITMQ_DEFAULT_PASS: pantos
       RABBITMQ_DEFAULT_VHOST: pantos-service-node
     volumes:
-      - ./rabbitmq_data:/rabbitmq_data
+      - rabbitmq_data:/rabbitmq_data
+
+volumes:
+  postgresql_data:
+  rabbitmq_data:

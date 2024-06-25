@@ -39,16 +39,12 @@ def create_application() -> flask.Flask:
     from pantos.servicenode.restapi import flask_app
     return flask_app
 
-
-def initialize_application(is_flask_app: bool = False) -> None:
-    """Initialize the service node application.
-
-    """
+def initialize_base():
     # Logging for loading the configuration
     logging.basicConfig(level=logging.INFO)
     # Load the configuration
     try:
-        load_config()
+        load_config(reload=False)
     except Exception:
         _logger.critical('unable to load the configuration', exc_info=True)
         sys.exit(1)
@@ -70,6 +66,12 @@ def initialize_application(is_flask_app: bool = False) -> None:
     except Exception:
         _logger.critical('unable to initialize logging', exc_info=True)
         sys.exit(1)
+
+def initialize_application(is_flask_app: bool = False) -> None:
+    """Initialize the service node application.
+
+    """
+    initialize_base()
     # Package-specific initialization
     try:
         initialize_database_package(is_flask_app)
