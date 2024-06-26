@@ -64,12 +64,24 @@ sudo apt install pantos-service-node
 
 We also distribute docker images in DockerHub with each release. These are made available under the pantosio project as either [**app**](https://hub.docker.com/r/pantosio/service-node-app) or [**worker**](https://hub.docker.com/r/pantosio/service-node-worker).
 
+##### Local Setup
+
 You can run a local setup with docker by doing the following steps:
 
+- Run `make docker` on the `ethereum-contracts` project
 - The variables `DB_URL`, `CELERY_BACKEND` and `CELERY_BROKER` are already defined in the `docker-compose.yml`
-- Modify the `.env` file to match your current setup
-- Ensure you have a `keystore` and `signer_key.pem` file located in the same directory
-- Run `docker compose up`
+- Modify the `docker.env` file to match your current setup
+- Ensure you have a `signer_key` file located in the same directory. If you don't, you can create one with `make signer-key`
+- Run `make docker`
+
+##### Production Setup
+
+The production setup is slightly different, for convenience we provide a separate `.env` file and `make` method.
+
+- The variables `DB_URL`, `CELERY_BACKEND` and `CELERY_BROKER` are already defined in the `docker-compose.yml`
+- Modify the `.env` file (**not** `docker.env`) to match your current setup
+- Ensure you have a `signer_key` file located in the same directory. If you don't, you can create one with `make signer-key`
+- Run `make docker-prod`
 
 Please note that you may need to add a load balancer or another webserver in front of this setup should you want to host this setup under a specific domain.
 
@@ -79,7 +91,7 @@ If you're hosting this on a cloud provider (AWS, GCP, Azure or alike), these are
 
 We distribute the package in test-pypi and pypi under the following projects: https://test.pypi.org/project/pantos-service-node/ and https://pypi.org/project/pantos-service-node/. You can install it to your project by using `pip install pantos-service-node`.
 
-### 2.2  Prerequisites
+### 2.2 Prerequisites
 
 Please make sure that your environment meets the following requirements:
 

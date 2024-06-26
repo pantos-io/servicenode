@@ -45,7 +45,7 @@ plugins:
     bids:
         class: pantos.servicenode.plugins.bids.ConfigFileBidPlugin
         arguments:
-            file_path: !ENV ${PLUGINS_BIDS_ARGUMENTS_FILE_PATH:/opt/pantos/pantos-service-node/bids.yml}
+            file_path: !ENV ${PLUGINS_BIDS_ARGUMENTS_FILE_PATH:/etc/pantos/service-node-bids.yml}
 
 signer:
     pem: !ENV ${SIGNER_PEM:/etc/pantos/service-node-signer.pem}

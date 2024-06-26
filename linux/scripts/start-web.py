@@ -26,17 +26,17 @@ if ssl_certificate:
     print('SSL certificate found')
 
 # apache2 should stop if already running
-completed_process = subprocess.run('systemctl list-units --type=service || true',
-                                   check=True, text=True, shell=True,
-                                   capture_output=True)  # nosec B602
+completed_process = subprocess.run(
+    'systemctl list-units --type=service || true', check=True, text=True,
+    shell=True, capture_output=True)  # nosec B602
 if 'apache2' in completed_process.stdout:
     print('Stopping apache2...')
     subprocess.run('systemctl stop apache2', check=True, text=True, shell=True,
                    capture_output=True)  # nosec B602
-    apache=True
+    apache = True
 else:
     print('apache2 is not installed, using gunicorn...')
-    apache=False
+    apache = False
 
 print(f'Starting the server on {host}:{port}...')
 # the server should not run on a priviledged port (<1024)
@@ -60,17 +60,17 @@ if port < 1024:
     except subprocess.CalledProcessError as error:
         if 'command not found' in error.stderr:
             print(
-                f'nft is not installed, unable to redirect the '
-                'port to {port}; please reinstall the package with the recommended '
-                'dependencies', file=sys.stderr)
+                'nft is not installed, unable to redirect the '
+                f'port to {port}; please reinstall the package '
+                'with the recommended dependencies', file=sys.stderr)
         else:
             print(f'unable to redirect the port to {port}', file=sys.stderr)
         sys.exit(1)
     port = default_port
 
 # build the port command (along with the ssl certificate info if requested)
-gunicorn_command = (
-    f"gunicorn --bind {host}:{port} --workers 1 'pantos.servicenode.application:create_application()'")
+gunicorn_command = (f"python -m gunicorn --bind {host}:{port} --workers 1 "
+                    "pantos.servicenode.application:create_application()")
 if ssl_certificate:
     server_name = re.sub(r'http.*?//|/.*', '', application_config['url'])
     port_command = (
@@ -82,16 +82,13 @@ if ssl_certificate:
 else:
     port_command = f'--port {port}'
 
+core_command = ['runuser', '-u', USER_NAME, '--']
 if apache:
-    server_run_command = (
-        f'runuser -u {USER_NAME} -- bash -c "source {APP_DIRECTORY}/bin/activate; '
-        f'nohup mod_wsgi-express start-server --host {host} {port_command} '
-        f'{WSGI_FILE} --log-to-terminal &"')
+    server_run_command = core_command + [
+        'mod_wsgi-express', 'start-server', '--host', host
+    ] + port_command.split() + [WSGI_FILE, '--log-to-terminal']
 else:
-    server_run_command = (
-        f'runuser -u {USER_NAME} -- '
-        f'{gunicorn_command}')
+    server_run_command = core_command + gunicorn_command.split()
 
 print(f'Starting the server with the command: {server_run_command}...')
-subprocess.run(server_run_command, check=True, text=True,
-               shell=True)  # nosec B602
+subprocess.run(server_run_command, check=True, text=True)
