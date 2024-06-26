@@ -576,12 +576,14 @@ def test_register_node_correct(mock_start_transaction_submission, node_stake,
     if node_stake > 0:
         approve_request = mock_start_transaction_submission.call_args_list[
             0].args[0]
-        assert approve_request.contract_abi is ContractAbi.PANTOS_TOKEN
+        assert approve_request.versioned_contract_abi.contract_abi is \
+            ContractAbi.PANTOS_TOKEN
         assert approve_request.function_args == (hub_contract_address,
                                                  node_stake)
     register_request = mock_start_transaction_submission.call_args_list[
         node_stake].args[0]
-    assert register_request.contract_abi is ContractAbi.PANTOS_HUB
+    assert register_request.versioned_contract_abi.contract_abi is \
+        ContractAbi.PANTOS_HUB
     assert register_request.function_args == (service_node_address,
                                               service_node_url, node_stake,
                                               service_node_address)
@@ -609,7 +611,8 @@ def test_unregister_node_correct(mock_start_transaction_submission,
 
     mock_start_transaction_submission.assert_called_once()
     unregister_request = mock_start_transaction_submission.call_args.args[0]
-    assert unregister_request.contract_abi is ContractAbi.PANTOS_HUB
+    assert unregister_request.versioned_contract_abi.contract_abi is \
+        ContractAbi.PANTOS_HUB
     assert unregister_request.function_args == (service_node_address, )
 
 
@@ -629,7 +632,8 @@ def test_update_node_url_correct(mock_start_transaction_submission,
 
     mock_start_transaction_submission.assert_called_once()
     update_request = mock_start_transaction_submission.call_args.args[0]
-    assert update_request.contract_abi is ContractAbi.PANTOS_HUB
+    assert update_request.versioned_contract_abi.contract_abi is \
+        ContractAbi.PANTOS_HUB
     assert update_request.function_args == (service_node_url, )
 
 
@@ -932,7 +936,8 @@ def test_cancel_unregistration_correct(mock_start_transaction_submission,
 
     mock_start_transaction_submission.assert_called_once()
     cancel_request = mock_start_transaction_submission.call_args.args[0]
-    assert cancel_request.contract_abi is ContractAbi.PANTOS_HUB
+    assert cancel_request.versioned_contract_abi.contract_abi is \
+        ContractAbi.PANTOS_HUB
     assert cancel_request.function_args == (service_node_address, )
 
 

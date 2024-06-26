@@ -7,10 +7,12 @@ import logging
 import typing
 import uuid
 
+import semantic_version  # type: ignore
 from pantos.common.blockchains.base import BlockchainHandler
 from pantos.common.blockchains.base import BlockchainUtilities
 from pantos.common.blockchains.base import BlockchainUtilitiesError
 from pantos.common.blockchains.base import NodeConnections
+from pantos.common.blockchains.base import VersionedContractAbi
 from pantos.common.blockchains.enums import Blockchain
 from pantos.common.blockchains.enums import ContractAbi
 from pantos.common.blockchains.factory import get_blockchain_utilities
@@ -24,6 +26,13 @@ from pantos.servicenode.configuration import get_blockchain_config
 from pantos.servicenode.exceptions import ServiceNodeError
 
 _logger = logging.getLogger(__name__)
+
+_CONTRACTS_VERSION = semantic_version.Version('1.0.0')
+
+VERSIONED_CONTRACTS_ABI = {
+    abi_contract: VersionedContractAbi(abi_contract, _CONTRACTS_VERSION)
+    for abi_contract in ContractAbi
+}
 
 
 class BlockchainClientError(ServiceNodeError):
@@ -565,9 +574,9 @@ class BlockchainClient(BlockchainHandler, ErrorCreator[BlockchainClientError]):
 
         Attributes
         ----------
-        contract_abi : ContractAbi
-            The ABI of the contract to invoke a function on in the
-            transaction.
+        versioned_contract_abi : VersionedContractAbi
+            The version and the ABI of the contract to invoke a function
+            on in the transaction.
         function_selector : str
             The selector of the contract function to be invoked in the
             transaction.
@@ -587,7 +596,7 @@ class BlockchainClient(BlockchainHandler, ErrorCreator[BlockchainClientError]):
             the default private key.
 
         """
-        contract_abi: ContractAbi
+        versioned_contract_abi: VersionedContractAbi
         function_selector: str
         function_args: ContractFunctionArgs
         gas: typing.Optional[int]
@@ -627,9 +636,10 @@ class BlockchainClient(BlockchainHandler, ErrorCreator[BlockchainClientError]):
             other reason.
 
         """
-        if request.contract_abi is ContractAbi.PANTOS_HUB:
+        contract_abi = request.versioned_contract_abi.contract_abi
+        if contract_abi is ContractAbi.PANTOS_HUB:
             contract_address = self._get_config()['hub']
-        elif request.contract_abi is ContractAbi.PANTOS_TOKEN:
+        elif contract_abi is ContractAbi.PANTOS_TOKEN:
             contract_address = self._get_config()['pan_token']
         else:
             raise NotImplementedError
@@ -641,9 +651,10 @@ class BlockchainClient(BlockchainHandler, ErrorCreator[BlockchainClientError]):
         blocks_until_resubmission = \
             self._get_config()['blocks_until_resubmission']
         request_ = BlockchainUtilities.TransactionSubmissionStartRequest(
-            contract_address, request.contract_abi, request.function_selector,
-            request.function_args, request.gas, min_adaptable_fee_per_gas,
-            max_total_fee_per_gas, request.amount, request.nonce,
-            adaptable_fee_increase_factor, blocks_until_resubmission)
+            contract_address, request.versioned_contract_abi,
+            request.function_selector, request.function_args, request.gas,
+            min_adaptable_fee_per_gas, max_total_fee_per_gas, request.amount,
+            request.nonce, adaptable_fee_increase_factor,
+            blocks_until_resubmission)
         return self._get_utilities().start_transaction_submission(
             request_, node_connections)
