@@ -6,6 +6,7 @@ APP_NAME=pantos-service-node
 APP_DIR=/opt/pantos/"$APP_NAME"
 export PYTHONHOME=$APP_DIR
 export PATH=$APP_DIR/bin:$PATH
+export PYTHONUNBUFFERED=1
 
 source_if_not_set() {
     [ ! -f "$1" ] && return
@@ -13,8 +14,10 @@ source_if_not_set() {
     while IFS= read -r line || [ -n "$line" ]; do
         [ -z "$line" ] || [ "${line#\#}" != "$line" ] && continue
         key="${line%%=*}"
+        echo "Checking $key"
         eval currentValue=\$$key
         [ -n "$currentValue" ] && continue
+        echo "Exporting $key"
         export "$line"
     done < "$1"
 }

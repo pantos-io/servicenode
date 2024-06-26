@@ -1,4 +1,4 @@
-PANTOS_SERVICE_NODE_VERSION := $(shell poetry version -s)
+PANTOS_SERVICE_NODE_VERSION := $(shell command -v poetry >/dev/null 2>&1 && poetry version -s || echo "0.0.0")
 PANTOS_SERVICE_NODE_SSH_HOST ?= bdev-service-node
 PYTHON_FILES_WITHOUT_TESTS := pantos/servicenode linux/scripts/start-web.py
 PYTHON_FILES := $(PYTHON_FILES_WITHOUT_TESTS) tests
@@ -217,3 +217,9 @@ clean:
 	rm -r -f build/
 	rm -r -f dist/
 	rm -r -f pantos_service_node.egg-info/
+
+docker:
+	docker compose -f docker-compose.yml -f docker-compose.override.yml up --force-recreate $(ARGS)
+
+docker-prod:
+	docker compose -f docker-compose.yml -f docker-compose.prod.yml up --force-recreate $(ARGS)

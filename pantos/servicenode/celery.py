@@ -2,7 +2,6 @@
 
 """
 import logging
-import os
 import pathlib
 import sys
 
@@ -12,7 +11,7 @@ from pantos.common.logging import LogFile
 from pantos.common.logging import LogFormat
 from pantos.common.logging import initialize_logger
 
-from pantos.servicenode.application import initialize_application, initialize_base
+from pantos.servicenode.application import initialize_application
 from pantos.servicenode.configuration import config
 from pantos.servicenode.plugins import initialize_plugins
 
@@ -23,14 +22,13 @@ _logger = logging.getLogger(__name__)
 """Logger for this module."""
 
 
-def is_celery_worker_process() -> bool:
-    return os.environ.get('CELERY_WORKER') is not None
+def is_main_module() -> bool:
+    return __name__ == '__main__' or any('celery' in arg for arg in sys.argv)
 
 
-if is_celery_worker_process():
+if is_main_module():
+    print('Initializing the Celery application...')
     initialize_application(False)
-else:
-    initialize_base()
 
 celery_app = celery.Celery(
     'pantos.servicenode', broker=config['celery']['broker'],
@@ -56,7 +54,7 @@ celery_app.conf.update(
         }
     }, task_track_started=True, worker_enable_remote_control=False)
 
-if is_celery_worker_process():  # pragma: no cover
+if is_main_module():  # pragma: no cover
     # purge the bids queue at startup
     with celery_app.connection_for_write() as connection:
         try:

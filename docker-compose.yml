@@ -18,26 +18,17 @@ services:
           - ${DOCKER_REGISTRY-pantosio}/service-node-app:${DOCKER_TAG-latest}
     networks:
       pantos-service-node:
-    env_file:
-      - service-node-config.env
+    env_file: []
     environment:
+      # Ignore the env file inside the docker container
+      PANTOS_ENV_FILE: ' '
       APP_HOST: 0.0.0.0
       APP_PORT: 8080
-      APP_URL: http://app:8080
       APP_LOG_FILE_ENABLED: false
       APP_LOG_FORMAT: human_readable
       DB_URL: postgresql://pantos-service-node:pantos@db/pantos-service-node
       CELERY_BROKER: amqp://pantos-service-node:pantos@broker:5672/pantos-service-node
       CELERY_BACKEND: db+postgresql://pantos-service-node:pantos@db/pantos-service-node-celery
-    volumes:
-      - type: bind
-        source: ./keystore
-        target: /etc/pantos/service-node.keystore
-        read_only: true
-      - type: bind
-        source: ./signer_key.pem
-        target: /etc/pantos/service-node-signer.pem
-        read_only: true
     ports:
       - 8080:8080
     depends_on:
@@ -57,26 +48,17 @@ services:
           - ${DOCKER_REGISTRY-pantosio}/service-node-worker:${DOCKER_TAG-latest}
     networks:
       pantos-service-node:
-    env_file:
-      - service-node-config.env
+    env_file: []
     environment:
+      # Ignore the env file inside the docker container
+      PANTOS_ENV_FILE: ' '
       APP_HOST: 0.0.0.0
       APP_PORT: 8080
-      APP_URL: http://app:8080
       CELERY_LOG_FORMAT: human_readable
       CELERY_LOG_FILE_ENABLED: false
       DB_URL: postgresql://pantos-service-node:pantos@db/pantos-service-node
       CELERY_BROKER: amqp://pantos-service-node:pantos@broker:5672/pantos-service-node
       CELERY_BACKEND: db+postgresql://pantos-service-node:pantos@db/pantos-service-node-celery
-    volumes:
-      - type: bind
-        source: ./keystore
-        target: /etc/pantos/service-node.keystore
-        read_only: true
-      - type: bind
-        source: ./signer_key.pem
-        target: /etc/pantos/service-node-signer.pem
-        read_only: true
     depends_on:
       broker:
         condition: service_healthy

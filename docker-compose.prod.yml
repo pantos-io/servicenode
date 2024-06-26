@@ -1,0 +1,27 @@
+name: service-node
+
+services:
+  app:
+    env_file:
+      - service-node-config.env
+    volumes:
+      - type: bind
+        source: ./keystore
+        target: /etc/pantos/service-node.keystore
+        read_only: true
+      - type: bind
+        source: ./signer_key.pem
+        target: /etc/pantos/service-node-signer.pem
+        read_only: true
+  worker:
+    env_file:
+      - service-node-config.env
+    volumes:
+      - type: bind
+        source: ./keystore
+        target: /etc/pantos/service-node.keystore
+        read_only: true
+      - type: bind
+        source: ./signer_key.pem
+        target: /etc/pantos/service-node-signer.pem
+        read_only: true
