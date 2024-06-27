@@ -9,7 +9,7 @@ on:
 jobs:
   shared:
     #uses: pantos-io/ci-workflows/.github/workflows/python-ci.yml@v1
-    uses: pantos-io/ci-workflows/.github/workflows/python-ci.yml@c308b64f802b40269d58c1f2492a91ddf38a049c
+    uses: juanmanuel-tirado/ci-workflows/.github/workflows/python-ci.yml@c308b64f802b40269d58c1f2492a91ddf38a049c
     secrets: inherit  
 
   docker-build:
