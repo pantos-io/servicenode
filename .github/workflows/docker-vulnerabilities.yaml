@@ -46,7 +46,7 @@ jobs:
               uses: actions/cache@v3
               with:
                 path: /tmp/.buildx-cache
-                key: ${{ runner.os }}-buildx-v1.0-service-node-${{ github.sha }}
+                key: ${{ runner.os }}-buildx-v1.0-service-node-${{ github.ref_name }}
                 restore-keys: |
                     ${{ runner.os }}-buildx-v1.0-service-node-
 
