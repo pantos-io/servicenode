@@ -1,6 +1,6 @@
 [Unit]
 Description=Service Node celery worker reference implementation for the Pantos multi-blockchain system
-After=network.target postgresql.service rabbitmq-server.service
+After=network.target postgresql.service rabbitmq-server.service pantos-service-node-server.service
 StartLimitIntervalSec=0
 
 [Service]

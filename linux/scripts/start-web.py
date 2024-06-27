@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
+"""Start the service node server."""
 
-import re
 import subprocess
 import sys
 from importlib import resources
@@ -20,23 +20,23 @@ NON_ROOT_DEFAULT_HTTP_PORT = 8080
 application_config = config['application']
 host = application_config['host']
 port = application_config['port']
+
 ssl_certificate = application_config.get('ssl_certificate')
 if ssl_certificate:
     ssl_private_key = application_config['ssl_private_key']
     print('SSL certificate found')
 
-# apache2 should stop if already running
-completed_process = subprocess.run(
-    'systemctl list-units --type=service || true', check=True, text=True,
-    shell=True, capture_output=True)  # nosec B602
-if 'apache2' in completed_process.stdout:
-    print('Stopping apache2...')
-    subprocess.run('systemctl stop apache2', check=True, text=True, shell=True,
-                   capture_output=True)  # nosec B602
-    apache = True
+# Check if we got the --status argument
+if '--status' in sys.argv:
+    print('Checking the status of the server...')
+    import requests
+    protocol = 'https' if ssl_certificate else 'http'
+    response = requests.get(f"{protocol}://{host}:{port}/health/live")
+    response.raise_for_status()
+    print('Server is running')
+    sys.exit(0)
 else:
-    print('apache2 is not installed, using gunicorn...')
-    apache = False
+    print('Starting the server...')
 
 print(f'Starting the server on {host}:{port}...')
 # the server should not run on a priviledged port (<1024)
@@ -54,41 +54,31 @@ if port < 1024:
         f'Port {port} is a privileged port, redirecting to {default_port}...')
     try:
         completed_process = subprocess.run(port_redirect_command, text=True,
-                                           shell=True, check=True,
-                                           capture_output=True)  # nosec B602
+                                           shell=True,
+                                           check=True)  # nosec B602
         print(completed_process.stdout)
     except subprocess.CalledProcessError as error:
         if 'command not found' in error.stderr:
             print(
                 'nft is not installed, unable to redirect the '
                 f'port to {port}; please reinstall the package '
-                'with the recommended dependencies', file=sys.stderr)
+                f'with the recommended dependencies. {error}', file=sys.stderr)
         else:
-            print(f'unable to redirect the port to {port}', file=sys.stderr)
-        sys.exit(1)
+            print(f'unable to redirect the port to {port}: {error}',
+                  file=sys.stderr)
     port = default_port
 
 # build the port command (along with the ssl certificate info if requested)
 gunicorn_command = (f"python -m gunicorn --bind {host}:{port} --workers 1 "
                     "pantos.servicenode.application:create_application()")
 if ssl_certificate:
-    server_name = re.sub(r'http.*?//|/.*', '', application_config['url'])
-    port_command = (
-        f'--https-port {port} --https-only --ssl-certificate-file '
-        f'{ssl_certificate} --ssl-certificate-key-file {ssl_private_key} '
-        f'--server-name {server_name}')
     gunicorn_command += (
         f" --certfile {ssl_certificate} --keyfile {ssl_private_key} ")
 else:
     port_command = f'--port {port}'
 
-core_command = ['runuser', '-u', USER_NAME, '--']
-if apache:
-    server_run_command = core_command + [
-        'mod_wsgi-express', 'start-server', '--host', host
-    ] + port_command.split() + [WSGI_FILE, '--log-to-terminal']
-else:
-    server_run_command = core_command + gunicorn_command.split()
+server_run_command = ['runuser', '-u', USER_NAME, '--'
+                      ] + gunicorn_command.split()
 
 print(f'Starting the server with the command: {server_run_command}...')
 subprocess.run(server_run_command, check=True, text=True)

@@ -267,7 +267,7 @@ def read_transfer_nonce(internal_transfer_id: int) -> int:
         Transfer.nonce).filter(Transfer.id == internal_transfer_id)
     with get_session() as session:
         result = session.execute(statement).fetchall()
-        return result[0][0]
+        return result[0][0]  # type: ignore
 
 
 def reset_transfer_nonce(internal_transfer_id: int) -> None:

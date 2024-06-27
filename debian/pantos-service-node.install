@@ -5,4 +5,3 @@ alembic.ini opt/pantos/pantos-service-node
 service-node-config.env etc/pantos
 linux/etc/default/* etc/default
 linux/scripts/* opt/pantos/pantos-service-node/bin
-linux/etc/systemd/*.service lib/systemd/system

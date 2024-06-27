@@ -44,6 +44,9 @@ services:
       APP_URL: http://app:8080
       BNB_PRIVATE_KEY: /etc/pantos/bnb-data/keystore
       ETHEREUM_PRIVATE_KEY: /etc/pantos/eth-data/keystore
+      PANTOS_STATUS_MONITOR: 1
+    ports:
+      - 5555:5555
     volumes:
       - type: volume
         source: bnb-data

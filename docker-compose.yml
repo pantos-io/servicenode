@@ -60,9 +60,8 @@ services:
       CELERY_BROKER: amqp://pantos-service-node:pantos@broker:5672/pantos-service-node
       CELERY_BACKEND: db+postgresql://pantos-service-node:pantos@db/pantos-service-node-celery
     depends_on:
-      broker:
-        condition: service_healthy
-      db:
+      # Wait for the app to setup the DB
+      app:
         condition: service_healthy
   db:
     image: postgres:latest

@@ -14,6 +14,7 @@ DH_VERBOSE=1
 
 export DH_VIRTUALENV_INSTALL_ROOT=/opt/pantos
 export POETRY_VIRTUALENVS_CREATE=false
+PYTHON_VERSION ?= 3.12
 SNAKE=debian/$(PACKAGE)$(DH_VIRTUALENV_INSTALL_ROOT)/$(PACKAGE)/bin/python3
 EXTRA_REQUIREMENTS=--upgrade-pip --preinstall "setuptools>=38" --preinstall "poetry" --preinstall "dh-poetry"
 DH_VENV_ARGS=--builtin-venv --python=$(SNAKE) $(EXTRA_REQUIREMENTS) \
@@ -25,8 +26,7 @@ SDIST_DIR=debian/$(PACKAGE)-$(VERSION)
 export POETRY_VIRTUALENVS_PATH=debian/$(PACKAGE)$(DH_VIRTUALENV_INSTALL_ROOT)/$(PACKAGE)
 
 
-.PHONY: clean build-arch override_dh_virtualenv override_dh_strip
-	# override_dh_shlibdeps
+.PHONY: clean build-arch override_dh_virtualenv override_dh_strip override_dh_installsystemd
 
 clean:
 	test ! -d dist || rm -rf dist
@@ -44,9 +44,13 @@ build-arch:
 
 override_dh_virtualenv:
 	. $$(conda info --base)/etc/profile.d/conda.sh && \
-	conda create -y --prefix $(POETRY_VIRTUALENVS_PATH) python=3.10 && \
+	conda create -y --prefix $(POETRY_VIRTUALENVS_PATH) python=$(PYTHON_VERSION) && \
 	conda activate $(POETRY_VIRTUALENVS_PATH) && \
 	dh_virtualenv $(DH_VENV_ARGS)
 
 override_dh_strip:
 	dh_strip --exclude=cffi --exclude=_imaging
+
+override_dh_installsystemd:
+	dh_installsystemd --no-start --name=pantos-service-node-server
+	dh_installsystemd --no-start --name=pantos-service-node-celery

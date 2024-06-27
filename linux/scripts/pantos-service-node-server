@@ -23,9 +23,21 @@ source_if_not_set() {
 }
 
 source_if_not_set /etc/default/"$APP_NAME"
-if [ -f "$PANTOS_ENV_FILE" ]; then
-    source_if_not_set "$PANTOS_ENV_FILE"
-fi
 
 cd "$APP_DIR"
-exec ./bin/python ./bin/start-web.py
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -h|--help)
+      echo "Usage: $0 [-h|--help] [-s|--status]"
+      echo "-h, --help   Show this help message"
+      echo "-s, --status Start the celery worker with status monitoring"
+      exit 0
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
+exec ./bin/python ./bin/start-web.py $@
