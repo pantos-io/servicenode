@@ -48,7 +48,7 @@ RUN if [ -f ./*-signed.deb ]; then \
 
 FROM prod AS servicenode
 
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 CMD [ "python", "-c", 'import requests; response = requests.get("http://localhost:8080/health/live"); response.raise_for_status();' ]
+HEALTHCHECK --interval=10s --timeout=30s --start-period=5s --retries=3 CMD [ "/usr/bin/pantos-service-node-server", "--status" ]
 
 ENV APP_PORT 8080
 
@@ -56,6 +56,6 @@ ENTRYPOINT /usr/bin/pantos-service-node-server
 
 FROM prod AS servicenode-celery-worker
 
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 CMD [ "bash", "-c", 'celery -A pantos.servicenode inspect ping -d celery@\$HOSTNAME' ]
+HEALTHCHECK --interval=10s --timeout=30s --start-period=10s --retries=3 CMD [ "/usr/bin/pantos-service-node-celery", "--status" ]
 
 ENTRYPOINT /usr/bin/pantos-service-node-celery

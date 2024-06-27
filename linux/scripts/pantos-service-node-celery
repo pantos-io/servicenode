@@ -21,9 +21,38 @@ source_if_not_set() {
 }
 
 source_if_not_set /etc/default/"$APP_NAME"
-if [ -f "$PANTOS_ENV_FILE" ]; then
-    source_if_not_set "$PANTOS_ENV_FILE"
-fi
 
 cd "$APP_DIR"
-exec ./bin/python -m celery -A pantos.servicenode worker --uid $(id -u "$APP_NAME") --gid $(id -g "$APP_NAME") -l INFO -n pantos.servicenode -Q transfers,bids
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -h|--help)
+      echo "Usage: $0 [-h|--help] [-s|--status]"
+      echo "-h, --help   Show this help message"
+      echo "-s, --status Start the celery worker with status monitoring"
+      exit 0
+      ;;
+    -s|--status)
+      echo "Querying the status of the celery worker"
+      exec ./bin/python -m celery -A pantos.servicenode report 
+      exit $?
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
+if [ -n "$PANTOS_STATUS_MONITOR" ]; then
+    echo "Starting the status monitor"
+    exec ./bin/python -m celery -A pantos.servicenode flower &
+fi
+
+# Check if the current user is not "pantos-service-node" and if so, switch to that user
+# This can happen when started directly from the command line
+EXTRA_ARGS=""
+if [ "$(id -u)" -ne "$(id -u "$APP_NAME")" ]; then
+    EXTRA_ARGS="--uid $(id -u "$APP_NAME")"
+fi
+
+exec ./bin/python -m celery -A pantos.servicenode worker $EXTRA_ARGS -l INFO -n pantos.servicenode -Q transfers,bids
