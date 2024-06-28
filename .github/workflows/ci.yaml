@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions: 
       contents: read
-      repository-projects: write
+      actions: write
 
     steps:
       - name: Harden Runner
