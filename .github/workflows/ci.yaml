@@ -54,7 +54,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-v1.0-service-node-${{ github..ref_name }}
+          key: ${{ runner.os }}-buildx-v1.0-service-node-${{ github.ref_name }}
           restore-keys: |
             ${{ runner.os }}-buildx-v1.0-service-node-
 
@@ -85,10 +85,6 @@ jobs:
           chmod +x ./.github/workflows/scripts/generate-signer-key.py
           cat password.key | ./.github/workflows/scripts/generate-signer-key.py
           mv signer-key*.pem signer_key.pem
-
-      # - name: Test image
-      #   run: |
-      #     docker compose up -d
 
       - name: Move cache
         run: |
