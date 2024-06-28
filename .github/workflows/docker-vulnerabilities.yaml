@@ -31,7 +31,7 @@ jobs:
                   production.cloudflare.docker.com:443
                   pypi.org:443
                   registry-1.docker.io:443
-                  repo.anaconda.com:443
+                  repo.anaconda.com:443         
             
             - uses: actions/checkout@v4
             
