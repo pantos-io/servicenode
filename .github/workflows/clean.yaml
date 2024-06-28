@@ -24,14 +24,14 @@ jobs:
         runs-on: ubuntu-latest
         steps:
         - uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
-            with:
+          with:
             disable-sudo: true
             egress-policy: audit
 
         - name: Clean Docker cache
-        env: 
+          env: 
             TARGET: ${{ runner.os }}-buildx-v1.0-service-node-${{ github.ref_name }} 
-        run: |
+          run: |
             curl -L \
             -X DELETE \
             -H "Accept: application/vnd.github+json" \
