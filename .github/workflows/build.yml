@@ -30,15 +30,27 @@ jobs:
     # TODO: Change ubuntu-20.04 for the ARM public runner
     runs-on: ${{ inputs.architecture == 'amd64' && 'ubuntu-latest' || 'ubuntu-20.04' }}
     environment: ${{ inputs.environment }}
+    permissions: 
+      contents: read
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.10"]
     steps:
-      - uses: step-security/harden-runner@v2
+      - name: Harden Runner
+        uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
         with:
-          disable-sudo: false
-          egress-policy: audit
+          egress-policy: block
+          allowed-endpoints: >
+            azure.archive.ubuntu.com:80
+            esm.ubuntu.com:443
+            files.pythonhosted.org:443
+            github.com:443
+            motd.ubuntu.com:443
+            packages.microsoft.com:443
+            pypi.org:443
+            repo.anaconda.com:443
+            
       - uses: actions/checkout@v4
 
       - name: Set up Poetry
@@ -58,7 +70,7 @@ jobs:
       - name: Import GPG key
         if: steps.is-signed-build.outputs.HAS_SECRETS == 'true'
         id: import-gpg
-        uses: crazy-max/ghaction-import-gpg@v6
+        uses: crazy-max/ghaction-import-gpg@01dd5d3ca463c7f10f7f4f7b4f177225ac661ee4 # v6.1.0
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.GPG_PASSPHRASE }}

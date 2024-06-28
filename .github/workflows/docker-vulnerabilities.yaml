@@ -8,20 +8,38 @@ jobs:
     docker-analysis:
         name: Trivy analysis for Docker image
         runs-on: ubuntu-latest
-
+        permissions: 
+          contents: read
         steps:
-            - uses: step-security/harden-runner@v2
+            - name: Harden Runner
+              uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
               with:
-               disable-sudo: false
-               egress-policy: audit
+                egress-policy: block
+                allowed-endpoints: >
+                  api.github.com:443
+                  auth.docker.io:443
+                  azure.archive.ubuntu.com:80
+                  deb.debian.org:80
+                  esm.ubuntu.com:443
+                  files.pythonhosted.org:443
+                  ghcr.io:443
+                  github.com:443
+                  index.docker.io:443
+                  motd.ubuntu.com:443
+                  packages.microsoft.com:443
+                  pkg-containers.githubusercontent.com:443
+                  production.cloudflare.docker.com:443
+                  pypi.org:443
+                  registry-1.docker.io:443
+                  repo.anaconda.com:443
             
             - uses: actions/checkout@v4
             
             - name: Set up QEMU
-              uses: docker/setup-qemu-action@v3
+              uses: docker/setup-qemu-action@68827325e0b33c7199eb31dd4e31fbe9023e06e3 # v3.0.0
 
             - name: Set up Docker Buildx
-              uses: docker/setup-buildx-action@v3
+              uses: docker/setup-buildx-action@d70bba72b1f3fd22344832f00baa16ece964efeb # v3.3.0
               id: buildx
 
             - name: Cache Docker layers
@@ -46,7 +64,7 @@ jobs:
                 DOCKER_TAG: analysis-latest
         
             - name: Scan vulnerabilities app image
-              uses: aquasecurity/trivy-action@0.20.0
+              uses: aquasecurity/trivy-action@7c2007bcb556501da015201bcba5aa14069b74e2 # v0.23.0
               with:           
                 image-ref: 'pantosio/service-node-app:analysis-latest'
                 format: 'sarif'
@@ -61,7 +79,7 @@ jobs:
                 sarif_file: 'trivy-app-results.sarif'
 
             - name: Scan vulnerabilities worker image
-              uses: aquasecurity/trivy-action@0.20.0
+              uses: aquasecurity/trivy-action@7c2007bcb556501da015201bcba5aa14069b74e2 # v0.23.0
               with:           
                 image-ref: 'pantosio/service-node-worker:analysis-latest'
                 format: 'sarif'
