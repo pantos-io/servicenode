@@ -3,23 +3,17 @@ name: Clean
 # Collection of functions to clean any generated and no-longer-needed item
 
 on:
-    push:
-        branches:
-            - main
-    pull_request:
-      #types:
-      #  - closed
+    pull_request_target: 
+      types:
+        - closed
     
 
 permissions: 
     contents: read
     actions: write
 
-
-
 jobs:
-    #if_merged:
-    # #if: github.event.pull_request.merged == true
+        
     clean:
         name: "Clean"
         runs-on: ubuntu-latest
@@ -38,6 +32,6 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/repos/pantos-io/servicenode/actions/caches?key=${{ env.TARGET }}&ref=${{ github.ref }}"
+            "https://api.github.com/repos/pantos-io/servicenode/actions/caches?key=${{ env.TARGET }}"
 
-        
+      
