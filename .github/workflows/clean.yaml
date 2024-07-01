@@ -1,0 +1,37 @@
+name: Clean
+
+# Collection of functions to clean any generated and no-longer-needed item
+
+on:
+    pull_request_target: 
+      types:
+        - closed
+    
+
+permissions: 
+    contents: read
+    actions: write
+
+jobs:
+        
+    clean:
+        name: "Clean"
+        runs-on: ubuntu-latest
+        steps:
+        - uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
+          with:
+            disable-sudo: true
+            egress-policy: audit
+
+        - name: Clean Docker cache
+          env: 
+            TARGET: ${{ runner.os }}-buildx-v1.0-service-node-${{ github.ref_name }} 
+          run: |
+            curl -L \
+            -X DELETE \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/pantos-io/servicenode/actions/caches?key=${{ env.TARGET }}"
+
+      
