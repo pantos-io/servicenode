@@ -10,6 +10,8 @@ jobs:
         runs-on: ubuntu-latest
         permissions: 
           contents: read
+          # for sarif
+          security-events: write
         steps:
             - name: Harden Runner
               uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
@@ -46,7 +48,7 @@ jobs:
               uses: actions/cache@v3
               with:
                 path: /tmp/.buildx-cache
-                key: ${{ runner.os }}-buildx-v1.0-service-node-${{ github.sha }}
+                key: ${{ runner.os }}-buildx-v1.0-service-node-${{ github.ref_name }}
                 restore-keys: |
                     ${{ runner.os }}-buildx-v1.0-service-node-
 
