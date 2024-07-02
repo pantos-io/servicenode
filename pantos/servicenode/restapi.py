@@ -15,6 +15,7 @@ import marshmallow.validate
 from pantos.common.blockchains.enums import Blockchain
 from pantos.common.entities import ServiceNodeBid
 from pantos.common.restapi import Live
+from pantos.common.restapi import NodesHealthResource
 from pantos.common.restapi import bad_request
 from pantos.common.restapi import conflict
 from pantos.common.restapi import internal_server_error
@@ -308,6 +309,7 @@ class _Bids(flask_restful.Resource):
 # Register the RESTful resources
 _restful_api = flask_restful.Api(flask_app)
 _restful_api.add_resource(Live, '/health/live')
+_restful_api.add_resource(NodesHealthResource, '/health/nodes')
 _restful_api.add_resource(_Transfer, '/transfer')
 _restful_api.add_resource(_TransferStatus, '/transfer/<string:task_id>/status')
 _restful_api.add_resource(_Bids, '/bids')
