@@ -3,7 +3,7 @@ name: Sonar
 on:
   pull_request:
     branches:
-      - masin
+      - main
 
 jobs:
   shared:
