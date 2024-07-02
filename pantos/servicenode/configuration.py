@@ -347,6 +347,29 @@ def get_plugin_config() -> typing.Dict[str, typing.Any]:
     return config['plugins']
 
 
+def get_blockchains_rpc_nodes() \
+        -> dict[Blockchain, tuple[list[str], float | None]]:
+    """Get the RPC nodes for the active blockchains.
+
+    Returns
+    -------
+    dict[Blockchain, tuple[list[str], int]]
+        The RPC nodes for the blockchains.
+
+    """
+    rpc_nodes = {}
+    for blockchain in Blockchain:
+        blockchain_config = get_blockchain_config(blockchain)
+        if blockchain_config['active']:
+            timeout = float(
+                blockchain_config.get('provider_timeout')  # type: ignore
+            ) if blockchain_config.get('provider_timeout') else None
+            rpc_nodes[blockchain] = (
+                [blockchain_config['provider']] +
+                blockchain_config.get('fallback_providers', []), timeout)
+    return rpc_nodes
+
+
 def load_config(file_path: typing.Optional[str] = None,
                 reload: bool = True) -> None:
     """Load the configuration from a configuration file.
