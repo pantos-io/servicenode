@@ -27,7 +27,7 @@ def is_main_module() -> bool:
     return __name__ == '__main__' or any('celery' in arg for arg in sys.argv)
 
 
-if is_main_module():
+if is_main_module(): # pragma: no cover
     _logger.info('Initializing the Celery application...')
     initialize_application(False)
 
@@ -105,4 +105,4 @@ def prep_db_pool(**kwargs):
     More info:
     https://docs.sqlalchemy.org/en/latest/core/pooling.html#using-connection-pools-with-multiprocessing
     """ # noqa
-    get_engine().dispose()
+    get_engine().dispose() # pragma: no cover
