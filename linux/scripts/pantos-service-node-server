@@ -1,23 +1,43 @@
 #! /bin/sh
 #
-# Helper to launch the celery worker
+# Helper to launch the server
 
 APP_NAME=pantos-service-node
 APP_DIR=/opt/pantos/"$APP_NAME"
-. /etc/default/"$APP_NAME"
-. "$APP_DIR"/bin/activate
+export PYTHONHOME=$APP_DIR
+export PATH=$APP_DIR/bin:$PATH
+export PYTHONUNBUFFERED=1
 
-if [ -f "$PANTOS_ENV_FILE" ]; then
-    echo "Sourcing $PANTOS_ENV_FILE"
-    set -a
-    . $PANTOS_ENV_FILE
-    set +a
-fi
+source_if_not_set() {
+    [ ! -f "$1" ] && return
+    echo "Sourcing $1"
+    while IFS= read -r line || [ -n "$line" ]; do
+        [ -z "$line" ] || [ "${line#\#}" != "$line" ] && continue
+        key="${line%%=*}"
+        echo "Checking $key"
+        eval currentValue=\$$key
+        [ -n "$currentValue" ] && continue
+        echo "Exporting $key"
+        export "$line"
+    done < "$1"
+}
 
-# Install mod_wsgi
-if ! pip list | grep -q mod_wsgi; then
-    echo "Installing mod_wsgi"
-    pip install mod_wsgi
-fi
+source_if_not_set /etc/default/"$APP_NAME"
 
-exec "$APP_DIR"/bin/start-web.py
+cd "$APP_DIR"
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -h|--help)
+      echo "Usage: $0 [-h|--help] [-s|--status]"
+      echo "-h, --help   Show this help message"
+      echo "-s, --status Start the celery worker with status monitoring"
+      exit 0
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
+exec ./bin/python ./bin/start-web.py $@

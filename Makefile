@@ -1,4 +1,4 @@
-PANTOS_SERVICE_NODE_VERSION := $(shell poetry version -s)
+PANTOS_SERVICE_NODE_VERSION := $(shell command -v poetry >/dev/null 2>&1 && poetry version -s || echo "0.0.0")
 PANTOS_SERVICE_NODE_SSH_HOST ?= bdev-service-node
 PYTHON_FILES_WITHOUT_TESTS := pantos/servicenode linux/scripts/start-web.py
 PYTHON_FILES := $(PYTHON_FILES_WITHOUT_TESTS) tests
@@ -140,7 +140,30 @@ debian:
 	mv ../$(debian_package) dist/
 
 debian-all: debian debian-full
-	
+
+.PHONY: signer-key
+signer-key:
+	@if ! command -v ssh-keygen &> /dev/null; then \
+        echo "ssh-keygen not found. Please install OpenSSH."; \
+        exit 1; \
+    fi; \
+	if [ -t 0 ]; then \
+        read -p "Enter path for signer key (default: ./signer_key.pem): " SIGNER_KEY_FILE; \
+        echo "Enter passphrase for signer key (leave empty for no passphrase):"; \
+        read -s SIGNER_KEY; echo; \
+    fi; \
+	if [ -z "$$SIGNER_KEY_FILE" ]; then \
+		SIGNER_KEY_FILE="$$(pwd)/signer_key.pem"; \
+	fi; \
+	if [ -z "$$SIGNER_KEY" ]; then \
+		SIGNER_KEY=""; \
+	fi; \
+    if ssh-keygen -t ed25519 -f "$$SIGNER_KEY_FILE" -N "$$SIGNER_KEY"; then \
+        echo "SSH key generated successfully at $$SIGNER_KEY_FILE"; \
+    else \
+        echo "Failed to generate SSH key"; \
+        exit 1; \
+    fi
 
 .PHONY: remote-install
 remote-install: debian-all
@@ -194,3 +217,9 @@ clean:
 	rm -r -f build/
 	rm -r -f dist/
 	rm -r -f pantos_service_node.egg-info/
+
+docker:
+	docker compose -f docker-compose.yml -f docker-compose.override.yml up --force-recreate $(ARGS)
+
+docker-prod:
+	docker compose -f docker-compose.yml -f docker-compose.prod.yml up --force-recreate $(ARGS)

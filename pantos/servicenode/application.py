@@ -48,7 +48,7 @@ def initialize_application(is_flask_app: bool = False) -> None:
     logging.basicConfig(level=logging.INFO)
     # Load the configuration
     try:
-        load_config()
+        load_config(reload=False)
     except Exception:
         _logger.critical('unable to load the configuration', exc_info=True)
         sys.exit(1)

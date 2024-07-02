@@ -4,12 +4,13 @@
 import logging
 import typing
 
-import sqlalchemy  # type: ignore
-import sqlalchemy.exc  # type: ignore
-import sqlalchemy.orm  # type: ignore
+import sqlalchemy
+import sqlalchemy.exc
+import sqlalchemy.orm
 from alembic import command
 from alembic.config import Config
 from pantos.common.blockchains.enums import Blockchain
+from sqlalchemy.orm import Session
 
 from pantos.servicenode.configuration import config
 from pantos.servicenode.database.enums import TransferStatus
@@ -19,7 +20,28 @@ from pantos.servicenode.database.models import \
     TransferStatus as TransferStatus_
 
 _session_maker: typing.Optional[sqlalchemy.orm.sessionmaker] = None
+_sql_engine: typing.Optional[sqlalchemy.engine.base.Engine] = None
 _logger = logging.getLogger(__name__)
+
+
+def get_engine() -> sqlalchemy.engine.base.Engine:
+    """Get the session engine for interacting with the
+    connection object, used to clean up connections.
+
+    Returns
+    -------
+    sqlalchemy.engine.base.Engine
+        The session engine.
+
+    Raises
+    ------
+    DatabaseError
+        If the database package has not been initialized.
+
+    """
+    if _sql_engine is None:
+        raise DatabaseError('database package not yet initialized')
+    return _sql_engine
 
 
 def get_session_maker() -> sqlalchemy.orm.sessionmaker:
@@ -75,14 +97,16 @@ def initialize_package(is_flask_app: bool = False) -> None:
         run_migrations(config['database']['alembic_config'],
                        config['database']['url'])
 
-    sql_engine = sqlalchemy.create_engine(
+    global _sql_engine
+    _sql_engine = sqlalchemy.create_engine(
         config['database']['url'], pool_size=config['database']['pool_size'],
         max_overflow=config['database']['max_overflow'], pool_pre_ping=True,
         echo=config['database']['echo'])
     global _session_maker
-    _session_maker = sqlalchemy.orm.sessionmaker(bind=sql_engine)
+    _session_maker = sqlalchemy.orm.sessionmaker(bind=_sql_engine)
     # Initialize the tables
     with _session_maker.begin() as session:
+        assert isinstance(session, Session)  # type hint
         # Blockchain table
         statement = sqlalchemy.select(sqlalchemy.func.max(Blockchain_.id))
         max_blockchain_id = session.execute(statement).scalar_one_or_none()
