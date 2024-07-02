@@ -80,6 +80,6 @@ server_run_command = (
     f'runuser -u {USER_NAME} -- bash -c "source {APP_DIRECTORY}/bin/activate; '
     f'nohup mod_wsgi-express start-server --host {host} {port_command} '
     f'{WSGI_FILE} --log-to-terminal &"')
-print(f'Starting the server...')
+print('Starting the server...')
 subprocess.run(server_run_command, check=True, text=True,
                shell=True)  # nosec B602
