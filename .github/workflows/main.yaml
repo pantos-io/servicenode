@@ -1,0 +1,20 @@
+name: Publish dev release
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build and attach .deb and .whl package
+    uses: ./.github/workflows/build.yml
+    secrets: 'inherit'
+    with:
+      architecture: amd64
+
+  publish-docker:
+    uses: ./.github/workflows/publish-docker.yaml
+    needs: [build]
+    with:
+      tag: development
+      architecture: amd64
