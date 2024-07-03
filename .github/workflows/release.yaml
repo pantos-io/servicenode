@@ -54,9 +54,11 @@ jobs:
     name: Publish docker image for ${{ needs.define-environment.outputs.deployment_longname }}
     needs: [define-environment, build]
     uses: ./.github/workflows/publish-docker.yaml
+    secrets: 'inherit'
     with:
       tag: ${{ github.event.release.tag_name }}${{ needs.define-environment.outputs.deployment_environment }}
       architecture: amd64
+      environment: dockerhub
 
   build:
     name: Build and attach .deb and .whl package

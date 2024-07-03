@@ -11,12 +11,24 @@ on:
         required: false
         type: string
         default: "amd64"
+      environment:
+        description: 'Environment where the secrets are stored'
+        required: true
+        type: string
+    secrets:
+      DOCKERHUB_USERNAME:
+        description: 'Docker Hub username'
+        required: false
+      DOCKERHUB_TOKEN:
+        description: 'Docker Hub token'
+        required: false
+
 
 jobs:
   publish-docker:
-    name: Publish docker image for ${{ needs.define-environment.outputs.deployment_longname }}
+    name: Publish docker image for ${{ inputs.tag }}/${{ inputs.architecture }}
     environment: 
-      name: dockerhub
+      name: ${{ inputs.environment }}
       url: ${{ steps.set-output-url.outputs.deployment_dockerhub_url }}
     runs-on: ${{ inputs.architecture == 'amd64' && 'ubuntu-latest' || 'ubuntu-20.04' }}
     permissions:
