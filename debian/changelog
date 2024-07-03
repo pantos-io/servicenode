@@ -1,4 +1,4 @@
-pantos-service-node (1.9.0) UNRELEASED; urgency=medium
+pantos-service-node (1.8.1) UNRELEASED; urgency=medium
 
   * pantos-service-node: Initial debian packaging
 
