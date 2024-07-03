@@ -13,6 +13,7 @@ from pantos.common.logging import initialize_logger
 
 from pantos.servicenode.application import initialize_application
 from pantos.servicenode.configuration import config
+from pantos.servicenode.database import get_engine
 from pantos.servicenode.plugins import initialize_plugins
 
 _TRANSFERS_QUEUE_NAME = 'transfers'
@@ -22,13 +23,13 @@ _logger = logging.getLogger(__name__)
 """Logger for this module."""
 
 
-def is_celery_worker_process() -> bool:
-    return (len(sys.argv) > 0 and sys.argv[0].endswith('celery')
-            and 'worker' in sys.argv)
+def is_main_module() -> bool:
+    return __name__ == '__main__' or any('celery' in arg for arg in sys.argv)
 
 
-if is_celery_worker_process():
-    initialize_application(False)  # pragma: no cover
+if is_main_module():  # pragma: no cover
+    _logger.info('Initializing the Celery application...')
+    initialize_application(False)
 
 celery_app = celery.Celery(
     'pantos.servicenode', broker=config['celery']['broker'],
@@ -54,7 +55,7 @@ celery_app.conf.update(
         }
     }, task_track_started=True, worker_enable_remote_control=False)
 
-if is_celery_worker_process():  # pragma: no cover
+if is_main_module():  # pragma: no cover
     # purge the bids queue at startup
     with celery_app.connection_for_write() as connection:
         try:
@@ -91,3 +92,17 @@ def setup_logger(logger: logging.Logger, *args, **kwargs):
     except Exception:
         logger.critical('unable to initialize logging', exc_info=True)
         sys.exit(1)
+
+
+# Source: https://stackoverflow.com/questions/43944787/sqlalchemy-celery-with-scoped-session-error/54751019#54751019 # noqa
+@celery.signals.worker_process_init.connect
+def prep_db_pool(**kwargs):
+    """
+    When Celery forks the parent process, it includes the db engine & connection
+    pool. However, db connections should not be shared across processes. Thus,
+    we instruct the engine to dispose of all existing connections, prompting the
+    opening of new ones in child processes as needed.
+    More info:
+    https://docs.sqlalchemy.org/en/latest/core/pooling.html#using-connection-pools-with-multiprocessing
+    """ # noqa
+    get_engine().dispose()  # pragma: no cover

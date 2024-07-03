@@ -48,28 +48,14 @@ RUN if [ -f ./*-signed.deb ]; then \
 
 FROM prod AS servicenode
 
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 CMD [ "python", "-c", 'import requests; response = requests.get("http://localhost:8080/health/live"); response.raise_for_status();' ]
+HEALTHCHECK --interval=10s --timeout=30s --start-period=5s --retries=3 CMD [ "/usr/bin/pantos-service-node-server", "--status" ]
 
-ENTRYPOINT bash -c 'source /opt/pantos/pantos-service-node/virtual-environment/bin/activate && \
-    exec mod_wsgi-express start-server \
-    /opt/pantos/pantos-service-node/wsgi.py \
-    --user pantos \
-    --group pantos \
-    --port 8080 \
-    --log-to-terminal \
-    --error-log-format "%M"'
+ENV APP_PORT 8080
+
+ENTRYPOINT /usr/bin/pantos-service-node-server
 
 FROM prod AS servicenode-celery-worker
 
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 CMD [ "bash", "-c", 'celery inspect ping -A pantos.servicenode -d celery@\$HOSTNAME' ]
+HEALTHCHECK --interval=10s --timeout=30s --start-period=10s --retries=3 CMD [ "/usr/bin/pantos-service-node-celery", "--status" ]
 
-ENTRYPOINT bash -c 'source /opt/pantos/pantos-service-node/virtual-environment/bin/activate && \
-    celery \
-    -A pantos.servicenode \
-    worker \
-    --uid $(id -u pantos) \
-    --gid $(id -g pantos) \
-    -l INFO \
-    --concurrency 4 \
-    -n pantos.servicenode \
-    -Q transfers,bids'
+ENTRYPOINT /usr/bin/pantos-service-node-celery

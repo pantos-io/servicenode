@@ -50,10 +50,5 @@ configure_postgresql=$RET
 db_get pantos/common/configure_rabbitmq
 configure_rabbitmq=$RET
 
-if [ "$configure_postgresql" != "false" ] || [ "$configure_rabbitmq" != "false" ]; then
-    db_fset pantos/common/reset_users seen false
-    db_input high pantos/common/reset_users || true
-fi
-
 db_input high pantos/common/start_services || true
 db_go

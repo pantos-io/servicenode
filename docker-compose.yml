@@ -4,12 +4,6 @@ networks:
   pantos-service-node:
     name: pantos-service-node
     attachable: true
-  pantos-validator-node:
-    name: pantos-validator-node
-    external: true
-  pantos-ethereum:
-    name: pantos-ethereum
-    external: true
 
 services:
   app:
@@ -24,26 +18,17 @@ services:
           - ${DOCKER_REGISTRY-pantosio}/service-node-app:${DOCKER_TAG-latest}
     networks:
       pantos-service-node:
-    env_file:
-      - service-node-config.env
+    env_file: []
     environment:
+      # Ignore the env file inside the docker container
+      PANTOS_ENV_FILE: ' '
       APP_HOST: 0.0.0.0
       APP_PORT: 8080
-      APP_URL: http://app:8080
       APP_LOG_FILE_ENABLED: false
       APP_LOG_FORMAT: human_readable
       DB_URL: postgresql://pantos-service-node:pantos@db/pantos-service-node
       CELERY_BROKER: amqp://pantos-service-node:pantos@broker:5672/pantos-service-node
       CELERY_BACKEND: db+postgresql://pantos-service-node:pantos@db/pantos-service-node-celery
-    volumes:
-      - type: bind
-        source: ./keystore
-        target: /etc/pantos/service-node.keystore
-        read_only: true
-      - type: bind
-        source: ./signer_key.pem
-        target: /etc/pantos/service-node-signer.pem
-        read_only: true
     ports:
       - 8080:8080
     depends_on:
@@ -63,27 +48,19 @@ services:
           - ${DOCKER_REGISTRY-pantosio}/service-node-worker:${DOCKER_TAG-latest}
     networks:
       pantos-service-node:
-    env_file:
-      - service-node-config.env
+    env_file: []
     environment:
+      # Ignore the env file inside the docker container
+      PANTOS_ENV_FILE: ' '
       APP_HOST: 0.0.0.0
       APP_PORT: 8080
-      APP_URL: http://app:8080
       CELERY_LOG_FORMAT: human_readable
       CELERY_LOG_FILE_ENABLED: false
       DB_URL: postgresql://pantos-service-node:pantos@db/pantos-service-node
       CELERY_BROKER: amqp://pantos-service-node:pantos@broker:5672/pantos-service-node
       CELERY_BACKEND: db+postgresql://pantos-service-node:pantos@db/pantos-service-node-celery
-    volumes:
-      - type: bind
-        source: ./keystore
-        target: /etc/pantos/service-node.keystore
-        read_only: true
-      - type: bind
-        source: ./signer_key.pem
-        target: /etc/pantos/service-node-signer.pem
-        read_only: true
     depends_on:
+      # Wait for the app to setup the DB
       app:
         condition: service_healthy
   db:
@@ -101,7 +78,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
     volumes:
-      - ./postgresql_data:/postgresql_data
+      - postgresql_data:/postgresql_data
       - type: bind
         source: ./db_init.sh
         target: /docker-entrypoint-initdb.d/init-user-db.sh
@@ -122,4 +99,8 @@ services:
       RABBITMQ_DEFAULT_PASS: pantos
       RABBITMQ_DEFAULT_VHOST: pantos-service-node
     volumes:
-      - ./rabbitmq_data:/rabbitmq_data
+      - rabbitmq_data:/rabbitmq_data
+
+volumes:
+  postgresql_data:
+  rabbitmq_data:

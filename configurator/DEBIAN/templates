@@ -11,17 +11,12 @@ Description: Please provide the signer key password:
 Template: pantos/common/configure_postgresql
 Type: boolean
 Default: true
-Description: Local PostgreSQL detected, configure?
+Description: Local PostgreSQL detected, configure? This will create a new database and user for the service unless previously configured.
 
 Template: pantos/common/configure_rabbitmq
 Type: boolean
 Default: true
-Description: Local RabbitMQ detected, configure?
-
-Template: pantos/common/reset_users
-Type: boolean
-Default: true
-Description: Either PostgreSQL or RabbitMQ have been detected. Reset user passwords?
+Description: Local RabbitMQ detected, configure? This will create a new database and user for the service unless previously configured.
 
 Template: pantos/configurator/finish_note
 Type: note

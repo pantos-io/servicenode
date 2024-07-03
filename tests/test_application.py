@@ -52,7 +52,7 @@ def test_initialize_application_correct(
     assert mock_initialize_logger.call_count == 1
     assert mock_initialize_database.call_count == 1
     assert mock_initialize_blockchain_clients.call_count == 1
-    mock_load_config.assert_called_with()
+    mock_load_config.assert_called_with(reload=False)
 
 
 @unittest.mock.patch('pantos.servicenode.application.logging.basicConfig')
