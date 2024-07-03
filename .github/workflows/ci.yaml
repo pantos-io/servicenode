@@ -85,6 +85,7 @@ jobs:
             --load
 
       - name: Test image
+        timeout-minutes: 10
         run: |
           make docker ARGS="-d --no-build --wait"
           docker compose down
@@ -182,6 +183,7 @@ jobs:
 
       # Check service is running
       - name: Check service is running
+        timeout-minutes: 5
         run: |
           # Wait for the service to start
           while ! sudo systemctl is-active --quiet pantos-service-node-server; do
