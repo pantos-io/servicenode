@@ -1,0 +1,111 @@
+name: Build Debian Package
+on:
+  workflow_call:
+    inputs:
+      tag:
+        description: 'The docker tag name'
+        required: true
+        type: string
+      architecture:
+        description: 'Architecture to build'
+        required: false
+        type: string
+        default: "amd64"
+      environment:
+        description: 'Environment where the secrets are stored'
+        required: true
+        type: string
+    secrets:
+      DOCKERHUB_USERNAME:
+        description: 'Docker Hub username'
+        required: false
+      DOCKERHUB_TOKEN:
+        description: 'Docker Hub token'
+        required: false
+
+
+jobs:
+  publish-docker:
+    name: Publish docker image for ${{ inputs.tag }}/${{ inputs.architecture }}
+    environment: 
+      name: ${{ inputs.environment }}
+      url: ${{ steps.set-output-url.outputs.deployment_dockerhub_url }}
+    runs-on: ${{ inputs.architecture == 'amd64' && 'ubuntu-latest' || 'ubuntu-20.04' }}
+    permissions:
+      id-token: write
+    steps:
+      - uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
+        with:
+          disable-sudo: true
+          egress-policy: audit
+      - uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@68827325e0b33c7199eb31dd4e31fbe9023e06e3 # v3.0.0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@d70bba72b1f3fd22344832f00baa16ece964efeb # v3.3.0
+        id: buildx
+
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-v1.0-service-node-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-v1.0-service-node-
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@0d4c9c5ea7693da7b068278f7b52bda2a190a446 # v3.2.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+          pattern: build-
+          path: dist
+
+      - name: Rename built artifacts
+        run: |
+          for file in dist/*.deb; do
+            mv "$file" "${file%.deb}-signed.deb"
+          done
+
+      - name: Build and push the images
+        run: |
+          docker buildx bake \
+            --set "*.cache-from=type=local,src=/tmp/.buildx-cache" \
+            --set "*.cache-to=type=local,dest=/tmp/.buildx-cache-new" \
+            --set "*.platform=linux/${{ inputs.architecture }}" \
+            --builder ${{ steps.buildx.outputs.name }} \
+            --push \
+            -f docker-compose.yml \
+            app worker
+        env:
+          DOCKER_TAG: ${{ inputs.tag }}
+
+      - name: Set output url
+        id: set-output-url
+        run: |
+          echo "deployment_dockerhub_url=https://hub.docker.com/r/pantosio/service-node/tags?name=${{ inputs.tag }}" >> $GITHUB_OUTPUT
+
+      - uses: sigstore/cosign-installer@59acb6260d9c0ba8f4a2f9d9b48431a222b68e20 # v3.5.0
+
+      - name: Sign the images
+        run: |
+          for app in $(docker buildx bake -f docker-compose.yml --print --progress "plain" | jq -r '.target[].tags | add'); do
+            for image in $(docker buildx imagetools inspect $app --raw | jq -r '.manifests[].digest'); do
+              echo "Signing $image from $app";
+              cosign sign --yes --verbose "${app%%:*}@$image";
+            done;
+          done;
+        env:
+          DOCKER_TAG: ${{ inputs.tag }}
+          COSIGN_EXPERIMENTAL: "true"
+
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache

@@ -23,6 +23,10 @@ on:
       GPG_PASSPHRASE:
         description: 'GPG passphrase'
         required: false
+    outputs:
+      version: 
+        description: 'Version of the built package'
+        value: ${{ jobs.build-deb.outputs.version }}
 
 jobs:
   build-deb:
@@ -30,6 +34,8 @@ jobs:
     # TODO: Change ubuntu-20.04 for the ARM public runner
     runs-on: ${{ inputs.architecture == 'amd64' && 'ubuntu-latest' || 'ubuntu-20.04' }}
     environment: ${{ inputs.environment }}
+    outputs:
+      version: ${{ steps.is-signed-build.outputs.built-version }}
     permissions: 
       contents: read
     strategy:
@@ -63,6 +69,7 @@ jobs:
         id: is-signed-build
         run: |
           echo "HAS_SECRETS=$(if [ -n "$GPG_PRIVATE_KEY" ] && [ -n "$GPG_PASSPHRASE" ]; then echo 'true'; else echo 'false'; fi)" >> $GITHUB_OUTPUT
+          echo "built-version=$(poetry version --short)" >> $GITHUB_OUTPUT
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
@@ -112,8 +119,6 @@ jobs:
         run: |
           make debian debian-full
           make wheel
-        env:
-          PANTOS_SERVICE_NODE_VERSION: ${{ inputs.version }}
         shell: sh
 
       - name: Sign package
