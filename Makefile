@@ -135,6 +135,10 @@ debian-full:
 .PHONY: debian
 debian:
 	$(eval debian_package := pantos-service-node_$(PANTOS_SERVICE_NODE_VERSION)_*.deb)
+	@if ! conda --version; then \
+		echo "Conda not found. Please install conda."; \
+		exit 1; \
+	fi; \
 	dpkg-buildpackage -uc -us -g
 	mkdir -p dist
 	mv ../$(debian_package) dist/
