@@ -9,6 +9,9 @@ from pantos.servicenode.plugins.base import Bid
 from pantos.servicenode.plugins.base import BidPlugin
 from pantos.servicenode.plugins.base import BidPluginError
 
+_DEFAULT_CONFIGURATION_FILE_NAME: typing.Final[str] = 'service-node-bids.yml'
+"""Default configuration file name."""
+
 _BLOCKCHAIN_NAME_REGEX = "|".join([b.name.lower() for b in Blockchain])
 
 _BIDS_SCHEMA = {
@@ -102,5 +105,5 @@ class ConfigFileBidPlugin(BidPlugin):
 
     def _load_bids_config(self, path):
         if self.config is None:
-            self.config = Config(path)
-            self.config.load(_BIDS_SCHEMA)
+            self.config = Config(_DEFAULT_CONFIGURATION_FILE_NAME)
+            self.config.load(_BIDS_SCHEMA, path)
