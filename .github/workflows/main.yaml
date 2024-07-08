@@ -7,6 +7,7 @@ on:
 jobs:
   build:
     name: Build and attach .deb and .whl package
+    if: github.repository == 'pantos-io/servicenode'
     uses: ./.github/workflows/build.yml
     secrets: 'inherit'
     with:
@@ -14,6 +15,7 @@ jobs:
 
   publish-docker:
     uses: ./.github/workflows/publish-docker.yaml
+    if: github.repository == 'pantos-io/servicenode'
     needs: [build]
     secrets: 'inherit'
     with:

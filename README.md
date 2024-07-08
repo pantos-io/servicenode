@@ -95,6 +95,17 @@ We distribute the package in test-pypi and pypi under the following projects: ht
 
 Please make sure that your environment meets the following requirements:
 
+#### Conda
+
+Conda is only required to build the package, but you can also use it as your python version management tool. To install conda, follow the instructions [here](https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html).
+
+After activating it, you can directly call poetry install on your new environment:
+
+```bash
+conda env create -f environment.yml
+conda activate default
+```
+
 #### Python Version
 
 The Pantos Service Node supports **Python 3.10** or higher. Ensure that you have the correct Python version installed before the installation steps. You can download the latest version of Python from the official [Python website](https://www.python.org/downloads/).

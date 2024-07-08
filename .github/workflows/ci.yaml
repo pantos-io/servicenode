@@ -88,12 +88,15 @@ jobs:
         timeout-minutes: 10
         run: |
           make docker ARGS="-d --no-build --wait"
-          docker compose down
 
       - name: Dump service node logs
         if: always()
         run: |
           docker compose logs || true
+
+      - name: Tear down
+        run: |
+          docker compose down -v
 
       - name: Dump ethereum contract logs
         if: always()
