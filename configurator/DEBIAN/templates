@@ -18,6 +18,11 @@ Type: boolean
 Default: true
 Description: Local RabbitMQ detected, configure? This will create a new database and user for the service unless previously configured.
 
+Template: pantos/common/start_services
+Type: boolean
+Default: true
+Description: Start the services after install?
+
 Template: pantos/configurator/finish_note
 Type: note
 Description: |
