@@ -80,5 +80,5 @@ else:
 server_run_command = ['runuser', '-u', USER_NAME, '--'
                       ] + gunicorn_command.split()
 
-print(f'Starting the server...')
+print('Starting the server...')
 subprocess.run(server_run_command, check=True, text=True)
