@@ -315,8 +315,8 @@ class EthereumClient(BlockchainClient):
             node_connections = self.__create_node_connections()
             transaction_receipt = node_connections.eth.get_transaction_receipt(
                 typing.cast(web3.types.HexStr, transaction_id)).get()
-            assert (
-                transaction_receipt['transactionHash'].hex() == transaction_id)
+            assert (transaction_receipt['transactionHash'].to_0x_hex() ==
+                    transaction_id)
             _logger.info(
                 'transfer/transferFrom transaction receipt', extra=json.loads(
                     web3.Web3.to_json(transaction_receipt)))  # type: ignore
