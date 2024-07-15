@@ -852,7 +852,7 @@ def test_start_transfer_from_submission_verify_transfer_error(
 def test_read_on_chain_transfer_id_correct(mock_create_hub_contract,
                                            transaction_receipt,
                                            ethereum_client, w3):
-    transaction_id = transaction_receipt[0]['transactionHash'].hex()
+    transaction_id = transaction_receipt[0]['transactionHash'].to_0x_hex()
     on_chain_transfer_id = 13573
     mock_hub_contract = mock_create_hub_contract()
     mock_hub_contract.events.Transfer().process_receipt().__getitem__(
