@@ -100,7 +100,7 @@ jobs:
           tag: ${{ github.event.release.tag_name }}
 
       # We need to upload some artifacts, any, so that the download action works
-      - uses: robinraju/release-downloader@vc39a3b234af58f0cf85888573d361fb6fa281534 # v1.10
+      - uses: robinraju/release-downloader@a96f54c1b5f5e09e47d9504526e96febd949d4c2 # v1.11
         with:
           tag: ${{ github.event.release.tag_name }}
           tarBall: true
