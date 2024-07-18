@@ -68,6 +68,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-v1.0-service-node-
 
+      - name: Check docker config and disable live reload
+        run: |
+          cat /etc/docker/daemon.json
+          echo '{ "live-restore": false }' | sudo tee /etc/docker/daemon.json
+          sudo systemctl reload docker
+
       - name: Run Docker
         run: |
           docker compose -f ethereum-contracts/docker-compose.yml up -d --no-build --wait
