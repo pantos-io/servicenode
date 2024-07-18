@@ -86,7 +86,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           merge-multiple: true
-          pattern: build-
+          pattern: build-*
           path: dist
 
       # We need to upload some artifacts, any, so that the download action works
@@ -189,7 +189,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           merge-multiple: true
-          pattern: build-
+          pattern: build-*
           path: dist
 
       - name: List directory
