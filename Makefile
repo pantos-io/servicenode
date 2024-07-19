@@ -222,8 +222,36 @@ clean:
 	rm -r -f dist/
 	rm -r -f pantos_service_node.egg-info/
 
-docker:
+check-swarm-init:
+	@if [ "$$(docker info --format '{{.Swarm.LocalNodeState}}')" != "active" ]; then \
+        echo "Docker is not part of a swarm. Initializing..."; \
+        docker swarm init; \
+    else \
+        echo "Docker is already part of a swarm."; \
+    fi
+
+docker: check-swarm-init
 	docker compose -f docker-compose.yml -f docker-compose.override.yml up --force-recreate $(ARGS)
 
-docker-prod:
+docker-build:
+	docker buildx bake -f docker-compose.yml --load $(ARGS)
+
+docker-multiple: check-swarm-init docker-build
+	@if [ -z "$(INSTANCE_COUNT)" ]; then \
+        echo "Error: INSTANCE_COUNT is not set"; \
+        exit 1; \
+    fi; \
+    for i in $(shell seq 1 $(INSTANCE_COUNT)); do \
+        STACK_NAME="stack-service-node-$$i"; \
+		export INSTANCE=$$i; \
+        docker stack deploy -c docker-compose.yml -c docker-compose.override.yml $$STACK_NAME --with-registry-auth --detach=false $(ARGS); \
+    done
+
+docker-remove:
+	@for stack in $$(docker stack ls --format "{{.Name}}" | awk '/^stack-service-node-/ {print}'); do \
+        echo "Removing stack $$stack"; \
+        docker stack rm $$stack --detach=false; \
+    done
+
+docker-prod: check-swarm-init
 	docker compose -f docker-compose.yml -f docker-compose.prod.yml up --force-recreate $(ARGS)

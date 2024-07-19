@@ -74,6 +74,12 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Check docker config and disable live reload
+        run: |
+          cat /etc/docker/daemon.json
+          echo '{ "live-restore": false }' | sudo tee /etc/docker/daemon.json
+          sudo systemctl reload docker
+
       - name: Build and push the images
         run: |
           docker buildx bake \

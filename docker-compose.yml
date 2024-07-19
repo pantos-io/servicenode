@@ -1,8 +1,7 @@
-name: service-node
-
 networks:
   pantos-service-node:
-    name: pantos-service-node
+    name: pantos-service-node-${INSTANCE-1}
+    driver: overlay
     attachable: true
 
 services:
@@ -24,18 +23,16 @@ services:
       PANTOS_ENV_FILE: ' '
       APP_HOST: 0.0.0.0
       APP_PORT: 8080
-      APP_LOG_FILE_ENABLED: false
+      APP_LOG_FILE_ENABLED: 'false'
       APP_LOG_FORMAT: human_readable
       DB_URL: postgresql://pantos-service-node:pantos@db/pantos-service-node
       CELERY_BROKER: amqp://pantos-service-node:pantos@broker:5672/pantos-service-node
       CELERY_BACKEND: db+postgresql://pantos-service-node:pantos@db/pantos-service-node-celery
     ports:
-      - 8080:8080
+      - 808${INSTANCE-0}:8080
     depends_on:
-      broker:
-        condition: service_healthy
-      db:
-        condition: service_healthy
+      - broker
+      - db
   worker:
     restart: always
     image: pantosio/service-node-worker:${DOCKER_TAG-latest}
@@ -52,17 +49,17 @@ services:
     environment:
       # Ignore the env file inside the docker container
       PANTOS_ENV_FILE: ' '
+      PANTOS_CELERY_AUTORESTART: 'true'
       APP_HOST: 0.0.0.0
       APP_PORT: 8080
       CELERY_LOG_FORMAT: human_readable
-      CELERY_LOG_FILE_ENABLED: false
+      CELERY_LOG_FILE_ENABLED: 'false'
       DB_URL: postgresql://pantos-service-node:pantos@db/pantos-service-node
       CELERY_BROKER: amqp://pantos-service-node:pantos@broker:5672/pantos-service-node
       CELERY_BACKEND: db+postgresql://pantos-service-node:pantos@db/pantos-service-node-celery
     depends_on:
       # Wait for the app to setup the DB
-      app:
-        condition: service_healthy
+      - app
   db:
     image: postgres:latest
     restart: on-failure
