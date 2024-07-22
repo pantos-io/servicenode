@@ -19,6 +19,6 @@ jobs:
     needs: [build]
     secrets: 'inherit'
     with:
-      tag: ${{ needs.build.outputs.version }}-development
+      tag: development
       architecture: amd64
       environment: main

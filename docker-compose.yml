@@ -15,6 +15,7 @@ services:
       x-bake:
         tags:
           - ${DOCKER_REGISTRY-pantosio}/service-node-app:${DOCKER_TAG-latest}
+          - ${DOCKER_REGISTRY-pantosio}/service-node-worker:${EXTRA_TAG-latest}
     networks:
       pantos-service-node:
     env_file: []
@@ -43,6 +44,7 @@ services:
       x-bake:
         tags:
           - ${DOCKER_REGISTRY-pantosio}/service-node-worker:${DOCKER_TAG-latest}
+          - ${DOCKER_REGISTRY-pantosio}/service-node-worker:${EXTRA_TAG-latest}
     networks:
       pantos-service-node:
     env_file: []

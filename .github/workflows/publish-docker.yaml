@@ -15,6 +15,11 @@ on:
         description: 'Environment where the secrets are stored'
         required: true
         type: string
+      extra_tag:
+        description: 'Additional tag to push'
+        required: false
+        type: string
+        default: ""
     secrets:
       DOCKERHUB_USERNAME:
         description: 'Docker Hub username'
@@ -82,6 +87,11 @@ jobs:
 
       - name: Build and push the images
         run: |
+          if [ -n "${{ inputs.extra_tag }}" ]; then
+            export EXTRA_TAG="${{ inputs.extra_tag }}"
+          else 
+            export EXTRA_TAG=$DOCKER_TAG
+          fi
           docker buildx bake \
             --set "*.cache-from=type=local,src=/tmp/.buildx-cache" \
             --set "*.cache-to=type=local,dest=/tmp/.buildx-cache-new" \
