@@ -7,15 +7,15 @@ networks:
 services:
   app:
     restart: always
-    image: pantosio/service-node-app:${DOCKER_TAG-latest}
+    image: pantosio/service-node-app:${DOCKER_TAG-local}
     build:
       context: .
       dockerfile: Dockerfile
       target: servicenode
       x-bake:
         tags:
-          - ${DOCKER_REGISTRY-pantosio}/service-node-app:${DOCKER_TAG-latest}
-          - ${DOCKER_REGISTRY-pantosio}/service-node-worker:${EXTRA_TAG-latest}
+          - ${DOCKER_REGISTRY-pantosio}/service-node-app:${DOCKER_TAG-local}
+          - ${DOCKER_REGISTRY-pantosio}/service-node-worker:${EXTRA_TAG-local}
     networks:
       pantos-service-node:
     env_file: []
@@ -36,15 +36,15 @@ services:
       - db
   worker:
     restart: always
-    image: pantosio/service-node-worker:${DOCKER_TAG-latest}
+    image: pantosio/service-node-worker:${DOCKER_TAG-local}
     build:
       context: .
       dockerfile: Dockerfile
       target: servicenode-celery-worker
       x-bake:
         tags:
-          - ${DOCKER_REGISTRY-pantosio}/service-node-worker:${DOCKER_TAG-latest}
-          - ${DOCKER_REGISTRY-pantosio}/service-node-worker:${EXTRA_TAG-latest}
+          - ${DOCKER_REGISTRY-pantosio}/service-node-worker:${DOCKER_TAG-local}
+          - ${DOCKER_REGISTRY-pantosio}/service-node-worker:${EXTRA_TAG-local}
     networks:
       pantos-service-node:
     env_file: []
