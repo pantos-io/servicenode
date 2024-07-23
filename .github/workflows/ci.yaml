@@ -79,7 +79,7 @@ jobs:
         run: |
           docker compose -f ethereum-contracts/docker-compose.yml up -d --no-build --wait
         env:
-          DOCKER_TAG: "1.1.2"
+          DOCKER_TAG: "development"
 
       - name: Build and load
         run: |
