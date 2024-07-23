@@ -48,7 +48,7 @@ RUN if [ -f ./*-signed.deb ]; then \
 
 FROM prod AS servicenode
 
-HEALTHCHECK --interval=10s --timeout=30s --start-period=5s --retries=3 CMD [ "/usr/bin/pantos-service-node-server", "--status" ]
+HEALTHCHECK --interval=10s --timeout=30s --start-period=5s --retries=5 CMD [ "/usr/bin/pantos-service-node-server", "--status" ]
 
 ENV APP_PORT 8080
 
@@ -56,6 +56,6 @@ ENTRYPOINT /usr/bin/pantos-service-node-server
 
 FROM prod AS servicenode-celery-worker
 
-HEALTHCHECK --interval=10s --timeout=30s --start-period=10s --retries=3 CMD [ "/usr/bin/pantos-service-node-celery", "--status" ]
+HEALTHCHECK --interval=10s --timeout=30s --start-period=20s --retries=5 CMD [ "/usr/bin/pantos-service-node-celery", "--status" ]
 
 ENTRYPOINT /usr/bin/pantos-service-node-celery
