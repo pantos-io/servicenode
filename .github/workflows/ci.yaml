@@ -79,7 +79,7 @@ jobs:
         run: |
           docker compose -f ethereum-contracts/docker-compose.yml up -d --no-build --wait
         env:
-          DOCKER_TAG: "development"
+          DOCKER_TAG: "1.1.2"
 
       - name: Build and load
         run: |
@@ -159,7 +159,7 @@ jobs:
         run: |
           docker compose -f ethereum-contracts/docker-compose.yml up -d --no-build --wait
         env:
-          DOCKER_TAG: "development"
+          DOCKER_TAG: "1.1.2"
 
       - name: Download artifact
         uses: actions/download-artifact@v4
