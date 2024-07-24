@@ -17,3 +17,4 @@ docker-compose*
 .dockerignore
 signer_key*
 *docker.env
+.github

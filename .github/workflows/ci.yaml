@@ -73,6 +73,7 @@ jobs:
           cat /etc/docker/daemon.json
           echo '{ "live-restore": false }' | sudo tee /etc/docker/daemon.json
           sudo systemctl reload docker
+          make check-swarm-init
 
       - name: Run Docker
         run: |
@@ -146,6 +147,13 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         id: buildx
+
+      - name: Check docker config and disable live reload
+        run: |
+          cat /etc/docker/daemon.json
+          echo '{ "live-restore": false }' | sudo tee /etc/docker/daemon.json
+          sudo systemctl reload docker
+          make check-swarm-init
 
       - name: Run Docker
         run: |
