@@ -89,22 +89,11 @@ If you're hosting this on a cloud provider (AWS, GCP, Azure or alike), these are
 
 #### Python package
 
-We distribute the package in test-pypi and pypi under the following projects: https://test.pypi.org/project/pantos-service-node/ and https://pypi.org/project/pantos-service-node/. You can install it to your project by using `pip install pantos-service-node`.
+We distribute the package in pypi under the following project and https://pypi.org/project/pantos-service-node/. You can install it to your project by using `pip install pantos-service-node`.
 
 ### 2.2 Prerequisites
 
 Please make sure that your environment meets the following requirements:
-
-#### Conda
-
-Conda is only required to build the package, but you can also use it as your python version management tool. To install conda, follow the instructions [here](https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html).
-
-After activating it, you can directly call poetry install on your new environment:
-
-```bash
-conda env create -f environment.yml
-conda activate default
-```
 
 #### Python Version
 
@@ -128,6 +117,11 @@ By default poetry creates the venv directory under under ```{cache-dir}/virtuale
 poetry config virtualenvs.in-project true
 ```
 
+#### Conda (Debian package building only)
+
+Conda is only required to build the Debian package. To install conda, follow the instructions [here](https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html). Check the installation was correct running `conda -version`.
+
+
 ### 2.2  Installation Steps
 
 #### Libraries
@@ -135,7 +129,7 @@ poetry config virtualenvs.in-project true
 Create the virtual environment and install the dependencies:
 
 ```bash
-$ poetry install --no-root
+poetry install --no-root
 ```
 
 #### Pre-commit
