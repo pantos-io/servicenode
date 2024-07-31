@@ -1,4 +1,10 @@
-pantos-service-node (1.8.1) UNRELEASED; urgency=medium
+pantos-service-node (1.8.2) UNRELEASED; urgency=medium
+
+  * NA
+
+ -- Pantos GmbH <contact@pantos.io> Thu, 24 Jun 2024 14:00:15 +0000
+
+pantos-service-node (1.8.1) RELEASED; urgency=medium
 
   * pantos-service-node: Initial debian packaging
 
