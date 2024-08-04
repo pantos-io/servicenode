@@ -1,7 +1,7 @@
 networks:
   pantos-service-node:
   pantos-ethereum:
-    name: pantos-ethereum
+    name: pantos-ethereum-${ETHEREUM_NETWORK--1}
     external: true
 
 services:
@@ -66,8 +66,9 @@ services:
 
 volumes:
   bnb-data:
-    name: bnb-data
+    # Requires the same amount of instances as the servicenode
+    name: bnb-data-${ETHEREUM_NETWORK--1}
     external: true
   eth-data:
-    name: eth-data
+    name: eth-data-${ETHEREUM_NETWORK--1}
     external: true

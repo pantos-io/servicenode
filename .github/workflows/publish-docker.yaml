@@ -6,11 +6,6 @@ on:
         description: 'The docker tag name'
         required: true
         type: string
-      architecture:
-        description: 'Architecture to build'
-        required: false
-        type: string
-        default: "amd64"
       environment:
         description: 'Environment where the secrets are stored'
         required: true
@@ -31,11 +26,17 @@ on:
 
 jobs:
   publish-docker:
-    name: Publish docker image for ${{ inputs.tag }}/${{ inputs.architecture }}
+    name: Publish docker image for ${{ inputs.tag }}/${{ matrix.architecture }}
+    strategy:
+      fail-fast: false
+      matrix:
+        architecture:
+          - amd64
+          - arm64
     environment: 
       name: ${{ inputs.environment }}
       url: ${{ steps.set-output-url.outputs.deployment_dockerhub_url }}
-    runs-on: ${{ inputs.architecture == 'amd64' && 'ubuntu-latest' || 'ubuntu-20.04' }}
+    runs-on: macos-latest
     permissions:
       id-token: write
     steps:
@@ -94,7 +95,7 @@ jobs:
           docker buildx bake \
             --set "*.cache-from=type=local,src=/tmp/.buildx-cache" \
             --set "*.cache-to=type=local,dest=/tmp/.buildx-cache-new" \
-            --set "*.platform=linux/${{ inputs.architecture }}" \
+            --set "*.platform=linux/${{ matrix.architecture }}" \
             --builder ${{ steps.buildx.outputs.name }} \
             --sbom=true \
             --push \

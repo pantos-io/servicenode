@@ -20,5 +20,4 @@ jobs:
     secrets: 'inherit'
     with:
       tag: development
-      architecture: amd64
       environment: main
