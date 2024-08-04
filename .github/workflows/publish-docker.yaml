@@ -26,17 +26,11 @@ on:
 
 jobs:
   publish-docker:
-    name: Publish docker image for ${{ inputs.tag }}/${{ matrix.architecture }}
-    strategy:
-      fail-fast: false
-      matrix:
-        architecture:
-          - amd64
-          - arm64
+    name: Publish docker image for ${{ inputs.tag }}
     environment: 
       name: ${{ inputs.environment }}
       url: ${{ steps.set-output-url.outputs.deployment_dockerhub_url }}
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     permissions:
       id-token: write
     steps:
@@ -95,7 +89,7 @@ jobs:
           docker buildx bake \
             --set "*.cache-from=type=local,src=/tmp/.buildx-cache" \
             --set "*.cache-to=type=local,dest=/tmp/.buildx-cache-new" \
-            --set "*.platform=linux/${{ matrix.architecture }}" \
+            --set "*.platform=linux/amd64,linux/arm64 \
             --builder ${{ steps.buildx.outputs.name }} \
             --sbom=true \
             --push \
