@@ -8,6 +8,10 @@ jobs:
     docker-analysis:
         name: Trivy analysis for Docker image
         runs-on: ubuntu-latest
+        strategy:
+          fail-fast: false
+          matrix:
+            arch: [amd64, arm64]
         permissions: 
           contents: read
           # for sarif
@@ -36,16 +40,16 @@ jobs:
                   repo.anaconda.com:443         
             
             - uses: actions/checkout@v4
-            
+
             - name: Set up QEMU
-              uses: docker/setup-qemu-action@68827325e0b33c7199eb31dd4e31fbe9023e06e3 # v3.0.0
+              uses: docker/setup-qemu-action@v3
 
             - name: Set up Docker Buildx
-              uses: docker/setup-buildx-action@d70bba72b1f3fd22344832f00baa16ece964efeb # v3.3.0
+              uses: docker/setup-buildx-action@v3
               id: buildx
 
             - name: Cache Docker layers
-              uses: actions/cache@v3
+              uses: actions/cache@v4
               with:
                 path: /tmp/.buildx-cache
                 key: ${{ runner.os }}-buildx-v1.0-service-node-${{ github.ref_name }}
@@ -57,7 +61,7 @@ jobs:
                     docker buildx bake \
                     --set "*.cache-from=type=local,src=/tmp/.buildx-cache" \
                     --set "*.cache-to=type=local,dest=/tmp/.buildx-cache-new" \
-                    --set "*.platform=linux/amd64" \
+                    --set "*.platform=linux/${{ matrix.arch }}" \
                     --builder ${{ steps.buildx.outputs.name }} \
                     -f docker-compose.yml \
                     --load \
@@ -77,7 +81,7 @@ jobs:
               uses: github/codeql-action/upload-sarif@v3
               if: always()
               with:
-                category: 'service-node-app'
+                category: 'service-node-app-${{ matrix.arch }}'
                 sarif_file: 'trivy-app-results.sarif'
 
             - name: Scan vulnerabilities worker image
@@ -92,7 +96,7 @@ jobs:
               uses: github/codeql-action/upload-sarif@v3
               if: always()
               with:
-                category: 'service-node-worker'
+                category: 'service-node-worker-${{ matrix.arch }}'
                 sarif_file: 'trivy-worker-results.sarif'
 
             - name: Move cache

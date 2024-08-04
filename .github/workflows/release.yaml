@@ -69,7 +69,6 @@ jobs:
       # We need to use a semver that doesn't start with a v as debian will remove it anyways
       version: ${{ needs.define-environment.outputs.deployment_version }}
       environment: debian-release
-      architecture: amd64
 
   add-assets:
     name: Add Assets to the ${{ github.event.release.tag_name }} Release

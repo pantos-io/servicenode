@@ -28,7 +28,7 @@ COPY . /app
 
 RUN make debian-build-deps
 
-RUN make debian
+RUN make debian debian-full
 
 FROM bitnami/minideb:bookworm AS prod
 
@@ -37,10 +37,23 @@ RUN apt-get update
 # Do not copy the configurator package
 COPY --from=dev /app/dist/pantos-service-node_*.deb .
 
-RUN if [ -f ./*-signed.deb ]; then \
-    apt-get install -y --no-install-recommends ./*-signed.deb; \
-    else \
-    apt-get install -y --no-install-recommends ./*.deb; \
+RUN ARCH=$(dpkg --print-architecture) && \
+    PKGS=$(ls ./*-signed.deb 2>/dev/null || ls ./*.deb) && \
+    INSTALLED_COUNT=0 && \
+    for pkg in $PKGS; do \
+        if [ -f "$pkg" ]; then \
+            PKG_ARCH=$(dpkg-deb --field "$pkg" Architecture) && \
+            if [ "$PKG_ARCH" = "all" ] || [ "$PKG_ARCH" = "$ARCH" ]; then \
+                apt-get install -f -y --no-install-recommends "$pkg" && \
+                INSTALLED_COUNT=$((INSTALLED_COUNT + 1)); \
+            else \
+                echo "Skipping $pkg due to architecture mismatch"; \
+            fi; \
+        fi; \
+    done && \
+    if [ "$INSTALLED_COUNT" -eq 0 ]; then \
+        echo "Error: No packages were installed" >&2; \
+        exit 1; \
     fi && \
     rm -rf *.deb && \
     apt-get clean && \

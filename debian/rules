@@ -44,7 +44,7 @@ build-arch:
 
 override_dh_virtualenv:
 	. $$(conda info --base)/etc/profile.d/conda.sh && \
-	conda create -y --prefix $(POETRY_VIRTUALENVS_PATH) python=$(PYTHON_VERSION) && \
+	conda create -y -c defaults -c conda-forge --prefix $(POETRY_VIRTUALENVS_PATH) python=$(PYTHON_VERSION) && \
 	conda activate $(POETRY_VIRTUALENVS_PATH) && \
 	dh_virtualenv $(DH_VENV_ARGS)
 
