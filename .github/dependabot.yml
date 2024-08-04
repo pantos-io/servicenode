@@ -24,5 +24,9 @@ updates:
         update-types:
           - "minor"
           - "major"
+  - package-ecosystem: "docker"
+    directory: "/" # Location of Docker manifest
+    schedule:
+      interval: "daily"
 
         
