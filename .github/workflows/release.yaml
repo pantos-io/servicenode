@@ -57,7 +57,6 @@ jobs:
     secrets: 'inherit'
     with:
       tag: ${{ github.event.release.tag_name }}${{ needs.define-environment.outputs.deployment_environment }}
-      architecture: amd64
       environment: dockerhub
       extra_tag: ${{ github.event.release.prerelease && 'beta' || 'latest' }}
 
