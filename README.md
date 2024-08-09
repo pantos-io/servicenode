@@ -66,13 +66,34 @@ We also distribute docker images in DockerHub with each release. These are made 
 
 ##### Local Setup
 
-You can run a local setup with docker by doing the following steps:
+A complete local setup that comprehends a local blockchain instance, Pantos ethereum contracts (https://github.com/pantos-io/ethereum-contracts), RabbitMQ brokers, PosgreSQL, ServiceNode App, and a ServiceNode worker can be deployed. We recommend this setup for testing on a setup as close to production as possible.
 
-- Run `make docker` on the `ethereum-contracts` project
-- The variables `DB_URL`, `CELERY_BACKEND` and `CELERY_BROKER` are already defined in the `docker-compose.yml`
-- Modify the `docker.env` file to match your current setup
-- Ensure you have a `signer_key` file located in the same directory. If you don't, you can create one with `make signer-key`
-- Run `make docker`
+- Initialize a Docker swarm
+  ```sh
+  docker swarm init
+  ```
+- Run blockchain instances locally
+  Clone the Pantos ethereum contracts repo:
+  ```sh
+  git clone https://github.com/pantos-io/ethereum-contracts.git
+  ```
+  and run the corresponding Docker compose available at the repo. This will
+  setup a local blockchain environment and make it available to the Service
+  Node. For more convenience use the `Makefile`:
+  ```sh
+  cd ethereum-contracts
+  make docker
+  ```
+- Come back to the `service-node` repo.
+- Fill the `service-node-config.docker.env` accordingly to your configuration.
+- Make sure a signer key is available in the same folder. Run 
+  ```sh
+  make signer-key
+  ```
+- For your convenience all the external services required by the service node
+  (posgreSQL, celery, and RabbitMQ) are set in the `docker-compose.yaml`. 
+  Run `make docker` to deploy the environment completely.
+
 
 ##### Production Setup
 
