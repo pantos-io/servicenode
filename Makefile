@@ -143,9 +143,18 @@ debian:
 	fi; \
 	dpkg-buildpackage -uc -us -g
 	mkdir -p dist
-	mv ../$(debian_package) dist/
+	ARCHITECTURE=$$(dpkg --print-architecture); \
+	mv ../$(debian_package) dist/pantos-service-node_$(PANTOS_SERVICE_NODE_VERSION)_$${ARCHITECTURE}.deb
 
+.PHONY: debian-all
 debian-all: debian debian-full
+
+.PHONY: docker-debian-build
+docker-debian-build:
+	docker buildx build -t pantos-service-node-build -f Dockerfile --target dev . --load $(ARGS);
+	CONTAINER_ID=$$(docker create pantos-service-node-build); \
+    docker cp $${CONTAINER_ID}:/app/dist/ .; \
+    docker rm $${CONTAINER_ID}
 
 .PHONY: signer-key
 signer-key:

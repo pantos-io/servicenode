@@ -40,14 +40,14 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@68827325e0b33c7199eb31dd4e31fbe9023e06e3 # v3.0.0
+        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@d70bba72b1f3fd22344832f00baa16ece964efeb # v3.3.0
+        uses: docker/setup-buildx-action@v3
         id: buildx
 
       - name: Cache Docker layers
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-v1.0-service-node-${{ github.sha }}
@@ -89,7 +89,7 @@ jobs:
           docker buildx bake \
             --set "*.cache-from=type=local,src=/tmp/.buildx-cache" \
             --set "*.cache-to=type=local,dest=/tmp/.buildx-cache-new" \
-            --set "*.platform=linux/amd64,linux/arm64 \
+            --set "*.platform=linux/amd64,linux/arm64" \
             --builder ${{ steps.buildx.outputs.name }} \
             --sbom=true \
             --push \
