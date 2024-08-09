@@ -2,6 +2,8 @@ PANTOS_SERVICE_NODE_VERSION := $(shell command -v poetry >/dev/null 2>&1 && poet
 PANTOS_SERVICE_NODE_SSH_HOST ?= bdev-service-node
 PYTHON_FILES_WITHOUT_TESTS := pantos/servicenode linux/scripts/start-web.py
 PYTHON_FILES := $(PYTHON_FILES_WITHOUT_TESTS) tests
+STACK_BASE_NAME=stack-service-node
+INSTANCE_COUNT ?= 1
 
 .PHONY: check-version
 check-version:
@@ -141,9 +143,18 @@ debian:
 	fi; \
 	dpkg-buildpackage -uc -us -g
 	mkdir -p dist
-	mv ../$(debian_package) dist/
+	ARCHITECTURE=$$(dpkg --print-architecture); \
+	mv ../$(debian_package) dist/pantos-service-node_$(PANTOS_SERVICE_NODE_VERSION)_$${ARCHITECTURE}.deb
 
+.PHONY: debian-all
 debian-all: debian debian-full
+
+.PHONY: docker-debian-build
+docker-debian-build:
+	docker buildx build -t pantos-service-node-build -f Dockerfile --target dev . --load $(ARGS);
+	CONTAINER_ID=$$(docker create pantos-service-node-build); \
+    docker cp $${CONTAINER_ID}:/app/dist/ .; \
+    docker rm $${CONTAINER_ID}
 
 .PHONY: signer-key
 signer-key:
@@ -230,28 +241,50 @@ check-swarm-init:
         echo "Docker is already part of a swarm."; \
     fi
 
-docker: check-swarm-init
-	docker compose -f docker-compose.yml -f docker-compose.override.yml up --force-recreate $(ARGS)
-
 docker-build:
 	docker buildx bake -f docker-compose.yml --load $(ARGS)
 
-docker-multiple: check-swarm-init docker-build
-	@if [ -z "$(INSTANCE_COUNT)" ]; then \
-        echo "Error: INSTANCE_COUNT is not set"; \
-        exit 1; \
-    fi; \
-    for i in $(shell seq 1 $(INSTANCE_COUNT)); do \
-        STACK_NAME="stack-service-node-$$i"; \
+docker: check-swarm-init docker-build
+	@for i in $$(seq 1 $(INSTANCE_COUNT)); do \
+        STACK_NAME="${STACK_BASE_NAME}-${STACK_IDENTIFIER}-$$i"; \
 		export INSTANCE=$$i; \
+		echo "Deploying stack $$STACK_NAME"; \
         docker stack deploy -c docker-compose.yml -c docker-compose.override.yml $$STACK_NAME --with-registry-auth --detach=false $(ARGS); \
     done
 
+.PHONY: docker-remove
 docker-remove:
-	@for stack in $$(docker stack ls --format "{{.Name}}" | awk '/^stack-service-node-/ {print}'); do \
+	@STACK_NAME="${STACK_BASE_NAME}"; \
+    if [ -n "$(STACK_IDENTIFIER)" ]; then \
+        STACK_NAME="$$STACK_NAME-$(STACK_IDENTIFIER)"; \
+        echo "Removing the stack with identifier $(STACK_IDENTIFIER)"; \
+    else \
+        echo "** Removing all stacks **"; \
+    fi; \
+	for stack in $$(docker stack ls --format "{{.Name}}" | awk "/^$$STACK_NAME/ {print}"); do \
         echo "Removing stack $$stack"; \
         docker stack rm $$stack --detach=false; \
+		echo "Removing volumes for stack $$stack"; \
+        docker volume ls --format "{{.Name}}" | awk '/^$$stack/ {print}' | xargs -r docker volume rm; \
+        rm -Rf /data/$$stack; \
+    done;  \
+    for compose_stack in $$(docker compose ls --filter "name=$$STACK_NAME" --format json | jq -r '.[].Name' | awk "/^$$STACK_NAME/ {print}"); do \
+        echo "Removing Docker Compose stack $$compose_stack"; \
+        docker compose -p $$compose_stack down -v; \
+    done
+
+.PHONY: docker-logs
+docker-logs:
+	@for stack in $$(docker stack ls --format "{{.Name}}" | awk '/^${STACK_BASE_NAME}-${STACK_IDENTIFIER}/ {print}'); do \
+        echo "Showing logs for stack $$stack"; \
+        for service in $$(docker stack services --format "{{.Name}}" $$stack); do \
+            echo "Logs for service $$service in stack $$stack"; \
+            docker service logs --no-task-ids $$service; \
+        done; \
     done
 
 docker-prod: check-swarm-init
 	docker compose -f docker-compose.yml -f docker-compose.prod.yml up --force-recreate $(ARGS)
+
+docker-prod-down: check-swarm-init
+	docker compose -f docker-compose.yml -f docker-compose.prod.yml down -v $(ARGS)

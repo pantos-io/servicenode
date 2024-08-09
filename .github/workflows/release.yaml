@@ -57,7 +57,6 @@ jobs:
     secrets: 'inherit'
     with:
       tag: ${{ github.event.release.tag_name }}${{ needs.define-environment.outputs.deployment_environment }}
-      architecture: amd64
       environment: dockerhub
       extra_tag: ${{ github.event.release.prerelease && 'beta' || 'latest' }}
 
@@ -70,7 +69,6 @@ jobs:
       # We need to use a semver that doesn't start with a v as debian will remove it anyways
       version: ${{ needs.define-environment.outputs.deployment_version }}
       environment: debian-release
-      architecture: amd64
 
   add-assets:
     name: Add Assets to the ${{ github.event.release.tag_name }} Release

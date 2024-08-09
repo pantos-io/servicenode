@@ -16,12 +16,15 @@ jobs:
     runs-on: ubuntu-latest
     permissions: 
       contents: read
-
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: ['amd64', 'arm64']
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
         with:
-          egress-policy: block
+          egress-policy: audit
           allowed-endpoints: >
             api.github.com:443
             auth.docker.io:443
@@ -46,7 +49,9 @@ jobs:
         with:
           repository: pantos-io/ethereum-contracts
           path: ethereum-contracts
-          sparse-checkout: docker-compose.yml
+          sparse-checkout: |
+           Makefile
+           docker-compose.yml
 
       - name: Create local signer_key
         run: |
@@ -54,14 +59,14 @@ jobs:
           chmod 777 signer_key.pem
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@68827325e0b33c7199eb31dd4e31fbe9023e06e3 # v3.0.0
+        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@d70bba72b1f3fd22344832f00baa16ece964efeb # v3.3.0
+        uses: docker/setup-buildx-action@v3
         id: buildx
 
       - name: Cache Docker layers
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-v1.0-service-node-${{ github.ref_name }}
@@ -77,38 +82,52 @@ jobs:
 
       - name: Run Docker
         run: |
-          docker compose -f ethereum-contracts/docker-compose.yml up -d --no-build --wait
+          make docker-local
+        working-directory: ethereum-contracts
         env:
           DOCKER_TAG: "1.1.2"
 
+      - name: Ensure ethereum-contracts is accessible
+        run: |
+          for port in 8511 8510; do
+            echo "Checking availability of http://localhost:$port..."
+            for i in {1..30}; do
+              if curl -s --max-time 5 http://localhost:$port/ -X POST -H "Content-Type: application/json" --data '{"method":"eth_blockNumber","params":[],"id":1,"jsonrpc":"2.0"}'; then
+                echo " ... http://localhost:$port is accessible."
+                break
+              else
+                echo "http://localhost:$port is not accessible. Retrying in 10 seconds..."
+                sleep 10
+              fi
+            done
+          done
+        working-directory: ethereum-contracts
+
       - name: Build and load
         run: |
-          docker buildx bake \
-            --set "*.cache-from=type=local,src=/tmp/.buildx-cache" \
+          make docker-build ARGS='--set "*.cache-from=type=local,src=/tmp/.buildx-cache" \
             --set "*.cache-to=type=local,dest=/tmp/.buildx-cache-new" \
-            --set "*.platform=linux/amd64" \
-            --builder ${{ steps.buildx.outputs.name }} \
-            -f docker-compose.yml \
-            --load
+            --set "*.platform=linux/${{ matrix.arch }}" \
+            --builder ${{ steps.buildx.outputs.name }}'
 
       - name: Test image
         timeout-minutes: 10
         run: |
-          make docker ARGS="-d --no-build --wait"
+          make docker
 
       - name: Dump service node logs
         if: always()
         run: |
-          docker compose logs || true
+          timeout 1 make docker-logs || true
 
       - name: Tear down
         run: |
-          docker compose down -v
+          make docker-remove
 
       - name: Dump ethereum contract logs
         if: always()
         run: |
-          docker compose logs || true
+          timeout 1 make docker-logs || true
         working-directory: ethereum-contracts
 
       - name: Move cache
@@ -118,8 +137,6 @@ jobs:
 
   build:
     uses: ./.github/workflows/build.yml
-    with:
-      architecture: amd64
 
   install:
     needs: [build]
@@ -139,10 +156,9 @@ jobs:
         with:
           repository: pantos-io/ethereum-contracts
           path: ethereum-contracts
-          sparse-checkout: docker-compose.yml
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+          sparse-checkout: |
+           Makefile
+           docker-compose.yml
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -157,9 +173,26 @@ jobs:
 
       - name: Run Docker
         run: |
-          docker compose -f ethereum-contracts/docker-compose.yml up -d --no-build --wait
+          make docker-local
+        working-directory: ethereum-contracts
         env:
           DOCKER_TAG: "1.1.2"
+
+      - name: Ensure ethereum-contracts is accessible
+        run: |
+          for port in 8511 8510; do
+            echo "Checking availability of http://localhost:$port..."
+            for i in {1..30}; do
+              if curl -s --max-time 5 http://localhost:$port/ -X POST -H "Content-Type: application/json" --data '{"method":"eth_blockNumber","params":[],"id":1,"jsonrpc":"2.0"}'; then
+                echo " ... http://localhost:$port is accessible."
+                break
+              else
+                echo "http://localhost:$port is not accessible. Retrying in 10 seconds..."
+                sleep 10
+              fi
+            done
+          done
+        working-directory: ethereum-contracts
 
       - name: Download artifact
         uses: actions/download-artifact@v4
@@ -179,10 +212,17 @@ jobs:
         run: |
           sudo mkdir -p /etc/pantos
           sudo chmod 777 /etc/pantos
-          docker compose cp eth:/data/keystore /etc/pantos/keystore.eth
-          docker compose cp eth:/data/ETHEREUM.env /etc/pantos/ETHEREUM.env
-          docker compose cp bnb:/data/keystore /etc/pantos/keystore.bnb
-          docker compose cp bnb:/data/BNB.env /etc/pantos/BNB.env
+          # Get the task ID for the eth service
+          ETH_TASK_ID=$(docker ps --filter "name=stack-ethereum-contracts--1-eth" --format "{{.ID}}")
+          # Copy files from the eth service
+          docker cp $ETH_TASK_ID:/data/keystore /etc/pantos/keystore.eth
+          docker cp $ETH_TASK_ID:/data/ETHEREUM.env /etc/pantos/ETHEREUM.env
+
+          # Get the task ID for the bnb service
+          BNB_TASK_ID=$(docker ps --filter "name=stack-ethereum-contracts--1-bnb" --format "{{.ID}}")
+          # Copy files from the bnb service
+          docker cp $BNB_TASK_ID:/data/keystore /etc/pantos/keystore.bnb
+          docker cp $BNB_TASK_ID:/data/BNB.env /etc/pantos/BNB.env
         working-directory: ethereum-contracts
 
       - name: Set env
@@ -214,16 +254,23 @@ jobs:
           done
           echo "Celery is running"
           # Wait for curl to be positive
-          while true; do
-            response=$(curl -s -o /dev/null -w '%{http_code}' 'http://localhost:8080/bids?source_blockchain=0&destination_blockchain=1')
+          max_retries=60
+          retries=0
+          while [ $retries -lt $max_retries ]; do
+            response=$(curl -s --max-time 5 -o /dev/null -w '%{http_code}' 'http://localhost:8080/bids?source_blockchain=0&destination_blockchain=1')
             if [ "$response" -eq 200 ]; then
               echo "Received 200 response, exiting."
               break
             else
               echo "Did not receive 200 response, retrying in 1 second."
               sleep 1
+              retries=$((retries + 1))
             fi
           done
+          if [ $retries -eq $max_retries ]; then
+            echo "Max retries reached, exiting with failure."
+            exit 1
+          fi
           echo "Service is up and running"
 
       - name: Print logs
@@ -259,5 +306,5 @@ jobs:
       - name: Dump ethereum contract logs
         if: always()
         run: |
-          docker compose logs || true
+          timeout 1 make docker-logs || true
         working-directory: ethereum-contracts

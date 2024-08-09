@@ -10,8 +10,6 @@ jobs:
     if: github.repository == 'pantos-io/servicenode'
     uses: ./.github/workflows/build.yml
     secrets: 'inherit'
-    with:
-      architecture: amd64
 
   publish-docker:
     uses: ./.github/workflows/publish-docker.yaml
@@ -20,5 +18,4 @@ jobs:
     secrets: 'inherit'
     with:
       tag: development
-      architecture: amd64
       environment: main

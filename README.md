@@ -37,7 +37,7 @@ The celery application is responsible for the following:
 
 ### IMPORTANT ###
 
-We provide two ways to modify the app configuration, either through `service-node-config.env` or `service-node-config.yml`. We recommend using the `.env` file, as the `.conf` file is overwritten on every install.
+We provide two ways to modify the app configuration, either through `service-node-config.env` or `service-node-config.yml`. We recommend using the `.env` file, as the `.yml` file is overwritten on every install.
 
 While using the `.env` file you need to be aware that any fields containing certain special characters need to be wrapped around single quotes (e.g. `ETHEREUM_PRIVATE_KEY_PASSWORD='12$$#%R^'`).
 
@@ -133,7 +133,7 @@ https://python-poetry.org/docs/#installing-with-the-official-installer
 or
 https://python-poetry.org/docs/#installing-with-pipx
 
-By default poetry creates the venv directory under under ```{cache-dir}/virtualenvs```. If you opt for creating the virtualenv inside the project’s root directory, execute the following command:
+By default poetry creates the venv directory under ```{cache-dir}/virtualenvs```. If you opt for creating the virtualenv inside the project’s root directory, execute the following command:
 ```bash
 poetry config virtualenvs.in-project true
 ```
