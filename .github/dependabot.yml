@@ -28,5 +28,3 @@ updates:
     directory: "/" # Location of Docker manifest
     schedule:
       interval: "daily"
-
-        

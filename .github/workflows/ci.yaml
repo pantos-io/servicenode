@@ -69,9 +69,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-v1.0-service-node-${{ github.ref_name }}
+          key: ${{ runner.os }}-buildx-v1.0-service-node-${{ matrix.arch}}-${{ github.ref_name }}
           restore-keys: |
-            ${{ runner.os }}-buildx-v1.0-service-node-
+            ${{ runner.os }}-buildx-v1.0-service-node-${{ matrix.arch}}-
 
       - name: Check docker config and disable live reload
         run: |
@@ -111,7 +111,7 @@ jobs:
             --builder ${{ steps.buildx.outputs.name }}'
 
       - name: Test image
-        timeout-minutes: 10
+        timeout-minutes: ${{ matrix.arch == 'amd64' && 10 || 30 }}
         run: |
           make docker
 

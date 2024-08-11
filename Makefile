@@ -242,7 +242,9 @@ check-swarm-init:
     fi
 
 docker-build:
-	docker buildx bake -f docker-compose.yml --load $(ARGS)
+	@if [ "$$NO_BUILD" != "true" ]; then \
+		docker buildx bake -f docker-compose.yml --load $(ARGS); \
+	fi
 
 docker: check-swarm-init docker-build
 	@for i in $$(seq 1 $(INSTANCE_COUNT)); do \
