@@ -10,4 +10,3 @@ jobs:
     if: github.repository == 'pantos-io/servicenode'
     uses: pantos-io/ci-workflows/.github/workflows/sonar.yml@v1
     secrets: inherit
-    
