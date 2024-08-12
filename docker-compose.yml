@@ -6,7 +6,12 @@ networks:
 
 services:
   app:
-    restart: always
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
     image: ${DOCKER_REGISTRY-pantosio}/service-node-app:${DOCKER_TAG-local}
     build:
       context: .
@@ -41,7 +46,12 @@ services:
       - broker
       - db
   worker:
-    restart: always
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
     image: ${DOCKER_REGISTRY-pantosio}/service-node-worker:${DOCKER_TAG-local}
     build:
       context: .
@@ -76,7 +86,12 @@ services:
       - app
   db:
     image: postgres:latest
-    restart: on-failure
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
     healthcheck:
       test: [ "CMD", "pg_isready", "-U", "postgres" ]
       interval: 10s
@@ -96,7 +111,12 @@ services:
         read_only: true
   broker:
     image: rabbitmq:latest
-    restart: on-failure
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
     hostname: pantos-service-node
     networks:
       pantos-service-node:
