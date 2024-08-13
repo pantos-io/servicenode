@@ -248,11 +248,15 @@ docker-build:
 
 docker: check-swarm-init docker-build
 	@for i in $$(seq 1 $(INSTANCE_COUNT)); do \
+		( \
         STACK_NAME="${STACK_BASE_NAME}-${STACK_IDENTIFIER}-$$i"; \
 		export INSTANCE=$$i; \
 		echo "Deploying stack $$STACK_NAME"; \
-        docker stack deploy -c docker-compose.yml -c docker-compose.override.yml $$STACK_NAME --with-registry-auth --detach=false $(ARGS); \
-    done
+        docker compose -f docker-compose.yml -f docker-compose.override.yml -p $$STACK_NAME $(EXTRA_COMPOSE) up -d --wait $(ARGS); \
+		) & \
+    done; \
+	wait
+    #docker stack deploy -c docker-compose.yml -c docker-compose.override.yml $$STACK_NAME --with-registry-auth --detach=false $(ARGS) & \
 
 .PHONY: docker-remove
 docker-remove:
@@ -263,17 +267,21 @@ docker-remove:
     else \
         echo "** Removing all stacks **"; \
     fi; \
-	for stack in $$(docker stack ls --format "{{.Name}}" | awk "/^$$STACK_NAME/ {print}"); do \
+    for stack in $$(docker stack ls --format "{{.Name}}" | awk "/^$$STACK_NAME/ {print}"); do \
+        ( \
         echo "Removing stack $$stack"; \
         docker stack rm $$stack --detach=false; \
-		echo "Removing volumes for stack $$stack"; \
-        docker volume ls --format "{{.Name}}" | awk '/^$$stack/ {print}' | xargs -r docker volume rm; \
-        rm -Rf /data/$$stack; \
+        echo "Removing volumes for stack $$stack"; \
+        docker volume ls --format "{{.Name}}" | awk '/^$$stack/ {print}' | xargs -r docker volume rm \
+        ) & \
     done;  \
     for compose_stack in $$(docker compose ls --filter "name=$$STACK_NAME" --format json | jq -r '.[].Name' | awk "/^$$STACK_NAME/ {print}"); do \
+        ( \
         echo "Removing Docker Compose stack $$compose_stack"; \
-        docker compose -p $$compose_stack down -v; \
-    done
+        docker compose -p $$compose_stack down -v \
+        ) & \
+    done; \
+	wait
 
 .PHONY: docker-logs
 docker-logs:
