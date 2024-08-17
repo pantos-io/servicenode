@@ -19,3 +19,6 @@ jobs:
     with:
       tag: development
       environment: main
+
+  test:
+    uses: pantos-io/e2e-testing/.github/workflows/ci.yaml@main
