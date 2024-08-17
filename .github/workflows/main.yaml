@@ -14,11 +14,12 @@ jobs:
   publish-docker:
     uses: ./.github/workflows/publish-docker.yaml
     if: github.repository == 'pantos-io/servicenode'
-    needs: [build]
+    needs: build
     secrets: 'inherit'
     with:
       tag: development
       environment: main
 
   test:
+    needs: publish-docker
     uses: pantos-io/e2e-testing/.github/workflows/ci.yaml@main
