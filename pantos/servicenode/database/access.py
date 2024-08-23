@@ -3,14 +3,15 @@ records.
 
 """
 import datetime
-import threading
+import logging
 import typing
 import uuid
 
-import sqlalchemy  # type: ignore
-import sqlalchemy.exc  # type: ignore
-import sqlalchemy.orm  # type: ignore
+import sqlalchemy
+import sqlalchemy.exc
+import sqlalchemy.orm
 from pantos.common.blockchains.enums import Blockchain
+from pantos.common.types import BlockchainAddress
 
 from pantos.servicenode.database import get_session
 from pantos.servicenode.database import get_session_maker
@@ -25,9 +26,7 @@ from pantos.servicenode.database.models import HubContract
 from pantos.servicenode.database.models import TokenContract
 from pantos.servicenode.database.models import Transfer
 
-_forwarder_contract_lock = threading.Lock()
-_hub_contract_lock = threading.Lock()
-_token_contract_lock = threading.Lock()
+_logger = logging.getLogger(__name__)
 
 B = typing.TypeVar('B', bound=Base)
 
@@ -60,7 +59,6 @@ def create_bid(source_blockchain: Blockchain,
               execution_time=execution_time, valid_until=valid_until, fee=fee)
     with get_session_maker().begin() as session:
         session.add(bid)
-        session.flush()
 
 
 def replace_bids(source_blockchain_id: int, destination_blockchain_id: int,
@@ -140,45 +138,31 @@ def create_transfer(source_blockchain: Blockchain,
         If the sender nonce is not unique.
 
     """
+    transfer_status = TransferStatus.ACCEPTED
     try:
         with get_session_maker().begin() as session:
-            # Create the source and destination token contract instances if
-            # they do not exist yet
-            source_token_contract = _read_token_contract(
-                session, blockchain_id=source_blockchain.value,
-                address=source_token_address)
-            source_token_contract_id = (
-                source_token_contract.id if source_token_contract is not None
-                else _create_token_contract(
-                    blockchain_id=source_blockchain.value,
-                    address=source_token_address))
-            destination_token_contract = _read_token_contract(
-                session, blockchain_id=destination_blockchain.value,
-                address=destination_token_address)
-            destination_token_contract_id = (
-                destination_token_contract.id if destination_token_contract
-                is not None else _create_token_contract(
-                    blockchain_id=destination_blockchain.value,
-                    address=destination_token_address))
-            # Create the hub and forwarder contract instances if they do not
-            # exist yet
-            hub_contract = _read_hub_contract(
-                session, blockchain_id=source_blockchain.value,
-                address=hub_address)
-            hub_contract_id = (hub_contract.id if hub_contract is not None else
-                               _create_hub_contract(
-                                   blockchain_id=source_blockchain.value,
-                                   address=hub_address))
-            forwarder_contract = _read_forwarder_contract(
-                session, blockchain_id=source_blockchain.value,
-                address=forwarder_address)
-            forwarder_contract_id = (forwarder_contract.id
-                                     if forwarder_contract is not None else
-                                     _create_forwarder_contract(
-                                         blockchain_id=source_blockchain.value,
-                                         address=forwarder_address))
-
-            transfer = Transfer(
+            source_token_contract_id = _read_token_contract_id(
+                session, source_blockchain, source_token_address)
+            if source_token_contract_id is None:
+                source_token_contract_id = _create_token_contract(
+                    session, source_blockchain, source_token_address)
+            destination_token_contract_id = _read_token_contract_id(
+                session, destination_blockchain, destination_token_address)
+            if destination_token_contract_id is None:
+                destination_token_contract_id = _create_token_contract(
+                    session, destination_blockchain, destination_token_address)
+            hub_contract_id = _read_hub_contract_id(session, source_blockchain,
+                                                    hub_address)
+            if hub_contract_id is None:
+                hub_contract_id = _create_hub_contract(session,
+                                                       source_blockchain,
+                                                       hub_address)
+            forwarder_contract_id = _read_forwarder_contract_id(
+                session, source_blockchain, forwarder_address)
+            if forwarder_contract_id is None:
+                forwarder_contract_id = _create_forwarder_contract(
+                    session, source_blockchain, forwarder_address)
+            statement = sqlalchemy.insert(Transfer).values(
                 source_blockchain_id=source_blockchain.value,
                 destination_blockchain_id=destination_blockchain.value,
                 sender_address=sender_address,
@@ -188,13 +172,10 @@ def create_transfer(source_blockchain: Blockchain,
                 amount=amount, fee=fee, sender_nonce=sender_nonce,
                 signature=signature, hub_contract_id=hub_contract_id,
                 forwarder_contract_id=forwarder_contract_id,
-                status_id=TransferStatus.ACCEPTED.value)
-            session.add(transfer)
-            session.flush()
-            return int(transfer.id)
-    except sqlalchemy.exc.IntegrityError as e:
-        session.rollback()
-        if UNIQUE_SENDER_NONCE_CONSTRAINT in str(e):
+                status_id=transfer_status.value).returning(Transfer.id)
+            return session.execute(statement).scalar_one()
+    except sqlalchemy.exc.IntegrityError as error:
+        if UNIQUE_SENDER_NONCE_CONSTRAINT in str(error):
             raise SenderNonceNotUniqueError(source_blockchain, sender_address,
                                             sender_nonce)
         raise
@@ -249,8 +230,9 @@ def read_transfer_by_task_id(task_id: uuid.UUID) -> typing.Optional[Transfer]:
         return transfer
 
 
-def read_transfer_nonce(internal_transfer_id: int) -> int:
-    """Read the nonce of a transfer database record.
+def read_transfer_nonce(internal_transfer_id: int) -> int | None:
+    """Read the nonce for a transfer transaction submitted to the source
+    blockchain.
 
     Parameters
     ----------
@@ -259,15 +241,16 @@ def read_transfer_nonce(internal_transfer_id: int) -> int:
 
     Returns
     -------
-    int
-        The nonce of the transfer.
+    int or None
+        The nonce for the transfer transaction on the source blockchain,
+        or None if no blockchain nonce has been assigned to the
+        transfer.
 
     """
     statement = sqlalchemy.select(
         Transfer.nonce).filter(Transfer.id == internal_transfer_id)
     with get_session() as session:
-        result = session.execute(statement).fetchall()
-        return result[0][0]  # type: ignore
+        return session.execute(statement).scalar_one_or_none()
 
 
 def reset_transfer_nonce(internal_transfer_id: int) -> None:
@@ -471,54 +454,64 @@ def update_transfer_task_id(internal_transfer_id: int,
                                        datetime.datetime.utcnow())
 
 
-def _create_forwarder_contract(**kwargs: typing.Any) -> int:
-    return _create_instance(ForwarderContract, _forwarder_contract_lock,
-                            **kwargs)
+def _read_id(session: sqlalchemy.orm.Session, model: typing.Type[B],
+             **kwargs: typing.Any) -> int | None:
+    statement = sqlalchemy.select(model.id).filter_by(**kwargs)
+    return session.execute(statement).scalar_one_or_none()
 
 
-def _create_hub_contract(**kwargs: typing.Any) -> int:
-    return _create_instance(HubContract, _hub_contract_lock, **kwargs)
+def _read_forwarder_contract_id(session: sqlalchemy.orm.Session,
+                                blockchain: Blockchain,
+                                address: BlockchainAddress) -> int | None:
+    return _read_id(session, ForwarderContract, blockchain_id=blockchain.value,
+                    address=address)
 
 
-def _create_instance(model: Base, lock: threading.Lock,
-                     **kwargs: typing.Any) -> int:
-    """Create a new model instance in a thread-safe manner.
-
-    """
-    with lock:
-        with get_session_maker().begin() as session:
-            # New session necessary to allow committing after the new
-            # model instance has been added (flush is not sufficient in
-            # a multithreaded environment)
-            instance = session.query(model).filter_by(**kwargs).one_or_none()
-            if instance is None:
-                # Instance has been added by another thread in between
-                instance = model(**kwargs)
-                session.add(instance)
-                session.flush()
-            return instance.id
+def _read_hub_contract_id(session: sqlalchemy.orm.Session,
+                          blockchain: Blockchain,
+                          address: BlockchainAddress) -> int | None:
+    return _read_id(session, HubContract, blockchain_id=blockchain.value,
+                    address=address)
 
 
-def _create_token_contract(**kwargs: typing.Any) -> int:
-    return _create_instance(TokenContract, _token_contract_lock, **kwargs)
+def _read_token_contract_id(session: sqlalchemy.orm.Session,
+                            blockchain: Blockchain,
+                            address: BlockchainAddress) -> int | None:
+    return _read_id(session, TokenContract, blockchain_id=blockchain.value,
+                    address=address)
 
 
-def _read_forwarder_contract(session: sqlalchemy.orm.Session,
-                             **kwargs: typing.Any) -> ForwarderContract:
-    return _read_instance(session, ForwarderContract, **kwargs)
+def _create_with_id(session: sqlalchemy.orm.Session, model: typing.Type[B],
+                    **kwargs: typing.Any) -> int:
+    statement = sqlalchemy.insert(model).values(**kwargs).returning(model.id)
+    try:
+        with session.begin_nested():
+            return session.execute(statement).scalar_one()
+    except sqlalchemy.exc.IntegrityError:
+        # Non-critical error that can happen in a parallel execution
+        # environment due to a race condition
+        _logger.warning('instance already created', exc_info=True)
+        id_ = _read_id(session, model, **kwargs)
+        assert id_ is not None
+        return id_
 
 
-def _read_hub_contract(session: sqlalchemy.orm.Session,
-                       **kwargs: typing.Any) -> HubContract:
-    return _read_instance(session, HubContract, **kwargs)
+def _create_forwarder_contract(session: sqlalchemy.orm.Session,
+                               blockchain: Blockchain,
+                               address: BlockchainAddress) -> int:
+    return _create_with_id(session, ForwarderContract,
+                           blockchain_id=blockchain.value, address=address)
 
 
-def _read_instance(session: sqlalchemy.orm.Session, model: typing.Type[B],
-                   **kwargs: typing.Any) -> B:
-    return typing.cast(B,
-                       session.query(model).filter_by(**kwargs).one_or_none())
+def _create_hub_contract(session: sqlalchemy.orm.Session,
+                         blockchain: Blockchain,
+                         address: BlockchainAddress) -> int:
+    return _create_with_id(session, HubContract,
+                           blockchain_id=blockchain.value, address=address)
 
 
-def _read_token_contract(session: sqlalchemy.orm.Session,
-                         **kwargs: typing.Any) -> TokenContract:
-    return _read_instance(session, TokenContract, **kwargs)
+def _create_token_contract(session: sqlalchemy.orm.Session,
+                           blockchain: Blockchain,
+                           address: BlockchainAddress) -> int:
+    return _create_with_id(session, TokenContract,
+                           blockchain_id=blockchain.value, address=address)

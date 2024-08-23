@@ -340,6 +340,17 @@ class EthereumClient(BlockchainClient):
         provider_timeout = self._get_config()['provider_timeout']
         return self._get_utilities().create_node_connections(provider_timeout)
 
+    def __get_nonce(self, node_connections: NodeConnections,
+                    internal_transfer_id: int) -> int:
+        transaction_count = node_connections.eth.get_transaction_count(
+            self.__address).get_maximum_result()
+        database_access.update_transfer_nonce(internal_transfer_id,
+                                              self.get_blockchain(),
+                                              transaction_count)
+        nonce = database_access.read_transfer_nonce(internal_transfer_id)
+        assert nonce is not None
+        return nonce
+
     def __start_transfer_submission(self, internal_transfer_id: int,
                                     on_chain_request: tuple, signature: str,
                                     verify_function_name: str,
@@ -357,12 +368,7 @@ class EthereumClient(BlockchainClient):
             if _INVALID_SIGNATURE_ERROR in str(error):
                 raise self._create_invalid_signature_error()
             raise
-        nonce = typing.cast(
-            int,
-            node_connections.eth.get_transaction_count(self.__address).get())
-        database_access.update_transfer_nonce(internal_transfer_id,
-                                              self.get_blockchain(), nonce)
-        nonce = database_access.read_transfer_nonce(internal_transfer_id)
+        nonce = self.__get_nonce(node_connections, internal_transfer_id)
         request = BlockchainClient._TransactionSubmissionStartRequest(
             VERSIONED_CONTRACTS_ABI[ContractAbi.PANTOS_HUB], function_selector,
             (on_chain_request, signature), gas, None, nonce)
