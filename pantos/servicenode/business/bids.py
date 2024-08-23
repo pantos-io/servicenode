@@ -76,7 +76,12 @@ class BidInteractor(Interactor):
 
         """
         try:
-            _logger.info('Reading cross-blockchain bids from database')
+            _logger.info(
+                'reading cross-blockchain bids from database', extra={
+                    'source_blockchain': Blockchain(source_blockchain_id),
+                    'destination_blockchain': Blockchain(
+                        destination_blockchain_id)
+                })
             raw_bids = database_access.read_cross_blockchain_bids(
                 source_blockchain_id, destination_blockchain_id)
             bids = []
