@@ -313,3 +313,9 @@ _restful_api.add_resource(NodesHealthResource, '/health/nodes')
 _restful_api.add_resource(_Transfer, '/transfer')
 _restful_api.add_resource(_TransferStatus, '/transfer/<string:task_id>/status')
 _restful_api.add_resource(_Bids, '/bids')
+
+conf = OpenAPISettings(
+    api_version="v1", api_name="My API", app_package_name="my_api", mounted_at="/v1"
+)
+docs = OpenAPI(config=conf)
+docs.init_app(app)
