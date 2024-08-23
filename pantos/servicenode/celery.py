@@ -24,7 +24,17 @@ _logger = logging.getLogger(__name__)
 
 
 def is_main_module() -> bool:
-    return __name__ == '__main__' or any('celery' in arg for arg in sys.argv)
+    """Determine if the current process is a Celery worker process.
+
+    Returns
+    -------
+    bool
+        True if the current process is a Celery worker process.
+
+    """
+    potential_celery_markers = ['celery', 'worker', 'beat', 'flower']
+    return (__name__ == '__main__'
+            or any(marker in sys.argv for marker in potential_celery_markers))
 
 
 if is_main_module():  # pragma: no cover
