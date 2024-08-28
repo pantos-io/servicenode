@@ -20,7 +20,7 @@ services:
       x-bake:
         tags:
           - ${DOCKER_REGISTRY-pantosio}/service-node-app:${DOCKER_TAG-local}
-          - ${DOCKER_REGISTRY-pantosio}/service-node-worker:${EXTRA_TAG-local}
+          - ${DOCKER_REGISTRY-pantosio}/service-node-app:${EXTRA_TAG-local}
     networks:
       pantos-service-node:
     env_file: []

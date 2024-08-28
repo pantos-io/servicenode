@@ -346,8 +346,8 @@ jobs:
 
       - name: Load images
         run: |
-          docker load -i export/app.tar
-          docker load -i export/worker.tar
+          cat export/app.tar | docker import - pantosio/service-node-app:local
+          cat export/worker.tar | docker import - pantosio/service-node-worker:local
 
       - uses: pantos-io/e2e-testing/.github/actions/run-tests@main
         with:
