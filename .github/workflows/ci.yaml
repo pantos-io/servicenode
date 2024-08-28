@@ -105,10 +105,13 @@ jobs:
 
       - name: Build and load
         run: |
+          mkdir export
           make docker-build ARGS='--set "*.cache-from=type=local,src=/tmp/.buildx-cache" \
             --set "*.cache-to=type=local,dest=/tmp/.buildx-cache-new" \
             --set "*.platform=linux/${{ matrix.arch }}" \
-            --builder ${{ steps.buildx.outputs.name }}'
+            --builder ${{ steps.buildx.outputs.name }} \
+            --set "app.output=type=tar,dest=export/app.tar" \
+            --set "worker.output=type=tar,dest=export/worker.tar"'
 
       - name: Test image
         timeout-minutes: ${{ matrix.arch == 'amd64' && 10 || 30 }}
@@ -134,6 +137,13 @@ jobs:
         run: |
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-images-${{ matrix.arch }}
+          path: export
+          retention-days: 1
 
   build:
     uses: ./.github/workflows/build.yml
@@ -308,3 +318,38 @@ jobs:
         run: |
           timeout 1 make docker-logs || true
         working-directory: ethereum-contracts
+
+  e2e-tests:
+    name: E2E tests
+    needs: docker-build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: ['amd64', 'arm64']
+    env:
+      PANTOS_SERVICE_NODE: ${{ github.workspace }}/servicenode
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: ${{ env.PANTOS_SERVICE_NODE }}
+          sparse-checkout: |
+            docker-compose.yml
+            docker-compose.override.yml
+            Makefile
+            
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-images-${{ matrix.arch }}
+          path: export
+
+      - name: Load images
+        run: |
+          docker load -i export/app.tar
+          docker load -i export/worker.tar
+
+      - uses: pantos-io/e2e-testing/.github/actions/run-tests@main
+        with:
+          servicenode-path: ${{ env.PANTOS_SERVICE_NODE }}
+          servicenode-version: 'local'
