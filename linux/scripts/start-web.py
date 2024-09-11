@@ -83,7 +83,9 @@ server_run_command = ['runuser', '-u', USER_NAME, '--'
 
 if os.getenv('DEV_MODE', False) == 'true':
     print('Running in development mode')
-    server_run_command = server_run_command + ['--reload', '--log-level', 'debug']
+    server_run_command = server_run_command + [
+        '--reload', '--log-level', 'debug'
+    ]
 
 print('Starting the server...')
 subprocess.run(server_run_command, check=True, text=True)
