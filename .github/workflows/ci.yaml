@@ -336,6 +336,7 @@ jobs:
           sparse-checkout: |
             docker-compose.yml
             docker-compose.override.yml
+            service-node-config.docker.env
             Makefile
             
       - name: Download artifacts

@@ -49,9 +49,15 @@ while [ $# -gt 0 ]; do
   esac
 done
 
+PROGRAM="./bin/python"
+if [ "$DEV_MODE" = "true" ]; then
+    echo "Running in development mode"
+    PROGRAM="./bin/python watchmedo autorestart --directory=$APP_DIR --pattern=*.py --recursive -- ./bin/python"
+fi
+
 if [ -n "$PANTOS_STATUS_MONITOR" ]; then
     echo "Starting the status monitor"
-    exec ./bin/python -m celery -A pantos.servicenode flower &
+    $PROGRAM -m celery -A pantos.servicenode flower &
 fi
 
 # Check if the current user is not "pantos-service-node" and if so, switch to that user
@@ -61,9 +67,10 @@ if [ "$(id -u)" -ne "$(id -u "$APP_NAME")" ]; then
     EXTRA_ARGS="--uid $(id -u "$APP_NAME")"
 fi
 
+
 while true; do
   echo "Starting the celery worker"
-  ./bin/python -m celery -A pantos.servicenode worker $EXTRA_ARGS -l INFO -n pantos.servicenode -Q transfers,bids
+  $PROGRAM -m celery -A pantos.servicenode worker $EXTRA_ARGS -l INFO -n pantos.servicenode -Q transfers,bids
   PYTHON_EXIT_CODE=$?
 
   if [ "$PANTOS_CELERY_AUTORESTART" != "true" ]; then
