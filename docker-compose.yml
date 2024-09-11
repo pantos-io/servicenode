@@ -183,9 +183,11 @@ services:
         source: ./db_init.sh
         target: /docker-entrypoint-initdb.d/init-user-db.sh
         read_only: true
-    watch:
-      - action: rebuild
-        path: db_init.sh
+    develop:
+      watch:
+        - action: rebuild
+          path: db_init.sh
+
   broker:
     image: rabbitmq:latest
     deploy:

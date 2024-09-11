@@ -32,6 +32,11 @@ services:
         source: ./service-node-config.docker.env
         target: /etc/pantos/service-node-config.env
         read_only: true
+    develop:
+      watch:
+        - action: sync+restart
+          path: service-node-config.docker.env
+          target: /root/service-node-config.docker.env
 
   worker:
     networks:
@@ -63,10 +68,11 @@ services:
         source: ./service-node-config.docker.env
         target: /etc/pantos/service-node-config.env
         read_only: true
-    watch:
-      - action: sync+restart
-        path: service-node-config.docker.env
-        target: /root/service-node-config.docker.env
+    develop:
+      watch:
+        - action: sync+restart
+          path: service-node-config.docker.env
+          target: /root/service-node-config.docker.env
 
 volumes:
   bnb-data:
