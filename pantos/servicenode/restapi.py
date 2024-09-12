@@ -289,6 +289,27 @@ class _Bids(flask_restful.Resource):
 
     """
     def get(self) -> flask.Response:
+        """
+        A simple GET endpoint that returns a greeting.
+        ---
+        parameters:
+          - in: query
+            name: source_blockchain
+            schema:
+              $ref: '#/components/schemas/_Bids/properties/source_blockchain' # references the schema which has been added to the definitions in the previous Python code
+            required: true
+            description: Numeric ID of the user to get
+          - in: query
+            name: destination_blockchain
+            schema:
+              $ref: '#/components/schemas/_Bids/properties/destination_blockchain'
+            required: true
+            description: Numeric ID of the user to get
+        responses:
+          200:
+            description: 'ok'
+        """
+        
         try:
             query_arguments = flask_restful.request.args
             bids_parameter = _BidsSchema().load(query_arguments)

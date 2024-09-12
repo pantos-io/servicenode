@@ -353,3 +353,13 @@ jobs:
         with:
           servicenode-path: ${{ env.PANTOS_SERVICE_NODE }}
           servicenode-version: 'local'
+        
+  openapi:
+    name: OpenAPI docs generation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pantos-io/ci-workflows/.github/actions/install-python-deps@v1
+      - name: Build OpenAPI
+        run: |
+          make OPEN_API_OUTPUT=open_api.json docs
