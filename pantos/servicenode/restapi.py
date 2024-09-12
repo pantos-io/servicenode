@@ -296,7 +296,7 @@ class _Bids(flask_restful.Resource):
           - in: query
             name: source_blockchain
             schema:
-              $ref: '#/components/schemas/_Bids/properties/source_blockchain' # references the schema which has been added to the definitions in the previous Python code
+              $ref: '#/components/schemas/_Bids/properties/source_blockchain'
             required: true
             description: Numeric ID of the user to get
           - in: query
@@ -309,7 +309,7 @@ class _Bids(flask_restful.Resource):
           200:
             description: 'ok'
         """
-        
+
         try:
             query_arguments = flask_restful.request.args
             bids_parameter = _BidsSchema().load(query_arguments)

@@ -26,13 +26,15 @@ from pantos.servicenode.plugins import initialize_plugins
 _logger = logging.getLogger(__name__)
 """Logger for this module."""
 
+
 def create_dummy_application() -> flask.Flask:
     """Create a useless dummy web app avoiding all the initialization
     of additional components. Mainly used for docs generation.
-    
+
     """
     from pantos.servicenode.restapi import flask_app
     return flask_app
+
 
 def create_application() -> flask.Flask:
     """Create the service node application.
