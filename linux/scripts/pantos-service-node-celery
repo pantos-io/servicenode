@@ -52,7 +52,7 @@ done
 PROGRAM="./bin/python"
 if [ "$DEV_MODE" = "true" ]; then
     echo "Running in development mode"
-    PROGRAM="./bin/python watchmedo autorestart --directory=$APP_DIR --pattern=*.py --recursive -- ./bin/python"
+    PROGRAM="./bin/python -m watchme autorestart --directory=$APP_DIR --pattern=*.py --recursive -- ./bin/python"
 fi
 
 if [ -n "$PANTOS_STATUS_MONITOR" ]; then
