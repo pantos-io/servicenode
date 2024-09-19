@@ -90,7 +90,7 @@ To remove all the stacks, run the following:
 
 `make docker-remove`
 
-Please note that this mode uses an incremental amount of resources and that Docker Desktop doesn't fully support displaying it, but it should be good enough to test multi-sig locally.
+Please note that this mode uses an incremental amount of resources and that Docker Desktop doesn't fully support displaying it, but it should be good enough to test multiple service nodes locally.
 
 ##### Production Setup
 
