@@ -57,6 +57,15 @@ flower = "^2.0.1"
 types-requests = "^2.32.0.20240622"
 types-sqlalchemy = "^1.4.53.38"
 
+[tool.poetry.group.docs]
+optional = true
+
+[tool.poetry.group.docs.dependencies]
+apispec = "6.6.1"
+apispec-webframeworks = "^1.1.0"
+flasgger = "^0.9.7.1"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+

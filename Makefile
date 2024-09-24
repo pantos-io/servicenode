@@ -20,6 +20,10 @@ check-version:
 		echo "Version check passed" ; \
 	fi
 
+.PHONY: docs
+docs:
+	poetry run python3 -m pantos.servicenode.docs $(OPEN_API_OUTPUT)
+
 .PHONY: dist
 dist: tar wheel debian
 
