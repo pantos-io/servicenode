@@ -4,6 +4,7 @@ PYTHON_FILES_WITHOUT_TESTS := pantos/servicenode linux/scripts/start-web.py
 PYTHON_FILES := $(PYTHON_FILES_WITHOUT_TESTS) tests
 STACK_BASE_NAME=stack-service-node
 INSTANCE_COUNT ?= 1
+DEV_MODE ?= false
 
 .PHONY: check-version
 check-version:
@@ -246,16 +247,34 @@ docker-build:
 		docker buildx bake -f docker-compose.yml --load $(ARGS); \
 	fi
 
+.PHONY: docker
 docker: check-swarm-init docker-build
 	@for i in $$(seq 1 $(INSTANCE_COUNT)); do \
-		( \
-        STACK_NAME="${STACK_BASE_NAME}-${STACK_IDENTIFIER}-$$i"; \
-		export INSTANCE=$$i; \
-		echo "Deploying stack $$STACK_NAME"; \
-        docker compose -f docker-compose.yml -f docker-compose.override.yml -p $$STACK_NAME $(EXTRA_COMPOSE) up -d --wait $(ARGS); \
-		) & \
+        ( \
+        export STACK_NAME="${STACK_BASE_NAME}-${STACK_IDENTIFIER}-$$i"; \
+        export INSTANCE=$$i; \
+        echo "Deploying stack $$STACK_NAME"; \
+        if [ "$(DEV_MODE)" = "true" ]; then \
+            echo "Running in development mode"; \
+            export ARGS="$(ARGS) --watch"; \
+            docker compose -f docker-compose.yml -f docker-compose.override.yml -p $$STACK_NAME $$EXTRA_COMPOSE up $$ARGS & \
+            COMPOSE_PID=$$!; \
+            trap 'echo "Caught SIGINT, killing background processes..."; kill $$COMPOSE_PID; exit 1' SIGINT; \
+        else \
+            export ARGS="--detach --wait $(ARGS)"; \
+            docker compose -f docker-compose.yml -f docker-compose.override.yml -p $$STACK_NAME $$EXTRA_COMPOSE up $$ARGS; \
+        fi; \
+        trap 'exit 1' SIGINT; \
+        echo "Stack $$STACK_NAME deployed"; \
+        if [ "$(DEV_MODE)" = "true" ]; then \
+            wait $$COMPOSE_PID; \
+        fi; \
+        ) & \
     done; \
-	wait
+    trap 'echo "Caught SIGINT, killing all background processes..."; kill 0; exit 1' SIGINT; \
+    wait
+    # We need to use compose because swarm goes absolutely crazy on MacOS when using cross architecture
+    # And can't pull the correct images
     #docker stack deploy -c docker-compose.yml -c docker-compose.override.yml $$STACK_NAME --with-registry-auth --detach=false $(ARGS) & \
 
 .PHONY: docker-remove

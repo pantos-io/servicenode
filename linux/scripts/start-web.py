@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Start the service node server."""
 
+import os
 import subprocess
 import sys
 from importlib import resources
@@ -79,6 +80,12 @@ else:
 
 server_run_command = ['runuser', '-u', USER_NAME, '--'
                       ] + gunicorn_command.split()
+
+if os.getenv('DEV_MODE', False) == 'true':
+    print('Running in development mode')
+    server_run_command = server_run_command + [
+        '--reload', '--log-level', 'debug'
+    ]
 
 print('Starting the server...')
 subprocess.run(server_run_command, check=True, text=True)

@@ -74,6 +74,24 @@ You can run a local setup with docker by doing the following steps:
 - Ensure you have a `signer_key` file located in the same directory. If you don't, you can create one with `make signer-key`
 - Run `make docker`
 
+##### Local development with Docker
+
+You can do local development with Docker by enabling dev mode (Docker watch mode). To do so, set the environment variable `DEV_MODE` to true, like this:
+
+`DEV_MODE=true make docker`
+
+#### Multiple local deployments
+
+We support multiple local deployments, for example for testing purposes, you can run the stacks like this:
+
+`make docker INSTANCE_COUNT=<number of instances>`
+
+To remove all the stacks, run the following:
+
+`make docker-remove`
+
+Please note that this mode uses an incremental amount of resources and that Docker Desktop doesn't fully support displaying it, but it should be good enough to test multiple service nodes locally.
+
 ##### Production Setup
 
 The production setup is slightly different, for convenience we provide a separate `.env` file and `make` method.
