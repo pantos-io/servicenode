@@ -52,8 +52,10 @@ celery_app = celery.Celery(
 
 # Additional Celery configuration
 celery_app.conf.update(
-    result_expires=None, task_default_exchange='pantos.servicenode',
-    task_default_queue='transfers', task_routes={
+    result_expires=None,
+    task_default_exchange='pantos.servicenode',
+    task_default_queue='transfers',
+    task_routes={
         'pantos.servicenode.business.plugins.execute_bid_plugin': {
             'queue': _BIDS_QUEUE_NAME
         },
@@ -63,7 +65,13 @@ celery_app.conf.update(
         'pantos.common.blockchains.tasks.*': {
             'queue': _TRANSFERS_QUEUE_NAME
         }
-    }, task_track_started=True, worker_enable_remote_control=False)
+    },
+    task_track_started=True,
+    worker_enable_remote_control=False,
+    # Make sure the broker crashes if it can't connect on startup
+    broker_connection_retry=10,
+    broker_channel_error_retry=True,
+    broker_connection_retry_on_startup=False)
 
 if is_main_module():  # pragma: no cover
     # purge the bids queue at startup
