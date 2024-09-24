@@ -53,7 +53,7 @@ PROGRAM="./bin/python"
 if [ "$DEV_MODE" = "true" ]; then
     echo "Running in development mode"
     ./bin/pip install watchdog[watchmedo]
-    PROGRAM="./bin/watchme autorestart --directory=$APP_DIR --pattern=*.py --recursive -- ./bin/python"
+    PROGRAM="./bin/watchmedo auto-restart --directory=$APP_DIR --pattern=*.py --recursive -- ./bin/python"
 fi
 
 if [ -n "$PANTOS_STATUS_MONITOR" ]; then
