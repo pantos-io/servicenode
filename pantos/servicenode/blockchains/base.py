@@ -22,17 +22,12 @@ from pantos.common.exceptions import ErrorCreator
 from pantos.common.types import BlockchainAddress
 from pantos.common.types import ContractFunctionArgs
 
+from pantos.servicenode.configuration import config
 from pantos.servicenode.configuration import get_blockchain_config
 from pantos.servicenode.exceptions import ServiceNodeError
+from pantos.servicenode.protocol import is_supported_protocol_version
 
 _logger = logging.getLogger(__name__)
-
-_CONTRACTS_VERSION = semantic_version.Version('1.0.0')
-
-VERSIONED_CONTRACTS_ABI = {
-    abi_contract: VersionedContractAbi(abi_contract, _CONTRACTS_VERSION)
-    for abi_contract in ContractAbi
-}
 
 
 class BlockchainClientError(ServiceNodeError):
@@ -77,6 +72,12 @@ class UnresolvableTransferSubmissionError(BlockchainClientError):
 class BlockchainClient(BlockchainHandler, ErrorCreator[BlockchainClientError]):
     """Base class for all blockchain clients.
 
+    Attributes
+    ----------
+    protocol_version : semantic_version.Version
+        The version of the Pantos protocol that the blockchain client
+        instance is compliant with.
+
     """
     def __init__(self):
         """Construct a blockchain client instance.
@@ -88,6 +89,10 @@ class BlockchainClient(BlockchainHandler, ErrorCreator[BlockchainClientError]):
             initialized.
 
         """
+        self.protocol_version: typing.Final[
+            semantic_version.Version] = semantic_version.Version(
+                config['protocol'])
+        assert is_supported_protocol_version(self.protocol_version)
         blockchain_node_url = self._get_config()['provider']
         fallback_blockchain_nodes_urls = self._get_config().get(
             'fallback_providers', [])
@@ -185,20 +190,21 @@ class BlockchainClient(BlockchainHandler, ErrorCreator[BlockchainClientError]):
         pass  # pragma: no cover
 
     @abc.abstractmethod
-    def register_node(self, node_url: str, node_stake: int,
-                      unstaking_address: BlockchainAddress) -> None:
+    def register_node(self, node_url: str, node_deposit: int,
+                      withdrawal_address: BlockchainAddress) -> None:
         """Register the service node at the Pantos Hub on the blockchain.
 
         Parameters
         ----------
         node_url : str
             The service node's URL to be registered.
-        node_stake : int
-            The service node's stake to be locked (must be at least the
-            minimum required service node stake at the Pantos Hub).
-        unstaking_address : str
-            The address where the stake will be returned when the
-            service node will be unregistered.
+        node_deposit : int
+            The service node's deposit to be locked (must be at least
+            the minimum required service node deposit at the Pantos
+            Hub).
+        withdrawal_address : BlockchainAddress
+            The address where the deposit will be returned after the
+            service node has been unregistered.
 
         Raises
         ------
@@ -380,9 +386,9 @@ class BlockchainClient(BlockchainHandler, ErrorCreator[BlockchainClientError]):
 
         """
         transaction_submission_completed: bool
-        transaction_status: typing.Optional[TransactionStatus] = None
-        transaction_id: typing.Optional[str] = None
-        on_chain_transfer_id: typing.Optional[int] = None
+        transaction_status: TransactionStatus | None = None
+        transaction_id: str | None = None
+        on_chain_transfer_id: int | None = None
 
     def get_transfer_submission_status(
             self, internal_transaction_id: uuid.UUID,
@@ -474,14 +480,14 @@ class BlockchainClient(BlockchainHandler, ErrorCreator[BlockchainClientError]):
 
     @abc.abstractmethod
     def is_unbonding(self) -> bool:
-        """Determine if the service node is during the unbonding period
-        and has withdrawn its stake.
+        """Determine if the service node is in the unbonding period and
+        has not yet withdrawn its deposit.
 
         Returns
         -------
         bool
-            True if service node is during the unbonding period
-            and has not withdrawn its stake, else false.
+            True if service node is in the unbonding period and has not
+            yet withdrawn its deposit.
 
         Raises
         ------
@@ -505,16 +511,16 @@ class BlockchainClient(BlockchainHandler, ErrorCreator[BlockchainClientError]):
 
     @abc.abstractmethod
     def get_validator_fee_factor(self, blockchain: Blockchain) -> int:
-        """Get the Validator fee factor of the given blockchain.
+        """Get the validator fee factor of the given blockchain.
 
         Returns
         -------
-            The Validator fee factor.
+            The validator fee factor.
 
         Raises
         ------
         BlockchainClientError
-            If the Validator factor cannot be obtained.
+            If the validator fee factor cannot be obtained.
 
         """
         pass  # pragma: no cover
@@ -535,7 +541,7 @@ class BlockchainClient(BlockchainHandler, ErrorCreator[BlockchainClientError]):
             specialized_error_class=UnresolvableTransferSubmissionError,
             **kwargs)
 
-    def _get_config(self) -> typing.Dict[str, typing.Any]:
+    def _get_config(self) -> dict[str, typing.Any]:
         return get_blockchain_config(self.get_blockchain())  # pragma: no cover
 
     def _get_utilities(self) -> BlockchainUtilities:
@@ -599,8 +605,8 @@ class BlockchainClient(BlockchainHandler, ErrorCreator[BlockchainClientError]):
         versioned_contract_abi: VersionedContractAbi
         function_selector: str
         function_args: ContractFunctionArgs
-        gas: typing.Optional[int]
-        amount: typing.Optional[int]
+        gas: int | None
+        amount: int | None
         nonce: int
 
     def _start_transaction_submission(
@@ -658,3 +664,13 @@ class BlockchainClient(BlockchainHandler, ErrorCreator[BlockchainClientError]):
             blocks_until_resubmission)
         return self._get_utilities().start_transaction_submission(
             request_, node_connections)
+
+    @property
+    def _versioned_pantos_hub_abi(self) -> VersionedContractAbi:
+        return VersionedContractAbi(ContractAbi.PANTOS_HUB,
+                                    self.protocol_version)
+
+    @property
+    def _versioned_pantos_token_abi(self) -> VersionedContractAbi:
+        return VersionedContractAbi(ContractAbi.PANTOS_TOKEN,
+                                    self.protocol_version)

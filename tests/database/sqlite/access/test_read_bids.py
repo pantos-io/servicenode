@@ -3,7 +3,7 @@ import unittest.mock
 from pantos.common.blockchains.enums import Blockchain
 
 from pantos.servicenode.database.access import create_bid
-from pantos.servicenode.database.access import read_cross_blockchain_bids
+from pantos.servicenode.database.access import read_bids
 
 _SOURCE_BLOCKCHAIN_ID = 0
 
@@ -20,10 +20,8 @@ _BID_VALID_UNTIL = 1000
 
 @unittest.mock.patch('pantos.servicenode.database.access.get_session_maker')
 @unittest.mock.patch('pantos.servicenode.database.access.get_session')
-def test_read_cross_blockchain_bids_correct(mocked_session,
-                                            mocked_session_maker,
-                                            db_initialized_session,
-                                            embedded_db_session_maker):
+def test_read_bids_correct(mocked_session, mocked_session_maker,
+                           db_initialized_session, embedded_db_session_maker):
     mocked_session.side_effect = embedded_db_session_maker
     mocked_session_maker.return_value = embedded_db_session_maker
     create_bid(Blockchain(_SOURCE_BLOCKCHAIN_ID),
@@ -33,8 +31,7 @@ def test_read_cross_blockchain_bids_correct(mocked_session,
                Blockchain(_DESTINATION_BLOCKCHAIN_ID), _EXECUTION_TIME * 2,
                _BID_VALID_UNTIL, _DOUBLE_FEE)
 
-    bids = read_cross_blockchain_bids(_SOURCE_BLOCKCHAIN_ID,
-                                      _DESTINATION_BLOCKCHAIN_ID)
+    bids = read_bids(_SOURCE_BLOCKCHAIN_ID, _DESTINATION_BLOCKCHAIN_ID)
 
     assert bids[0].fee == _FEE
     assert bids[0].destination_blockchain_id == _DESTINATION_BLOCKCHAIN_ID
@@ -47,9 +44,9 @@ def test_read_cross_blockchain_bids_correct(mocked_session,
 
 @unittest.mock.patch('pantos.servicenode.database.access.get_session_maker')
 @unittest.mock.patch('pantos.servicenode.database.access.get_session')
-def test_read_cross_blockchain_bids_non_existent_correct(
-        mocked_session, mocked_session_maker, db_initialized_session,
-        embedded_db_session_maker):
+def test_read_bids_non_existent_correct(mocked_session, mocked_session_maker,
+                                        db_initialized_session,
+                                        embedded_db_session_maker):
     mocked_session.side_effect = embedded_db_session_maker
     mocked_session_maker.return_value = embedded_db_session_maker
     create_bid(Blockchain(_SOURCE_BLOCKCHAIN_ID),
@@ -57,7 +54,6 @@ def test_read_cross_blockchain_bids_non_existent_correct(
                _BID_VALID_UNTIL, _DOUBLE_FEE)
 
     # the chain ids have been switched
-    bids = read_cross_blockchain_bids(_DESTINATION_BLOCKCHAIN_ID,
-                                      _SOURCE_BLOCKCHAIN_ID)
+    bids = read_bids(_DESTINATION_BLOCKCHAIN_ID, _SOURCE_BLOCKCHAIN_ID)
 
     assert len(bids) == 0

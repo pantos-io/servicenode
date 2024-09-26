@@ -293,7 +293,7 @@ class _Bids(flask_restful.Resource):
             query_arguments = flask_restful.request.args
             bids_parameter = _BidsSchema().load(query_arguments)
             _logger.info('new bids request', extra=bids_parameter)
-            bids = BidInteractor().get_cross_blockchain_bids(
+            bids = BidInteractor().get_current_bids(
                 bids_parameter['source_blockchain'],
                 bids_parameter['destination_blockchain'])
         except marshmallow.ValidationError as ve:

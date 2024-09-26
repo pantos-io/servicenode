@@ -8,7 +8,7 @@ from pantos.servicenode.restapi import _BidsSchema
 
 
 def test_bids_correct(bids, test_client):
-    with unittest.mock.patch.object(BidInteractor, 'get_cross_blockchain_bids',
+    with unittest.mock.patch.object(BidInteractor, 'get_current_bids',
                                     return_value=bids):
         response = test_client.get(
             '/bids?source_blockchain=1&destination_blockchain=3')

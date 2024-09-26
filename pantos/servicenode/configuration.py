@@ -10,6 +10,8 @@ from pantos.common.blockchains.enums import Blockchain
 from pantos.common.configuration import Config
 from pantos.common.logging import LogFormat
 
+from pantos.servicenode.protocol import get_supported_protocol_versions
+
 _DEFAULT_FILE_NAME: typing.Final[str] = 'service-node-config.yml'
 """Default configuration file name."""
 
@@ -18,6 +20,7 @@ config = Config(_DEFAULT_FILE_NAME)
 
 _VALIDATION_SCHEMA_BLOCKCHAIN = {
     'type': 'dict',
+    'required': True,
     'schema': {
         'active': {
             'type': 'boolean',
@@ -27,7 +30,7 @@ _VALIDATION_SCHEMA_BLOCKCHAIN = {
             'type': 'boolean',
             'default': True
         },
-        'unstaking_address': {
+        'withdrawal_address': {
             'type': 'string',
             'required': True,
             'empty': False
@@ -98,7 +101,7 @@ _VALIDATION_SCHEMA_BLOCKCHAIN = {
             'type': 'integer',
             'required': True
         },
-        'stake': {
+        'deposit': {
             'type': 'integer',
             'required': True
         }
@@ -108,6 +111,7 @@ _VALIDATION_SCHEMA_BLOCKCHAIN = {
 
 _VALIDATION_SCHEMA_LOG = {
     'type': 'dict',
+    'required': True,
     'schema': {
         'format': {
             'type': 'string',
@@ -152,8 +156,17 @@ _VALIDATION_SCHEMA_LOG = {
 """Schema for validating a log entry in the configuration file."""
 
 _VALIDATION_SCHEMA = {
+    'protocol': {
+        'type': 'string',
+        'required': True,
+        'allowed': [
+            str(protocol_version)
+            for protocol_version in get_supported_protocol_versions()
+        ]
+    },
     'application': {
         'type': 'dict',
+        'required': True,
         'schema': {
             'debug': {
                 'type': 'boolean',
@@ -189,6 +202,7 @@ _VALIDATION_SCHEMA = {
     },
     'database': {
         'type': 'dict',
+        'required': True,
         'schema': {
             'url': {
                 'type': 'string',
@@ -220,6 +234,7 @@ _VALIDATION_SCHEMA = {
     },
     'celery': {
         'type': 'dict',
+        'required': True,
         'schema': {
             'broker': {
                 'type': 'string',
@@ -236,6 +251,7 @@ _VALIDATION_SCHEMA = {
     },
     'signer': {
         'type': 'dict',
+        'required': True,
         'schema': {
             'pem': {
                 'type': 'string',
@@ -250,6 +266,7 @@ _VALIDATION_SCHEMA = {
     },
     'plugins': {
         'type': 'dict',
+        'required': True,
         'schema': {
             'bids': {
                 'type': 'dict',
@@ -269,6 +286,7 @@ _VALIDATION_SCHEMA = {
     },
     'tasks': {
         'type': 'dict',
+        'required': True,
         'schema': {
             'confirm_transfer': {
                 'type': 'dict',
@@ -296,6 +314,7 @@ _VALIDATION_SCHEMA = {
     },
     'blockchains': {
         'type': 'dict',
+        'required': True,
         'schema': dict(
             zip([b.name.lower() for b in Blockchain],
                 itertools.repeat(_VALIDATION_SCHEMA_BLOCKCHAIN)))

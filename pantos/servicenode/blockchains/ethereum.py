@@ -3,7 +3,6 @@
 """
 import json
 import logging
-import time
 import typing
 import uuid
 
@@ -14,11 +13,9 @@ from pantos.common.blockchains.base import NodeConnections
 from pantos.common.blockchains.base import TransactionNonceTooLowError
 from pantos.common.blockchains.base import TransactionUnderpricedError
 from pantos.common.blockchains.enums import Blockchain
-from pantos.common.blockchains.enums import ContractAbi
 from pantos.common.blockchains.ethereum import EthereumUtilities
 from pantos.common.types import BlockchainAddress
 
-from pantos.servicenode.blockchains.base import VERSIONED_CONTRACTS_ABI
 from pantos.servicenode.blockchains.base import BlockchainClient
 from pantos.servicenode.blockchains.base import BlockchainClientError
 from pantos.servicenode.database import access as database_access
@@ -89,7 +86,7 @@ class EthereumClient(BlockchainClient):
             hub_contract = self._create_hub_contract(node_connections)
             node_record = hub_contract.functions.getServiceNodeRecord(
                 self.__address).call().get()
-            assert len(node_record) == 6
+            assert len(node_record) == 5
             active = node_record[0]
             assert isinstance(active, bool)
             return active
@@ -99,7 +96,7 @@ class EthereumClient(BlockchainClient):
 
     def is_valid_recipient_address(self, recipient_address: str) -> bool:
         # Docstring inherited
-        if self.is_valid_address(recipient_address) is False:
+        if not self.is_valid_address(recipient_address):
             return False
         is_zero_address = int(recipient_address, 0) == 0
         return not is_zero_address
@@ -111,48 +108,46 @@ class EthereumClient(BlockchainClient):
             hub_contract = self._create_hub_contract(node_connections)
             node_record = hub_contract.functions.getServiceNodeRecord(
                 self.__address).call().get()
-            assert len(node_record) == 6
+            assert len(node_record) == 5
             node_url = node_record[1]
             assert isinstance(node_url, str)
             return node_url
         except Exception:
             raise self._create_error('unable to read the service node URL')
 
-    def register_node(self, node_url: str, node_stake: int,
-                      unstaking_address: BlockchainAddress) -> None:
+    def register_node(self, node_url: str, node_deposit: int,
+                      withdrawal_address: BlockchainAddress) -> None:
         # Docstring inherited
         extra_info = {
             'blockchain': self.get_blockchain(),
             'service_node_address': self.__address,
             'node_url': node_url,
-            'node_stake': node_stake,
-            'unstaking_address': unstaking_address
+            'node_deposit': node_deposit,
+            'withdrawal_address': withdrawal_address
         }
         try:
             node_connections = self.__create_node_connections()
-            nonce = typing.cast(
-                int,
-                node_connections.eth.get_transaction_count(
-                    self.__address).get())
-            if node_stake > 0:
+            nonce = node_connections.eth.get_transaction_count(
+                self.__address).get()
+            if node_deposit > 0:
                 spender_address = self._get_config()['hub']
                 request = BlockchainClient._TransactionSubmissionStartRequest(
-                    VERSIONED_CONTRACTS_ABI[ContractAbi.PANTOS_TOKEN],
+                    self._versioned_pantos_token_abi,
                     _TOKEN_APPROVE_FUNCTION_SELECTOR,
-                    (spender_address, node_stake), _TOKEN_APPROVE_GAS, None,
+                    (spender_address, node_deposit), _TOKEN_APPROVE_GAS, None,
                     nonce)
                 internal_transaction_id = self._start_transaction_submission(
                     request, node_connections)
                 extra_info |= {
                     'internal_transaction_id': internal_transaction_id
                 }
-                _logger.info('node stake allowance submitted',
+                _logger.info('node deposit allowance submitted',
                              extra=extra_info)
                 nonce += 1
             request = BlockchainClient._TransactionSubmissionStartRequest(
-                VERSIONED_CONTRACTS_ABI[ContractAbi.PANTOS_HUB],
+                self._versioned_pantos_hub_abi,
                 _HUB_REGISTER_SERVICE_NODE_FUNCTION_SELECTOR,
-                (self.__address, node_url, node_stake, unstaking_address),
+                (self.__address, node_url, node_deposit, withdrawal_address),
                 _HUB_REGISTER_SERVICE_NODE_GAS, None, nonce)
             internal_transaction_id = self._start_transaction_submission(
                 request, node_connections)
@@ -160,7 +155,8 @@ class EthereumClient(BlockchainClient):
             _logger.info('node registration submitted', extra=extra_info)
         except Exception:
             raise self._create_error('unable to register the service node',
-                                     node_url=node_url, node_stake=node_stake)
+                                     node_url=node_url,
+                                     node_deposit=node_deposit)
 
     def start_transfer_submission(
             self, request: BlockchainClient.TransferSubmissionStartRequest) \
@@ -214,7 +210,7 @@ class EthereumClient(BlockchainClient):
             nonce = node_connections.eth.get_transaction_count(
                 self.__address).get()
             request = BlockchainClient._TransactionSubmissionStartRequest(
-                VERSIONED_CONTRACTS_ABI[ContractAbi.PANTOS_HUB],
+                self._versioned_pantos_hub_abi,
                 _HUB_UNREGISTER_SERVICE_NODE_FUNCTION_SELECTOR,
                 (self.__address, ), _HUB_UNREGISTER_SERVICE_NODE_GAS, None,
                 nonce)
@@ -236,7 +232,7 @@ class EthereumClient(BlockchainClient):
             nonce = node_connections.eth.get_transaction_count(
                 self.__address).get()
             request = BlockchainClient._TransactionSubmissionStartRequest(
-                VERSIONED_CONTRACTS_ABI[ContractAbi.PANTOS_HUB],
+                self._versioned_pantos_hub_abi,
                 _HUB_UPDATE_SERVICE_NODE_URL_FUNCTION_SELECTOR, (node_url, ),
                 _HUB_UPDATE_SERVICE_NODE_URL_GAS, None, nonce)
             internal_transaction_id = self._start_transaction_submission(
@@ -269,7 +265,7 @@ class EthereumClient(BlockchainClient):
             nonce = node_connections.eth.get_transaction_count(
                 self.__address).get()
             request = BlockchainClient._TransactionSubmissionStartRequest(
-                VERSIONED_CONTRACTS_ABI[ContractAbi.PANTOS_HUB],
+                self._versioned_pantos_hub_abi,
                 _HUB_CANCEL_SERVICE_NODE_UNREGISTRATION_FUNCTION_SELECTOR,
                 (self.__address, ),
                 _HUB_CANCEL_SERVICE_NODE_UNREGISTRATION_GAS, None, nonce)
@@ -279,21 +275,18 @@ class EthereumClient(BlockchainClient):
             _logger.info('node cancel unregistration submitted',
                          extra=extra_info)
         except Exception:
-            raise self._create_error('unable to unregister the service node')
+            raise self._create_error(
+                'unable to cancel the service node unregistration')
 
     def get_validator_fee_factor(self, blockchain: Blockchain) -> int:
         # Docstring inherited
         try:
             node_connections = self.__create_node_connections()
             hub_contract = self._create_hub_contract(node_connections)
-            fee_record = hub_contract.functions.getValidatorFeeRecord(
+            fee_factor = hub_contract.functions.getCurrentValidatorFeeFactor(
                 blockchain.value).call().get()
-            # Check if the valid from of the factor has passed
-            if time.time() >= fee_record[2]:
-                # Return new factor
-                return fee_record[1]
-            # Return old factor
-            return fee_record[0]
+            assert isinstance(fee_factor, int)
+            return fee_factor
         except Exception:
             raise self._create_error('unable to get the validator fee factor')
 
@@ -302,7 +295,7 @@ class EthereumClient(BlockchainClient):
             -> NodeConnections.Wrapper[web3.contract.Contract]:
         return self._get_utilities().create_contract(
             BlockchainAddress(self._get_config()['hub']),
-            VERSIONED_CONTRACTS_ABI[ContractAbi.PANTOS_HUB], node_connections)
+            self._versioned_pantos_hub_abi, node_connections)
 
     def _get_utilities(self) -> EthereumUtilities:
         # Docstring inherited
@@ -318,15 +311,17 @@ class EthereumClient(BlockchainClient):
             assert (transaction_receipt['transactionHash'].to_0x_hex() ==
                     transaction_id)
             _logger.info(
-                'transfer/transferFrom transaction receipt', extra=json.loads(
-                    web3.Web3.to_json(transaction_receipt)))  # type: ignore
+                'transfer/transferFrom transaction receipt',
+                extra=json.loads(web3.Web3.to_json(transaction_receipt)))
             hub_contract = self._create_hub_contract(node_connections)
             if self.get_blockchain() is destination_blockchain:
-                event_log = hub_contract.events.Transfer().process_receipt(
+                event = hub_contract.events.TransferSucceeded()
+                event_log = event.process_receipt(
                     transaction_receipt, errors=web3.logs.DISCARD)[0].get()
                 on_chain_transfer_id = event_log['args']['transferId']
             else:
-                event_log = hub_contract.events.TransferFrom().process_receipt(
+                event = hub_contract.events.TransferFromSucceeded()
+                event_log = event.process_receipt(
                     transaction_receipt, errors=web3.logs.DISCARD)[0].get()
                 on_chain_transfer_id = event_log['args']['sourceTransferId']
             return on_chain_transfer_id
@@ -370,7 +365,7 @@ class EthereumClient(BlockchainClient):
             raise
         nonce = self.__get_nonce(node_connections, internal_transfer_id)
         request = BlockchainClient._TransactionSubmissionStartRequest(
-            VERSIONED_CONTRACTS_ABI[ContractAbi.PANTOS_HUB], function_selector,
+            self._versioned_pantos_hub_abi, function_selector,
             (on_chain_request, signature), gas, None, nonce)
         try:
             return self._start_transaction_submission(request,

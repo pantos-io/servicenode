@@ -29,6 +29,11 @@ class MockBidPlugin:
         return True
 
 
+@pytest.fixture(scope='module')
+def transfer_interactor():
+    return TransferInteractor()
+
+
 @unittest.mock.patch('pantos.servicenode.business.transfers.get_bid_plugin')
 @unittest.mock.patch('pantos.servicenode.business.transfers.'
                      'execute_transfer_task')
@@ -663,8 +668,9 @@ def test_confirm_transfer_task_confirmation_error(
     return_value=True)
 def test_check_valid_until_correct(mocked_is_valid_execution_time_limit,
                                    source_blockchain, valid_until,
-                                   bid_execution_time, time_received):
-    TransferInteractor()._TransferInteractor__check_valid_until(
+                                   bid_execution_time, time_received,
+                                   transfer_interactor):
+    transfer_interactor._TransferInteractor__check_valid_until(
         source_blockchain, valid_until, bid_execution_time, time_received)
 
 
@@ -673,9 +679,10 @@ def test_check_valid_until_correct(mocked_is_valid_execution_time_limit,
     return_value=False)
 def test_check_valid_until_invalid(mocked_is_valid_execution_time_limit,
                                    source_blockchain, valid_until,
-                                   bid_execution_time, time_received):
+                                   bid_execution_time, time_received,
+                                   transfer_interactor):
     with pytest.raises(TransferInteractorError):
-        TransferInteractor()._TransferInteractor__check_valid_until(
+        transfer_interactor._TransferInteractor__check_valid_until(
             source_blockchain, valid_until, bid_execution_time, time_received)
 
 
@@ -687,8 +694,9 @@ def test_check_valid_until_invalid(mocked_is_valid_execution_time_limit,
                             return_value=True)
 def test_check_valid_bid_correct(mocked_has_bid_expired,
                                  mocked_verify_bids_signature, bid,
-                                 source_blockchain, destination_blockchain):
-    TransferInteractor()._TransferInteractor__check_valid_bid(
+                                 source_blockchain, destination_blockchain,
+                                 transfer_interactor):
+    transfer_interactor._TransferInteractor__check_valid_bid(
         bid, source_blockchain, destination_blockchain)
 
 
@@ -696,9 +704,10 @@ def test_check_valid_bid_correct(mocked_has_bid_expired,
                             '_TransferInteractor__has_bid_expired',
                             return_value=True)
 def test_check_valid_bid_expired(mocked_has_bid_expired, bid,
-                                 source_blockchain, destination_blockchain):
+                                 source_blockchain, destination_blockchain,
+                                 transfer_interactor):
     with pytest.raises(TransferInteractorError):
-        TransferInteractor()._TransferInteractor__check_valid_bid(
+        transfer_interactor._TransferInteractor__check_valid_bid(
             bid, source_blockchain, destination_blockchain)
 
 
@@ -711,22 +720,24 @@ def test_check_valid_bid_expired(mocked_has_bid_expired, bid,
 def test_check_valid_bid_invalid_signature(mocked_has_bid_expired,
                                            mocked_verify_bids_signature, bid,
                                            source_blockchain,
-                                           destination_blockchain):
+                                           destination_blockchain,
+                                           transfer_interactor):
     with pytest.raises(TransferInteractorError):
-        TransferInteractor()._TransferInteractor__check_valid_bid(
+        transfer_interactor._TransferInteractor__check_valid_bid(
             bid, source_blockchain, destination_blockchain)
 
 
 @pytest.mark.parametrize("bid_vaild_until,expected",
                          [(time.time() - 2, True), (time.time() * 2, False)])
-def test_has_bid_expired(bid_vaild_until, expected):
-    assert TransferInteractor()._TransferInteractor__has_bid_expired(
+def test_has_bid_expired(bid_vaild_until, expected, transfer_interactor):
+    assert transfer_interactor._TransferInteractor__has_bid_expired(
         bid_vaild_until) is expected
 
 
 @unittest.mock.patch('pantos.servicenode.business.transfers.get_signer')
 @unittest.mock.patch('pantos.servicenode.business.transfers.get_signer_config')
-def test_verify_bids_signature(mocked_get_signer_config, mocked_get_signer):
+def test_verify_bids_signature(mocked_get_signer_config, mocked_get_signer,
+                               transfer_interactor):
     fee = 0
     bid_valid_until = time.time() * 2
     valid_until = 0
@@ -735,21 +746,21 @@ def test_verify_bids_signature(mocked_get_signer_config, mocked_get_signer):
     bid_signature = 'sig'
 
     mocked_get_signer.return_value.verify_message.return_value = True
-    assert TransferInteractor()._TransferInteractor__verify_bids_signature(
+    assert transfer_interactor._TransferInteractor__verify_bids_signature(
         fee, bid_valid_until, valid_until, source_blockchain_id,
         destination_blockchain_id, bid_signature) is True
 
 
 def test_check_valid_bid_mismatch(bid, source_blockchain,
-                                  destination_blockchain):
+                                  destination_blockchain, transfer_interactor):
     with pytest.raises(TransferInteractorError):
-        TransferInteractor()._TransferInteractor__check_valid_bid(
+        transfer_interactor._TransferInteractor__check_valid_bid(
             bid, source_blockchain, Blockchain.CELO)
 
     with pytest.raises(TransferInteractorError):
-        TransferInteractor()._TransferInteractor__check_valid_bid(
+        transfer_interactor._TransferInteractor__check_valid_bid(
             bid, Blockchain.CELO, destination_blockchain)
 
     with pytest.raises(TransferInteractorError):
-        TransferInteractor()._TransferInteractor__check_valid_bid(
+        transfer_interactor._TransferInteractor__check_valid_bid(
             bid, Blockchain.CELO, Blockchain.POLYGON)

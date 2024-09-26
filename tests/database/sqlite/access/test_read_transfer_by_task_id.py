@@ -17,6 +17,7 @@ def test_read_transfer_by_task_id_correct(mocked_session,
 
     result = read_transfer_by_task_id(task_id_uuid)
 
+    assert result is not None
     for column in result.__table__.columns:
         result_attributes[column.name] = str(getattr(result, column.name))
         transfer_attributes[column.name] = str(getattr(transfer, column.name))

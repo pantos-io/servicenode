@@ -1,4 +1,3 @@
-import collections.abc
 import time
 import typing
 
@@ -70,12 +69,12 @@ class ConfigFileBidPlugin(BidPlugin):
         self.config = None
         self.delay = 60
 
-    def get_bids(
-            self, source_blockchain_id: int, destination_blockchain_id: int,
-            **kwargs: typing.Any) \
-            -> typing.Tuple[collections.abc.Iterable[Bid], int]:
+    def get_bids(self, source_blockchain_id: int,
+                 destination_blockchain_id: int,
+                 **kwargs: typing.Any) -> tuple[list[Bid], int]:
         # Docstring inherited
         self._load_bids_config(kwargs['file_path'])
+        assert self.config is not None
 
         source_blockchain_bids = self.config['blockchains'].get(
             Blockchain(source_blockchain_id).name.lower())

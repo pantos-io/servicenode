@@ -1,3 +1,5 @@
+protocol: !ENV ${PROTOCOL:0.1.0}
+
 application:
     debug: !ENV tag:yaml.org,2002:bool ${APP_DEBUG:false}
     host: !ENV ${APP_HOST:127.0.0.1}
@@ -55,7 +57,7 @@ blockchains:
     avalanche:
         active: !ENV tag:yaml.org,2002:bool ${AVALANCHE_ACTIVE:true}
         registered: !ENV tag:yaml.org,2002:bool ${AVALANCHE_REGISTERED:true}
-        unstaking_address: !ENV ${AVALANCHE_UNSTAKING_ADDRESS:0x726265A9e352F2e9f15F255957840992803cED7d}
+        withdrawal_address: !ENV ${AVALANCHE_WITHDRAWAL_ADDRESS:0x726265A9e352F2e9f15F255957840992803cED7d}
         private_key: !ENV ${AVALANCHE_PRIVATE_KEY:/etc/pantos/service-node.keystore}
         private_key_password: !ENV ${AVALANCHE_PRIVATE_KEY_PASSWORD:<fill me>}
         provider: !ENV ${AVALANCHE_PROVIDER:https://api.avax-test.network/ext/bc/C/rpc}
@@ -72,11 +74,11 @@ blockchains:
         #max_total_fee_per_gas: !ENV tag:yaml.org,2002:int ${AVALANCHE_MAX_TOTAL_FEE_PER_GAS: }
         adaptable_fee_increase_factor: !ENV tag:yaml.org,2002:float ${AVALANCHE_ADAPTABLE_FEE_INCREASE_FACTOR:1.101}
         blocks_until_resubmission: !ENV tag:yaml.org,2002:int ${AVALANCHE_BLOCKS_UNTIL_RESUBMISSION:20}
-        stake: !ENV tag:yaml.org,2002:int ${AVALANCHE_STAKE:10000000000000}
+        deposit: !ENV tag:yaml.org,2002:int ${AVALANCHE_DEPOSIT:10000000000000}
     bnb_chain:
         active: !ENV tag:yaml.org,2002:bool ${BNB_ACTIVE:true}
         registered: !ENV tag:yaml.org,2002:bool ${BNB_REGISTERED:true}
-        unstaking_address: !ENV ${BNB_UNSTAKING_ADDRESS:0x726265A9e352F2e9f15F255957840992803cED7d}
+        withdrawal_address: !ENV ${BNB_WITHDRAWAL_ADDRESS:0x726265A9e352F2e9f15F255957840992803cED7d}
         private_key: !ENV ${BNB_PRIVATE_KEY:/etc/pantos/service-node.keystore}
         private_key_password: !ENV ${BNB_PRIVATE_KEY_PASSWORD:<fill me>}
         provider: !ENV ${BNB_PROVIDER:https://data-seed-prebsc-1-s1.binance.org:8545/}
@@ -93,11 +95,11 @@ blockchains:
         #max_total_fee_per_gas: !ENV tag:yaml.org,2002:int ${BNB_MAX_TOTAL_FEE_PER_GAS: }
         adaptable_fee_increase_factor: !ENV tag:yaml.org,2002:float ${BNB_ADAPTABLE_FEE_INCREASE_FACTOR:1.101}
         blocks_until_resubmission: !ENV tag:yaml.org,2002:int ${BNB_BLOCKS_UNTIL_RESUBMISSION:20}
-        stake: !ENV tag:yaml.org,2002:int ${BNB_STAKE:10000000000000}
+        deposit: !ENV tag:yaml.org,2002:int ${BNB_DEPOSIT:10000000000000}
     celo:
         active: !ENV tag:yaml.org,2002:bool ${CELO_ACTIVE:true}
         registered: !ENV tag:yaml.org,2002:bool ${CELO_REGISTERED:true}
-        unstaking_address: !ENV ${CELO_UNSTAKING_ADDRESS:0x726265A9e352F2e9f15F255957840992803cED7d}
+        withdrawal_address: !ENV ${CELO_WITHDRAWAL_ADDRESS:0x726265A9e352F2e9f15F255957840992803cED7d}
         private_key: !ENV ${CELO_PRIVATE_KEY:/etc/pantos/service-node.keystore}
         private_key_password: !ENV ${CELO_PRIVATE_KEY_PASSWORD:<fill me>}
         provider: !ENV ${CELO_PROVIDER:https://alfajores-forno.celo-testnet.org}
@@ -114,11 +116,11 @@ blockchains:
         #max_total_fee_per_gas: !ENV tag:yaml.org,2002:int ${CELO_MAX_TOTAL_FEE_PER_GAS: }
         adaptable_fee_increase_factor: !ENV tag:yaml.org,2002:float ${CELO_ADAPTABLE_FEE_INCREASE_FACTOR:1.101}
         blocks_until_resubmission: !ENV tag:yaml.org,2002:int ${CELO_BLOCKS_UNTIL_RESUBMISSION:20}
-        stake: !ENV tag:yaml.org,2002:int ${CELO_STAKE:10000000000000}
+        deposit: !ENV tag:yaml.org,2002:int ${CELO_DEPOSIT:10000000000000}
     cronos:
         active: !ENV tag:yaml.org,2002:bool ${CRONOS_ACTIVE:true}
         registered: !ENV tag:yaml.org,2002:bool ${CRONOS_REGISTERED:true}
-        unstaking_address: !ENV ${CRONOS_UNSTAKING_ADDRESS:0x726265A9e352F2e9f15F255957840992803cED7d}
+        withdrawal_address: !ENV ${CRONOS_WITHDRAWAL_ADDRESS:0x726265A9e352F2e9f15F255957840992803cED7d}
         private_key: !ENV ${CRONOS_PRIVATE_KEY:/etc/pantos/service-node.keystore}
         private_key_password: !ENV ${CRONOS_PRIVATE_KEY_PASSWORD:<fill me>}
         provider: !ENV ${CRONOS_PROVIDER:https://evm-t3.cronos.org}
@@ -135,11 +137,11 @@ blockchains:
         #max_total_fee_per_gas: !ENV tag:yaml.org,2002:int ${CRONOS_MAX_TOTAL_FEE_PER_GAS: }
         adaptable_fee_increase_factor: !ENV tag:yaml.org,2002:float ${CRONOS_ADAPTABLE_FEE_INCREASE_FACTOR:1.101}
         blocks_until_resubmission: !ENV tag:yaml.org,2002:int ${CRONOS_BLOCKS_UNTIL_RESUBMISSION:20}
-        stake: !ENV tag:yaml.org,2002:int ${CRONOS_STAKE:10000000000000}
+        deposit: !ENV tag:yaml.org,2002:int ${CRONOS_DEPOSIT:10000000000000}
     ethereum:
         active: !ENV tag:yaml.org,2002:bool ${ETHEREUM_ACTIVE:true}
         registered: !ENV tag:yaml.org,2002:bool ${ETHEREUM_REGISTERED:true}
-        unstaking_address: !ENV ${ETHEREUM_UNSTAKING_ADDRESS:0x726265A9e352F2e9f15F255957840992803cED7d}
+        withdrawal_address: !ENV ${ETHEREUM_WITHDRAWAL_ADDRESS:0x726265A9e352F2e9f15F255957840992803cED7d}
         private_key: !ENV ${ETHEREUM_PRIVATE_KEY:/etc/pantos/service-node.keystore}
         private_key_password: !ENV ${ETHEREUM_PRIVATE_KEY_PASSWORD:<fill me>}
         provider: !ENV ${ETHEREUM_PROVIDER:https://ethereum-holesky.publicnode.com}
@@ -156,11 +158,11 @@ blockchains:
         #max_total_fee_per_gas: !ENV tag:yaml.org,2002:int ${ETHEREUM_MAX_TOTAL_FEE_PER_GAS: }
         adaptable_fee_increase_factor: !ENV tag:yaml.org,2002:float ${ETHEREUM_ADAPTABLE_FEE_INCREASE_FACTOR:1.101}
         blocks_until_resubmission: !ENV tag:yaml.org,2002:int ${ETHEREUM_BLOCKS_UNTIL_RESUBMISSION:20}
-        stake: !ENV tag:yaml.org,2002:int ${ETHEREUM_STAKE:10000000000000}
+        deposit: !ENV tag:yaml.org,2002:int ${ETHEREUM_DEPOSIT:10000000000000}
     fantom:
         active: !ENV tag:yaml.org,2002:bool ${FANTOM_ACTIVE:true}
         registered: !ENV tag:yaml.org,2002:bool ${FANTOM_REGISTERED:true}
-        unstaking_address: !ENV ${FANTOM_UNSTAKING_ADDRESS:0x726265A9e352F2e9f15F255957840992803cED7d}
+        withdrawal_address: !ENV ${FANTOM_WITHDRAWAL_ADDRESS:0x726265A9e352F2e9f15F255957840992803cED7d}
         private_key: !ENV ${FANTOM_PRIVATE_KEY:/etc/pantos/service-node.keystore}
         private_key_password: !ENV ${FANTOM_PRIVATE_KEY_PASSWORD:<fill me>}
         provider: !ENV ${FANTOM_PROVIDER:https://rpc.testnet.fantom.network}
@@ -177,11 +179,11 @@ blockchains:
         #max_total_fee_per_gas: !ENV tag:yaml.org,2002:int ${FANTOM_MAX_TOTAL_FEE_PER_GAS: }
         adaptable_fee_increase_factor: !ENV tag:yaml.org,2002:float ${FANTOM_ADAPTABLE_FEE_INCREASE_FACTOR:1.101}
         blocks_until_resubmission: !ENV tag:yaml.org,2002:int ${FANTOM_BLOCKS_UNTIL_RESUBMISSION:20}
-        stake: !ENV tag:yaml.org,2002:int ${FANTOM_STAKE:10000000000000}
+        deposit: !ENV tag:yaml.org,2002:int ${FANTOM_DEPOSIT:10000000000000}
     polygon:
         active: !ENV tag:yaml.org,2002:bool ${POLYGON_ACTIVE:true}
         registered: !ENV tag:yaml.org,2002:bool ${POLYGON_REGISTERED:true}
-        unstaking_address: !ENV ${POLYGON_UNSTAKING_ADDRESS:0x726265A9e352F2e9f15F255957840992803cED7d}
+        withdrawal_address: !ENV ${POLYGON_WITHDRAWAL_ADDRESS:0x726265A9e352F2e9f15F255957840992803cED7d}
         private_key: !ENV ${POLYGON_PRIVATE_KEY:/etc/pantos/service-node.keystore}
         private_key_password: !ENV ${POLYGON_PRIVATE_KEY_PASSWORD:<fill me>}
         provider: !ENV ${POLYGON_PROVIDER:https://rpc.ankr.com/polygon_mumbai}
@@ -198,11 +200,11 @@ blockchains:
         #max_total_fee_per_gas: !ENV tag:yaml.org,2002:int ${POLYGON_MAX_TOTAL_FEE_PER_GAS: }
         adaptable_fee_increase_factor: !ENV tag:yaml.org,2002:float ${POLYGON_ADAPTABLE_FEE_INCREASE_FACTOR:1.101}
         blocks_until_resubmission: !ENV tag:yaml.org,2002:int ${POLYGON_BLOCKS_UNTIL_RESUBMISSION:20}
-        stake: !ENV tag:yaml.org,2002:int ${POLYGON_STAKE:10000000000000}
+        deposit: !ENV tag:yaml.org,2002:int ${POLYGON_DEPOSIT:10000000000000}
     solana:
         active: !ENV tag:yaml.org,2002:bool ${SOLANA_ACTIVE:false}
         registered: !ENV tag:yaml.org,2002:bool ${SOLANA_REGISTERED:true}
-        unstaking_address: !ENV ${SOLANA_UNSTAKING_ADDRESS:0x726265A9e352F2e9f15F255957840992803cED7d:' '}
+        withdrawal_address: !ENV ${SOLANA_WITHDRAWAL_ADDRESS:0x726265A9e352F2e9f15F255957840992803cED7d:' '}
         private_key: !ENV ${SOLANA_PRIVATE_KEY:' '}
         private_key_password: !ENV ${SOLANA_PRIVATE_KEY_PASSWORD:<fill me>}
         provider: !ENV ${SOLANA_PROVIDER:<fill me>}
@@ -218,5 +220,4 @@ blockchains:
         #max_total_fee_per_gas: !ENV tag:yaml.org,2002:int ${SOLANA_MAX_TOTAL_FEE_PER_GAS:' '}
         adaptable_fee_increase_factor: !ENV tag:yaml.org,2002:float ${SOLANA_ADAPTABLE_FEE_INCREASE_FACTOR:1.101}
         blocks_until_resubmission: !ENV tag:yaml.org,2002:int ${SOLANA_BLOCKS_UNTIL_RESUBMISSION:20}
-        stake: !ENV tag:yaml.org,2002:int ${SOLANA_STAKE:10000000000000}
-  
+        deposit: !ENV tag:yaml.org,2002:int ${SOLANA_DEPOSIT:10000000000000}

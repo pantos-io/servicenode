@@ -47,8 +47,8 @@ class SolanaClient(BlockchainClient):
         # Docstring inherited
         raise NotImplementedError  # pragma: no cover
 
-    def register_node(self, node_url: str, node_stake: int,
-                      unstaking_address: BlockchainAddress) -> None:
+    def register_node(self, node_url: str, node_deposit: int,
+                      withdrawal_address: BlockchainAddress) -> None:
         # Docstring inherited
         raise NotImplementedError  # pragma: no cover
 
