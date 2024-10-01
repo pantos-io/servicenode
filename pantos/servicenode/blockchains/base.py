@@ -652,6 +652,9 @@ class BlockchainClient(BlockchainHandler, ErrorCreator[BlockchainClientError]):
         min_adaptable_fee_per_gas = \
             self._get_config()['min_adaptable_fee_per_gas']
         max_total_fee_per_gas = self._get_config().get('max_total_fee_per_gas')
+        if max_total_fee_per_gas == 0:
+            # Since YAML Tag directives do not support the `or` operation
+            max_total_fee_per_gas = None
         adaptable_fee_increase_factor = \
             self._get_config()['adaptable_fee_increase_factor']
         blocks_until_resubmission = \

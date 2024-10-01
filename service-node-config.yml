@@ -71,7 +71,7 @@ blockchains:
         pan_token: !ENV ${AVALANCHE_PAN_TOKEN:0xC892F1D09a7BEF98d65e7f9bD4642d36BC506441}
         confirmations: !ENV tag:yaml.org,2002:int ${AVALANCHE_CONFIRMATIONS:20}
         min_adaptable_fee_per_gas: !ENV tag:yaml.org,2002:int ${AVALANCHE_MIN_ADAPTABLE_FEE_PER_GAS:1000000000}
-        #max_total_fee_per_gas: !ENV tag:yaml.org,2002:int ${AVALANCHE_MAX_TOTAL_FEE_PER_GAS: }
+        max_total_fee_per_gas: !ENV tag:yaml.org,2002:int ${AVALANCHE_MAX_TOTAL_FEE_PER_GAS:0}
         adaptable_fee_increase_factor: !ENV tag:yaml.org,2002:float ${AVALANCHE_ADAPTABLE_FEE_INCREASE_FACTOR:1.101}
         blocks_until_resubmission: !ENV tag:yaml.org,2002:int ${AVALANCHE_BLOCKS_UNTIL_RESUBMISSION:20}
         deposit: !ENV tag:yaml.org,2002:int ${AVALANCHE_DEPOSIT:10000000000000}
@@ -92,7 +92,7 @@ blockchains:
         pan_token: !ENV ${BNB_PAN_TOKEN:0xC892F1D09a7BEF98d65e7f9bD4642d36BC506441}
         confirmations: !ENV tag:yaml.org,2002:int ${BNB_CONFIRMATIONS:20}
         min_adaptable_fee_per_gas: !ENV tag:yaml.org,2002:int ${BNB_MIN_ADAPTABLE_FEE_PER_GAS:5000000000}
-        #max_total_fee_per_gas: !ENV tag:yaml.org,2002:int ${BNB_MAX_TOTAL_FEE_PER_GAS: }
+        max_total_fee_per_gas: !ENV tag:yaml.org,2002:int ${BNB_MAX_TOTAL_FEE_PER_GAS:0}
         adaptable_fee_increase_factor: !ENV tag:yaml.org,2002:float ${BNB_ADAPTABLE_FEE_INCREASE_FACTOR:1.101}
         blocks_until_resubmission: !ENV tag:yaml.org,2002:int ${BNB_BLOCKS_UNTIL_RESUBMISSION:20}
         deposit: !ENV tag:yaml.org,2002:int ${BNB_DEPOSIT:10000000000000}
@@ -113,7 +113,7 @@ blockchains:
         pan_token: !ENV ${CELO_PAN_TOKEN:0x5538e600dc919f72858dd4D4F5E4327ec6f2af60}
         confirmations: !ENV tag:yaml.org,2002:int ${CELO_CONFIRMATIONS:3}
         min_adaptable_fee_per_gas: !ENV tag:yaml.org,2002:int ${CELO_MIN_ADAPTABLE_FEE_PER_GAS:1000000000}
-        #max_total_fee_per_gas: !ENV tag:yaml.org,2002:int ${CELO_MAX_TOTAL_FEE_PER_GAS: }
+        max_total_fee_per_gas: !ENV tag:yaml.org,2002:int ${CELO_MAX_TOTAL_FEE_PER_GAS:0}
         adaptable_fee_increase_factor: !ENV tag:yaml.org,2002:float ${CELO_ADAPTABLE_FEE_INCREASE_FACTOR:1.101}
         blocks_until_resubmission: !ENV tag:yaml.org,2002:int ${CELO_BLOCKS_UNTIL_RESUBMISSION:20}
         deposit: !ENV tag:yaml.org,2002:int ${CELO_DEPOSIT:10000000000000}
@@ -134,7 +134,7 @@ blockchains:
         pan_token: !ENV ${CRONOS_PAN_TOKEN:0x5538e600dc919f72858dd4D4F5E4327ec6f2af60}
         confirmations: !ENV tag:yaml.org,2002:int ${CRONOS_CONFIRMATIONS:3}
         min_adaptable_fee_per_gas: !ENV tag:yaml.org,2002:int ${CRONOS_MIN_ADAPTABLE_FEE_PER_GAS:1000000000}
-        #max_total_fee_per_gas: !ENV tag:yaml.org,2002:int ${CRONOS_MAX_TOTAL_FEE_PER_GAS: }
+        max_total_fee_per_gas: !ENV tag:yaml.org,2002:int ${CRONOS_MAX_TOTAL_FEE_PER_GAS:0}
         adaptable_fee_increase_factor: !ENV tag:yaml.org,2002:float ${CRONOS_ADAPTABLE_FEE_INCREASE_FACTOR:1.101}
         blocks_until_resubmission: !ENV tag:yaml.org,2002:int ${CRONOS_BLOCKS_UNTIL_RESUBMISSION:20}
         deposit: !ENV tag:yaml.org,2002:int ${CRONOS_DEPOSIT:10000000000000}
@@ -155,7 +155,7 @@ blockchains:
         pan_token: !ENV ${ETHEREUM_PAN_TOKEN:0x7EFfCc0a130E452c2FB78bFEDBd02a33E03FD50d}
         confirmations: !ENV tag:yaml.org,2002:int ${ETHEREUM_CONFIRMATIONS:20}
         min_adaptable_fee_per_gas: !ENV tag:yaml.org,2002:int ${ETHEREUM_MIN_ADAPTABLE_FEE_PER_GAS:1000000000}
-        #max_total_fee_per_gas: !ENV tag:yaml.org,2002:int ${ETHEREUM_MAX_TOTAL_FEE_PER_GAS: }
+        max_total_fee_per_gas: !ENV tag:yaml.org,2002:int ${ETHEREUM_MAX_TOTAL_FEE_PER_GAS:0}
         adaptable_fee_increase_factor: !ENV tag:yaml.org,2002:float ${ETHEREUM_ADAPTABLE_FEE_INCREASE_FACTOR:1.101}
         blocks_until_resubmission: !ENV tag:yaml.org,2002:int ${ETHEREUM_BLOCKS_UNTIL_RESUBMISSION:20}
         deposit: !ENV tag:yaml.org,2002:int ${ETHEREUM_DEPOSIT:10000000000000}
@@ -176,7 +176,7 @@ blockchains:
         pan_token: !ENV ${FANTOM_PAN_TOKEN:0x5538e600dc919f72858dd4D4F5E4327ec6f2af60}
         confirmations: !ENV tag:yaml.org,2002:int ${FANTOM_CONFIRMATIONS:6}
         min_adaptable_fee_per_gas: !ENV tag:yaml.org,2002:int ${FANTOM_MIN_ADAPTABLE_FEE_PER_GAS:1000000000}
-        #max_total_fee_per_gas: !ENV tag:yaml.org,2002:int ${FANTOM_MAX_TOTAL_FEE_PER_GAS: }
+        max_total_fee_per_gas: !ENV tag:yaml.org,2002:int ${FANTOM_MAX_TOTAL_FEE_PER_GAS:0}
         adaptable_fee_increase_factor: !ENV tag:yaml.org,2002:float ${FANTOM_ADAPTABLE_FEE_INCREASE_FACTOR:1.101}
         blocks_until_resubmission: !ENV tag:yaml.org,2002:int ${FANTOM_BLOCKS_UNTIL_RESUBMISSION:20}
         deposit: !ENV tag:yaml.org,2002:int ${FANTOM_DEPOSIT:10000000000000}
@@ -197,7 +197,7 @@ blockchains:
         pan_token: !ENV ${POLYGON_PAN_TOKEN:0xC892F1D09a7BEF98d65e7f9bD4642d36BC506441}
         confirmations: !ENV tag:yaml.org,2002:int ${POLYGON_CONFIRMATIONS:200}
         min_adaptable_fee_per_gas: !ENV tag:yaml.org,2002:int ${POLYGON_MIN_ADAPTABLE_FEE_PER_GAS:1000000000}
-        #max_total_fee_per_gas: !ENV tag:yaml.org,2002:int ${POLYGON_MAX_TOTAL_FEE_PER_GAS: }
+        max_total_fee_per_gas: !ENV tag:yaml.org,2002:int ${POLYGON_MAX_TOTAL_FEE_PER_GAS:0}
         adaptable_fee_increase_factor: !ENV tag:yaml.org,2002:float ${POLYGON_ADAPTABLE_FEE_INCREASE_FACTOR:1.101}
         blocks_until_resubmission: !ENV tag:yaml.org,2002:int ${POLYGON_BLOCKS_UNTIL_RESUBMISSION:20}
         deposit: !ENV tag:yaml.org,2002:int ${POLYGON_DEPOSIT:10000000000000}
@@ -217,7 +217,7 @@ blockchains:
         pan_token: !ENV ${SOLANA_PAN_TOKEN:' '}
         confirmations: !ENV tag:yaml.org,2002:int ${SOLANA_CONFIRMATIONS:1}
         min_adaptable_fee_per_gas: !ENV tag:yaml.org,2002:int ${SOLANA_MIN_ADAPTABLE_FEE_PER_GAS:1000000000}
-        #max_total_fee_per_gas: !ENV tag:yaml.org,2002:int ${SOLANA_MAX_TOTAL_FEE_PER_GAS:' '}
+        max_total_fee_per_gas: !ENV tag:yaml.org,2002:int ${SOLANA_MAX_TOTAL_FEE_PER_GAS:0}
         adaptable_fee_increase_factor: !ENV tag:yaml.org,2002:float ${SOLANA_ADAPTABLE_FEE_INCREASE_FACTOR:1.101}
         blocks_until_resubmission: !ENV tag:yaml.org,2002:int ${SOLANA_BLOCKS_UNTIL_RESUBMISSION:20}
         deposit: !ENV tag:yaml.org,2002:int ${SOLANA_DEPOSIT:10000000000000}
