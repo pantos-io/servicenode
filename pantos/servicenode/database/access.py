@@ -181,9 +181,10 @@ def create_transfer(source_blockchain: Blockchain,
         raise
 
 
-def read_cross_blockchain_bids(source_blockchain_id: int,
-                               destination_blockchain_id: int) -> list[Bid]:
-    """Reads the bids for a cross-blockchain transfer from the database.
+def read_bids(source_blockchain_id: int,
+              destination_blockchain_id: int) -> list[Bid]:
+    """Read the bid records for a given source and destination
+    blockchain.
 
     Parameters
     ----------
@@ -195,7 +196,7 @@ def read_cross_blockchain_bids(source_blockchain_id: int,
     Returns
     -------
     list of Bid
-        The bids for a cross-blockchain transfer from the database.
+        The bid records.
 
     """
     statement = sqlalchemy.select(Bid).filter_by(

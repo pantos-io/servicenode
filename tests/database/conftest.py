@@ -95,7 +95,7 @@ def embedded_db_session_maker(embedded_db_engine):
     with all the models created.
 
     """
-    transfers_table = sqlalchemy.sql.schema.Table = Base.metadata.tables[
+    transfers_table: sqlalchemy.sql.schema.Table = Base.metadata.tables[
         'transfers']
     for constraint in transfers_table.constraints:
         if constraint.name == \

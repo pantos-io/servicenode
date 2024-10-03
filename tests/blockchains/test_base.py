@@ -42,8 +42,10 @@ _ON_CHAIN_TRANSFER_ID = 10512
                             return_value=Blockchain(0))
 @unittest.mock.patch.object(BlockchainClient, '__abstractmethods__', set())
 def blockchain_client(mock_get_blockchain, mock_get_config,
-                      mock_initialize_blockchain_utilities):
-    return BlockchainClient()
+                      mock_initialize_blockchain_utilities, config_dict):
+    with unittest.mock.patch('pantos.servicenode.blockchains.base.config',
+                             config_dict):
+        return BlockchainClient()
 
 
 @unittest.mock.patch(
@@ -54,8 +56,10 @@ def blockchain_client(mock_get_blockchain, mock_get_config,
                             return_value=Blockchain(0))
 @unittest.mock.patch.object(BlockchainClient, '__abstractmethods__', set())
 def test_init_correct(mock_get_blockchain, mock_get_config,
-                      mock_initialize_blockchain_utilities):
-    BlockchainClient()
+                      mock_initialize_blockchain_utilities, config_dict):
+    with unittest.mock.patch('pantos.servicenode.blockchains.base.config',
+                             config_dict):
+        BlockchainClient()
     mock_initialize_blockchain_utilities.assert_called_once()
 
 
@@ -70,9 +74,11 @@ def test_init_correct(mock_get_blockchain, mock_get_config,
                             return_value=Blockchain(0))
 @unittest.mock.patch.object(BlockchainClient, '__abstractmethods__', set())
 def test_init_error(mock_get_blockchain, mock_get_config, mock_create_error,
-                    mock_initialize_blockchain_utilities):
+                    mock_initialize_blockchain_utilities, config_dict):
     with pytest.raises(BlockchainClientError) as exception_info:
-        BlockchainClient()
+        with unittest.mock.patch('pantos.servicenode.blockchains.base.config',
+                                 config_dict):
+            BlockchainClient()
     assert isinstance(exception_info.value.__context__,
                       BlockchainUtilitiesError)
 

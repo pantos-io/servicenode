@@ -54,17 +54,17 @@ class NodeInteractor(Interactor):
                 elif to_be_registered:
                     is_unbonding = blockchain_client.is_unbonding()
                     if is_unbonding:
-                        # Service node was unregistered but the stake
+                        # Service node was unregistered but the deposit
                         # has not been withdrawn yet
                         blockchain_client.cancel_unregistration()
                     else:
                         # Not yet registered
-                        unstaking_address = blockchain_config[
-                            'unstaking_address']
+                        withdrawal_address = blockchain_config[
+                            'withdrawal_address']
                         node_url = config['application']['url']
-                        node_stake = blockchain_config['stake']
+                        node_deposit = blockchain_config['deposit']
                         blockchain_client.register_node(
-                            node_url, node_stake, unstaking_address)
+                            node_url, node_deposit, withdrawal_address)
                 elif is_registered:
                     # Not to be registered anymore
                     blockchain_client.unregister_node()

@@ -1,6 +1,4 @@
-"""Unit tests for the pantos.servicenode.business.node module.
-
-"""
+import typing
 import unittest.mock
 
 import pytest
@@ -11,13 +9,13 @@ from pantos.servicenode.business import node as node_module
 from pantos.servicenode.business.node import NodeInteractor
 from pantos.servicenode.business.node import NodeInteractorError
 
-CONFIG_NODE_URL = 'https://config.node.url/'
+_CONFIG_NODE_URL = 'https://config.node.url/'
 
-DEFAULT_NODE_URL = 'https://default.node.url/'
+_DEFAULT_NODE_URL = 'https://default.node.url/'
 
-DEFAULT_UNSTAKING_ADDRESS = '0x165A78accc6233466979AD311af606F4714da475'
+_DEFAULT_WITHDRAWAL_ADDRESS = '0x165A78accc6233466979AD311af606F4714da475'
 
-CONFIG_UNSTAKING_ADDRESS = '0xceb95Cb81e4f71c8Fc426a84fA29F2ac552AD752'
+_CONFIG_WITHDRAWAL_ADDRESS = '0xceb95Cb81e4f71c8Fc426a84fA29F2ac552AD752'
 
 
 class MockBlockchainClientError(BlockchainClientError):
@@ -29,8 +27,8 @@ class MockBlockchainClient:
     def __init__(self, node_registered, is_unbonding, raise_error):
         self.node_registered = node_registered
         self.unbonding = is_unbonding
-        self.node_url = DEFAULT_NODE_URL
-        self.unstaking_address = DEFAULT_UNSTAKING_ADDRESS
+        self.node_url = _DEFAULT_NODE_URL
+        self.withdrawal_address = _DEFAULT_WITHDRAWAL_ADDRESS
         self.raise_error = raise_error
 
     def is_node_registered(self):
@@ -44,17 +42,17 @@ class MockBlockchainClient:
         assert self.node_registered
         return self.node_url
 
-    def register_node(self, node_url, node_stake, unstaking_address):
+    def register_node(self, node_url, node_deposit, withdrawal_address):
         if self.raise_error:
             raise MockBlockchainClientError
         assert not self.node_registered
         assert isinstance(node_url, str)
         assert len(node_url) > 0
-        assert isinstance(node_stake, int)
-        assert node_stake >= 0
+        assert isinstance(node_deposit, int)
+        assert node_deposit >= 0
         self.node_registered = True
         self.node_url = node_url
-        self.unstaking_address = unstaking_address
+        self.withdrawal_address = withdrawal_address
 
     def unregister_node(self):
         if self.raise_error:
@@ -90,7 +88,7 @@ def mock_blockchain_client(request, monkeypatch):
     is_registered = ([] if is_registered_marker is None else
                      is_registered_marker.args[0])
     error_marker = request.node.get_closest_marker('error')
-    blockchain_clients = {}
+    blockchain_clients: dict[Blockchain, MockBlockchainClient] = {}
 
     def mock_get_blockchain_client(blockchain):
         try:
@@ -112,9 +110,9 @@ def mock_config(request, monkeypatch):
         'to_be_registered')
     to_be_registered = ([] if to_be_registered_marker is None else
                         to_be_registered_marker.args[0])
-    config = {}
+    config: dict[str, typing.Any] = {}
     config['application'] = {}
-    config['application']['url'] = CONFIG_NODE_URL
+    config['application']['url'] = _CONFIG_NODE_URL
     config['blockchains'] = {}
     for blockchain in Blockchain:
         blockchain_name = blockchain.name.lower()
@@ -122,9 +120,9 @@ def mock_config(request, monkeypatch):
         config['blockchains'][blockchain_name]['active'] = True
         config['blockchains'][blockchain_name]['registered'] = (
             blockchain in to_be_registered)
-        config['blockchains'][blockchain_name]['stake'] = 10000000000000
+        config['blockchains'][blockchain_name]['deposit'] = 10000000000000
         config['blockchains'][blockchain_name][
-            'unstaking_address'] = CONFIG_UNSTAKING_ADDRESS
+            'withdrawal_address'] = _CONFIG_WITHDRAWAL_ADDRESS
 
     def mock_get_blockchain_config(blockchain):
         return config['blockchains'][blockchain.name.lower()]
@@ -134,7 +132,7 @@ def mock_config(request, monkeypatch):
                         mock_get_blockchain_config)
 
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def node_interactor():
     return NodeInteractor()
 
@@ -153,14 +151,14 @@ def update_node_registrations_no_error(request, node_interactor):
         if blockchain in to_be_registered:
             assert blockchain_client.node_registered
             if blockchain in unbonding:
-                assert blockchain_client.node_url == DEFAULT_NODE_URL
+                assert blockchain_client.node_url == _DEFAULT_NODE_URL
             else:
-                assert blockchain_client.node_url == CONFIG_NODE_URL
+                assert blockchain_client.node_url == _CONFIG_NODE_URL
         else:
             assert not blockchain_client.node_registered
-            assert blockchain_client.node_url == DEFAULT_NODE_URL
-            assert blockchain_client.unstaking_address == \
-                DEFAULT_UNSTAKING_ADDRESS
+            assert blockchain_client.node_url == _DEFAULT_NODE_URL
+            assert (blockchain_client.withdrawal_address ==
+                    _DEFAULT_WITHDRAWAL_ADDRESS)
 
 
 @pytest.mark.to_be_registered(list(Blockchain))
