@@ -76,26 +76,26 @@ blockchains:
         blocks_until_resubmission: !ENV tag:yaml.org,2002:int ${AVALANCHE_BLOCKS_UNTIL_RESUBMISSION:20}
         deposit: !ENV tag:yaml.org,2002:int ${AVALANCHE_DEPOSIT:10000000000000}
     bnb_chain:
-        active: !ENV tag:yaml.org,2002:bool ${BNB_ACTIVE:true}
-        registered: !ENV tag:yaml.org,2002:bool ${BNB_REGISTERED:true}
-        withdrawal_address: !ENV ${BNB_WITHDRAWAL_ADDRESS:0x726265A9e352F2e9f15F255957840992803cED7d}
-        private_key: !ENV ${BNB_PRIVATE_KEY:/etc/pantos/service-node.keystore}
-        private_key_password: !ENV ${BNB_PRIVATE_KEY_PASSWORD:<fill me>}
-        provider: !ENV ${BNB_PROVIDER:https://data-seed-prebsc-1-s1.binance.org:8545/}
+        active: !ENV tag:yaml.org,2002:bool ${BNB_CHAIN_ACTIVE:true}
+        registered: !ENV tag:yaml.org,2002:bool ${BNB_CHAIN_REGISTERED:true}
+        withdrawal_address: !ENV ${BNB_CHAIN_WITHDRAWAL_ADDRESS:0x726265A9e352F2e9f15F255957840992803cED7d}
+        private_key: !ENV ${BNB_CHAIN_PRIVATE_KEY:/etc/pantos/service-node.keystore}
+        private_key_password: !ENV ${BNB_CHAIN_PRIVATE_KEY_PASSWORD:<fill me>}
+        provider: !ENV ${BNB_CHAIN_PROVIDER:https://data-seed-prebsc-1-s1.binance.org:8545/}
         fallback_providers:
-            - !ENV ${BNB_FALLBACK_PROVIDER:https://data-seed-prebsc-1-s1.binance.org:8545/}
-        average_block_time: !ENV tag:yaml.org,2002:int ${BNB_AVERAGE_BLOCK_TIME:3}
-        provider_timeout: !ENV tag:yaml.org,2002:int ${BNB_PROVIDER_TIMEOUT:100}
-        chain_id: !ENV tag:yaml.org,2002:int ${BNB_CHAIN_ID:97}
-        hub: !ENV ${BNB_HUB:0xFB37499DC5401Dc39a0734df1fC7924d769721d5}
-        forwarder: !ENV ${BNB_FORWARDER:0x8d1A4C7bc5f327f30895150c4596E3db6Eb48562}
-        pan_token: !ENV ${BNB_PAN_TOKEN:0xC892F1D09a7BEF98d65e7f9bD4642d36BC506441}
-        confirmations: !ENV tag:yaml.org,2002:int ${BNB_CONFIRMATIONS:20}
-        min_adaptable_fee_per_gas: !ENV tag:yaml.org,2002:int ${BNB_MIN_ADAPTABLE_FEE_PER_GAS:5000000000}
-        max_total_fee_per_gas: !ENV tag:yaml.org,2002:int ${BNB_MAX_TOTAL_FEE_PER_GAS:0}
-        adaptable_fee_increase_factor: !ENV tag:yaml.org,2002:float ${BNB_ADAPTABLE_FEE_INCREASE_FACTOR:1.101}
-        blocks_until_resubmission: !ENV tag:yaml.org,2002:int ${BNB_BLOCKS_UNTIL_RESUBMISSION:20}
-        deposit: !ENV tag:yaml.org,2002:int ${BNB_DEPOSIT:10000000000000}
+            - !ENV ${BNB_CHAIN_FALLBACK_PROVIDER:https://data-seed-prebsc-1-s1.binance.org:8545/}
+        average_block_time: !ENV tag:yaml.org,2002:int ${BNB_CHAIN_AVERAGE_BLOCK_TIME:3}
+        provider_timeout: !ENV tag:yaml.org,2002:int ${BNB_CHAIN_PROVIDER_TIMEOUT:100}
+        chain_id: !ENV tag:yaml.org,2002:int ${BNB_CHAIN_CHAIN_ID:97}
+        hub: !ENV ${BNB_CHAIN_HUB:0xFB37499DC5401Dc39a0734df1fC7924d769721d5}
+        forwarder: !ENV ${BNB_CHAIN_FORWARDER:0x8d1A4C7bc5f327f30895150c4596E3db6Eb48562}
+        pan_token: !ENV ${BNB_CHAIN_PAN_TOKEN:0xC892F1D09a7BEF98d65e7f9bD4642d36BC506441}
+        confirmations: !ENV tag:yaml.org,2002:int ${BNB_CHAIN_CONFIRMATIONS:20}
+        min_adaptable_fee_per_gas: !ENV tag:yaml.org,2002:int ${BNB_CHAIN_MIN_ADAPTABLE_FEE_PER_GAS:5000000000}
+        max_total_fee_per_gas: !ENV tag:yaml.org,2002:int ${BNB_CHAIN_MAX_TOTAL_FEE_PER_GAS:0}
+        adaptable_fee_increase_factor: !ENV tag:yaml.org,2002:float ${BNB_CHAIN_ADAPTABLE_FEE_INCREASE_FACTOR:1.101}
+        blocks_until_resubmission: !ENV tag:yaml.org,2002:int ${BNB_CHAIN_BLOCKS_UNTIL_RESUBMISSION:20}
+        deposit: !ENV tag:yaml.org,2002:int ${BNB_CHAIN_DEPOSIT:10000000000000}
     celo:
         active: !ENV tag:yaml.org,2002:bool ${CELO_ACTIVE:true}
         registered: !ENV tag:yaml.org,2002:bool ${CELO_REGISTERED:true}
