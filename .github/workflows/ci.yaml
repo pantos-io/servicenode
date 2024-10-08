@@ -229,10 +229,10 @@ jobs:
           docker cp $ETH_TASK_ID:/data/ETHEREUM.env /etc/pantos/ETHEREUM.env
 
           # Get the task ID for the bnb service
-          BNB_TASK_ID=$(docker ps --filter "name=stack-ethereum-contracts--1-bnb" --format "{{.ID}}")
+          BNB_CHAIN_TASK_ID=$(docker ps --filter "name=stack-ethereum-contracts--1-bnb" --format "{{.ID}}")
           # Copy files from the bnb service
-          docker cp $BNB_TASK_ID:/data/keystore /etc/pantos/keystore.bnb
-          docker cp $BNB_TASK_ID:/data/BNB.env /etc/pantos/BNB.env
+          docker cp $BNB_CHAIN_TASK_ID:/data/keystore /etc/pantos/keystore.bnb
+          docker cp $BNB_CHAIN_TASK_ID:/data/BNB.env /etc/pantos/BNB.env
         working-directory: ethereum-contracts
 
       - name: Set env
