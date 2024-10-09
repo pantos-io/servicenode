@@ -30,7 +30,7 @@ types-pyyaml = "6.0.12.20240917"
 yapf = "0.40.2"
 
 [tool.poetry.group.dev.dependencies]
-pre-commit = "3.8.0"
+pre-commit = "4.0.1"
 
 [tool.poetry.dependencies]
 python = "^3.10"
