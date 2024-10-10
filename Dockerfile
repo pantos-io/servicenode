@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-3.0-only
 FROM python:3.12-bookworm AS dev
 
 RUN apt-get update && \
