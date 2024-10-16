@@ -52,9 +52,9 @@ jobs:
               uses: actions/cache@v4
               with:
                 path: /tmp/.buildx-cache
-                key: ${{ runner.os }}-to-publish-service-node-${{ matrix.arch }}-${{ github.ref_name }}
+                key: ${{ runner.os }}-trivy-service-node-${{ matrix.arch }}-${{ github.ref_name }}
                 restore-keys: |
-                  ${{ runner.os }}-to-publish-service-node-${{ matrix.arch }}-
+                  ${{ runner.os }}-trivy-service-node-${{ matrix.arch }}-
             - name: Build and load
               run: |
                     docker buildx bake \
