@@ -89,7 +89,7 @@ jobs:
           docker buildx bake \
             --set "*.cache-from=type=local,src=/tmp/.buildx-cache" \
             --set "*.cache-to=type=local,dest=/tmp/.buildx-cache-new" \
-            --set "*.platform=linux/amd64,linux/arm64" \
+            --set "*.platform=linux/amd64" \
             --builder ${{ steps.buildx.outputs.name }} \
             --sbom=true \
             --push \
