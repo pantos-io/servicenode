@@ -85,7 +85,7 @@ jobs:
           make docker-local
         working-directory: ethereum-contracts
         env:
-          DOCKER_TAG: "1.1.2"
+          DOCKER_TAG: "development"
 
       - name: Ensure ethereum-contracts is accessible
         run: |
