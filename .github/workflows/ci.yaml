@@ -232,7 +232,7 @@ jobs:
           BNB_CHAIN_TASK_ID=$(docker ps --filter "name=stack-ethereum-contracts--1-bnb" --format "{{.ID}}")
           # Copy files from the bnb service
           docker cp $BNB_CHAIN_TASK_ID:/data/keystore /etc/pantos/keystore.bnb
-          docker cp $BNB_CHAIN_TASK_ID:/data/BNB.env /etc/pantos/BNB.env
+          docker cp $BNB_CHAIN_TASK_ID:/data/BNB_CHAIN.env /etc/pantos/BNB_CHAIN.env
         working-directory: ethereum-contracts
 
       - name: Set env
@@ -240,7 +240,7 @@ jobs:
           sudo cp ./service-node-config.local.env /etc/pantos/service-node-config.env
           # Append the new addresses from the copied env files
           sudo cat /etc/pantos/ETHEREUM.env | sudo tee -a /etc/pantos/service-node-config.env > /dev/null
-          sudo cat /etc/pantos/BNB.env | sudo tee -a /etc/pantos/service-node-config.env > /dev/null
+          sudo cat /etc/pantos/BNB_CHAIN.env | sudo tee -a /etc/pantos/service-node-config.env > /dev/null
           sudo chmod 644 /etc/pantos/service-node-config.env
 
       - name: Install Debian package
