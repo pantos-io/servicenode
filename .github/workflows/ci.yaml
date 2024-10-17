@@ -85,7 +85,7 @@ jobs:
           make docker-local
         working-directory: ethereum-contracts
         env:
-          DOCKER_TAG: "1.1.2"
+          DOCKER_TAG: "development"
 
       - name: Ensure ethereum-contracts is accessible
         run: |
@@ -186,7 +186,7 @@ jobs:
           make docker-local
         working-directory: ethereum-contracts
         env:
-          DOCKER_TAG: "1.1.2"
+          DOCKER_TAG: "development"
 
       - name: Ensure ethereum-contracts is accessible
         run: |
@@ -232,7 +232,7 @@ jobs:
           BNB_CHAIN_TASK_ID=$(docker ps --filter "name=stack-ethereum-contracts--1-bnb" --format "{{.ID}}")
           # Copy files from the bnb service
           docker cp $BNB_CHAIN_TASK_ID:/data/keystore /etc/pantos/keystore.bnb
-          docker cp $BNB_CHAIN_TASK_ID:/data/BNB.env /etc/pantos/BNB.env
+          docker cp $BNB_CHAIN_TASK_ID:/data/BNB_CHAIN.env /etc/pantos/BNB_CHAIN.env
         working-directory: ethereum-contracts
 
       - name: Set env
@@ -240,7 +240,7 @@ jobs:
           sudo cp ./service-node-config.local.env /etc/pantos/service-node-config.env
           # Append the new addresses from the copied env files
           sudo cat /etc/pantos/ETHEREUM.env | sudo tee -a /etc/pantos/service-node-config.env > /dev/null
-          sudo cat /etc/pantos/BNB.env | sudo tee -a /etc/pantos/service-node-config.env > /dev/null
+          sudo cat /etc/pantos/BNB_CHAIN.env | sudo tee -a /etc/pantos/service-node-config.env > /dev/null
           sudo chmod 644 /etc/pantos/service-node-config.env
 
       - name: Install Debian package
@@ -266,17 +266,22 @@ jobs:
           # Wait for curl to be positive
           max_retries=60
           retries=0
+          set +e
           while [ $retries -lt $max_retries ]; do
             response=$(curl -s --max-time 5 -o /dev/null -w '%{http_code}' 'http://localhost:8080/bids?source_blockchain=0&destination_blockchain=1')
+            exit_code=$?
             if [ "$response" -eq 200 ]; then
               echo "Received 200 response, exiting."
               break
+            elif [ $exit_code -eq 28 ]; then
+              echo "Curl timed out, continuing to retry."
             else
               echo "Did not receive 200 response, retrying in 1 second."
-              sleep 1
-              retries=$((retries + 1))
             fi
+            sleep 1
+            retries=$((retries + 1))
           done
+          set -e
           if [ $retries -eq $max_retries ]; then
             echo "Max retries reached, exiting with failure."
             exit 1
