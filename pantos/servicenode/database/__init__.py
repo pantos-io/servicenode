@@ -105,23 +105,25 @@ def initialize_package(is_flask_app: bool = False) -> None:
     global _session_maker
     _session_maker = sqlalchemy.orm.sessionmaker(bind=_sql_engine)
     # Initialize the tables
-    with _session_maker.begin() as session:
-        assert isinstance(session, Session)  # type hint
-        # Blockchain table
-        statement = sqlalchemy.select(sqlalchemy.func.max(Blockchain_.id))
-        max_blockchain_id = session.execute(statement).scalar_one_or_none()
-        for blockchain in sorted(Blockchain):
-            if (max_blockchain_id is None
-                    or max_blockchain_id < blockchain.value):
-                session.add(
-                    Blockchain_(id=blockchain.value, name=blockchain.name))
-        # Transfer status table
-        statement = sqlalchemy.select(sqlalchemy.func.max(TransferStatus_.id))
-        max_transfer_status_id = session.execute(
-            statement).scalar_one_or_none()
-        for transfer_status in sorted(TransferStatus):
-            if (max_transfer_status_id is None
-                    or max_transfer_status_id < transfer_status.value):
-                session.add(
-                    TransferStatus_(id=transfer_status.value,
-                                    name=transfer_status.name))
+    if is_flask_app:
+        with _session_maker.begin() as session:
+            assert isinstance(session, Session)
+            # Blockchain table
+            statement = sqlalchemy.select(sqlalchemy.func.max(Blockchain_.id))
+            max_blockchain_id = session.execute(statement).scalar_one_or_none()
+            for blockchain in sorted(Blockchain):
+                if (max_blockchain_id is None
+                        or max_blockchain_id < blockchain.value):
+                    session.add(
+                        Blockchain_(id=blockchain.value, name=blockchain.name))
+            # Transfer status table
+            statement = sqlalchemy.select(
+                sqlalchemy.func.max(TransferStatus_.id))
+            max_transfer_status_id = session.execute(
+                statement).scalar_one_or_none()
+            for transfer_status in sorted(TransferStatus):
+                if (max_transfer_status_id is None
+                        or max_transfer_status_id < transfer_status.value):
+                    session.add(
+                        TransferStatus_(id=transfer_status.value,
+                                        name=transfer_status.name))
