@@ -32,7 +32,7 @@ blockchains:
       - execution_time: 1200
         fee: 8500000000
         valid_period: 300
-    fantom:
+    sonic:
       - execution_time: 600
         fee: 10000000000
         valid_period: 300
@@ -79,7 +79,7 @@ blockchains:
       - execution_time: 1200
         fee: 150000000
         valid_period: 300
-    fantom:
+    sonic:
       - execution_time: 600
         fee: 200000000
         valid_period: 300
@@ -126,7 +126,7 @@ blockchains:
       - execution_time: 1200
         fee: 150000000
         valid_period: 300
-    fantom:
+    sonic:
       - execution_time: 600
         fee: 200000000
         valid_period: 300
@@ -173,7 +173,7 @@ blockchains:
       - execution_time: 1200
         fee: 150000000
         valid_period: 300
-    fantom:
+    sonic:
       - execution_time: 600
         fee: 200000000
         valid_period: 300
@@ -220,7 +220,7 @@ blockchains:
       - execution_time: 600
         fee: 50000000
         valid_period: 300
-    fantom:
+    sonic:
       - execution_time: 600
         fee: 200000000
         valid_period: 300
@@ -234,7 +234,7 @@ blockchains:
       - execution_time: 1200
         fee: 150000000
         valid_period: 300
-  fantom:
+  sonic:
     ethereum:
       - execution_time: 600
         fee: 10000000000
@@ -270,7 +270,7 @@ blockchains:
       - execution_time: 1200
         fee: 150000000
         valid_period: 300
-    fantom:
+    sonic:
       - execution_time: 600
         fee: 50000000
         valid_period: 300
@@ -317,7 +317,7 @@ blockchains:
       - execution_time: 1200
         fee: 150000000
         valid_period: 300
-    fantom:
+    sonic:
       - execution_time: 600
         fee: 200000000
         valid_period: 300

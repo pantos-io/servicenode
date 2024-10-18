@@ -200,7 +200,7 @@ def test_update_node_registrations_some_active_all_registered(
 
 
 @pytest.mark.to_be_registered(list(Blockchain))
-@pytest.mark.is_registered([Blockchain.FANTOM, Blockchain.POLYGON])
+@pytest.mark.is_registered([Blockchain.SONIC, Blockchain.POLYGON])
 def test_update_node_registrations_all_active_some_registered(
         request, node_interactor):
     update_node_registrations_no_error(request, node_interactor)

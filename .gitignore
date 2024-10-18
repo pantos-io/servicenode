@@ -9,8 +9,7 @@
 .vscode/
 build/
 dist/
-find.sh
-local/
+/local/
 postgresql_data
 rabbitmq_data
 debian/.debhelper
