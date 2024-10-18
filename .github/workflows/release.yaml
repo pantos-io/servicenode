@@ -21,7 +21,7 @@ jobs:
       deployment_pypi_environment: ${{ steps.get-environment.outputs.deployment_pypi_environment }}
       deployment_url: ${{ steps.get-environment.outputs.deployment_url }}
     steps:
-      - uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
+      - uses: step-security/harden-runner@91182cccc01eb5e619899d80e4e971d6181294a7 # v2.10.1
         with:
           disable-sudo: true
           egress-policy: audit
@@ -78,7 +78,7 @@ jobs:
       contents: write
       id-token: write
     steps:
-      - uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
+      - uses: step-security/harden-runner@91182cccc01eb5e619899d80e4e971d6181294a7 # v2.10.1
         with:
           disable-sudo: true
           egress-policy: audit
@@ -148,7 +148,7 @@ jobs:
     permissions:
       id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
     steps:
-      - uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
+      - uses: step-security/harden-runner@91182cccc01eb5e619899d80e4e971d6181294a7 # v2.10.1
         with:
           disable-sudo: true
           egress-policy: audit
@@ -165,7 +165,7 @@ jobs:
           ls -lha dist
 
       - name: Publish package distributions to ${{ needs.define-environment.outputs.deployment_pypi_environment }}
-        uses: pypa/gh-action-pypi-publish@ec4db0b4ddc65acdf4bff5fa45ac92d78b56bdf0 # stable/v1.9.0
+        uses: pypa/gh-action-pypi-publish@f7600683efdcb7656dec5b29656edb7bc586e597 # stable/v1.10.3
         with:
           repository-url: ${{ needs.define-environment.outputs.deployment_pypi_environment == 'test-pypi' && 'https://test.pypi.org/legacy/' || 'https://upload.pypi.org/legacy/' }}
 
@@ -181,7 +181,7 @@ jobs:
     # Disable the job for the moment being
     runs-on: ubuntu-latest
     steps:
-      - uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
+      - uses: step-security/harden-runner@91182cccc01eb5e619899d80e4e971d6181294a7 # v2.10.1
         with:
           disable-sudo: true
           egress-policy: audit
