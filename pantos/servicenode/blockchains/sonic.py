@@ -1,6 +1,9 @@
-"""Module for Fantom-specific clients and errors. Since Fantom is
+"""Module for Sonic-specific clients and errors. Since Sonic is
 Ethereum-compatible, the client implementation inherits from the
 pantos.servicenode.blockchains.ethereum module.
+
+Note that Pantos used to support Sonic's predecessor Fantom. This module
+was renamed accordingly on 2024-10-18.
 
 """
 from pantos.common.blockchains.enums import Blockchain
@@ -10,23 +13,23 @@ from pantos.servicenode.blockchains.ethereum import EthereumClient
 from pantos.servicenode.blockchains.ethereum import EthereumClientError
 
 
-class FantomClientError(EthereumClientError):
-    """Exception class for all Fantom client errors.
+class SonicClientError(EthereumClientError):
+    """Exception class for all Sonic client errors.
 
     """
     pass
 
 
-class FantomClient(EthereumClient):
-    """Fantom-specific blockchain client.
+class SonicClient(EthereumClient):
+    """Sonic-specific blockchain client.
 
     """
     @classmethod
     def get_blockchain(cls) -> Blockchain:
         # Docstring inherited
-        return Blockchain.FANTOM
+        return Blockchain.SONIC
 
     @classmethod
     def get_error_class(cls) -> type[BlockchainClientError]:
         # Docstring inherited
-        return FantomClientError
+        return SonicClientError
