@@ -1,8 +1,8 @@
 name: DockerVulnerabilities
 on:
-  push:
-    branches:
-      - main
+  schedule:
+    # At the end of every day
+    - cron: "0 0 * * *"
        
 jobs:
     docker-analysis:
@@ -18,7 +18,7 @@ jobs:
           security-events: write
         steps:
             - name: Harden Runner
-              uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
+              uses: step-security/harden-runner@91182cccc01eb5e619899d80e4e971d6181294a7 # v2.10.1
               with:
                 egress-policy: audit
                 allowed-endpoints: >
@@ -69,7 +69,7 @@ jobs:
                 DOCKER_TAG: analysis-latest
         
             - name: Scan vulnerabilities app image
-              uses: aquasecurity/trivy-action@7c2007bcb556501da015201bcba5aa14069b74e2 # v0.23.0
+              uses: aquasecurity/trivy-action@915b19bbe73b92a6cf82a1bc12b087c9a19a5fe2 # v0.28.0
               with:           
                 image-ref: 'pantosio/service-node-app:analysis-latest'
                 format: 'sarif'
@@ -84,7 +84,7 @@ jobs:
                 sarif_file: 'trivy-app-results.sarif'
 
             - name: Scan vulnerabilities worker image
-              uses: aquasecurity/trivy-action@7c2007bcb556501da015201bcba5aa14069b74e2 # v0.23.0
+              uses: aquasecurity/trivy-action@915b19bbe73b92a6cf82a1bc12b087c9a19a5fe2 # v0.28.0
               with:           
                 image-ref: 'pantosio/service-node-worker:analysis-latest'
                 format: 'sarif'
