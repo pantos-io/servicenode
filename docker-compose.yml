@@ -67,10 +67,10 @@ services:
           target: /opt/pantos/pantos-service-node/alembic.ini
         - action: sync+restart
           path: service-node-config.env
-          target: /root/service-node-config.env
+          target: /etc/pantos/service-node-config.env
         - action: sync+restart
           path: bids.yml
-          target: /etc/service-node-bids.yml
+          target: /etc/pantos/service-node-bids.yml
         - action: rebuild
           path: Dockerfile
         - action: rebuild
@@ -141,10 +141,10 @@ services:
           target: /opt/pantos/pantos-service-node/alembic.ini
         - action: sync+restart
           path: service-node-config.env
-          target: /root/service-node-config.env
+          target: /etc/pantos/service-node-config.env
         - action: sync+restart
           path: bids.yml
-          target: /etc/service-node-bids.yml
+          target: /etc/pantos/service-node-bids.yml
         - action: rebuild
           path: Dockerfile
         - action: rebuild
