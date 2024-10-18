@@ -69,8 +69,9 @@ class BidPluginInteractor(Interactor):
                 bids, delay = bid_plugin.get_bids(source_blockchain.value,
                                                   destination_blockchain.value,
                                                   **bids_arguments)
-                self.__add_validator_fee(bids, source_blockchain_factor,
-                                         destination_blockchain_factor)
+                if source_blockchain is not destination_blockchain:
+                    self.__add_validator_fee(bids, source_blockchain_factor,
+                                             destination_blockchain_factor)
                 _logger.debug(f'Saving {len(bids)} bids in database')
                 bids = [dataclasses.asdict(bid) for bid in bids]
                 replace_bids(source_blockchain.value,
