@@ -31,9 +31,9 @@ services:
       APP_PORT: 8080
       APP_LOG_FILE_ENABLED: 'false'
       APP_LOG_FORMAT: human_readable
-      DB_URL: postgresql://pantos-service-node:pantos@db/pantos-service-node
+      DB_URL: postgresql+psycopg://pantos-service-node:pantos@db/pantos-service-node
       CELERY_BROKER: amqp://pantos-service-node:pantos@broker:5672/pantos-service-node
-      CELERY_BACKEND: db+postgresql://pantos-service-node:pantos@db/pantos-service-node-celery
+      CELERY_BACKEND: db+postgresql+psycopg://pantos-service-node:pantos@db/pantos-service-node-celery
       DEV_MODE: ${DEV_MODE}
     ports:
       - 808${INSTANCE-0}:8080
@@ -111,9 +111,9 @@ services:
       APP_PORT: 8080
       CELERY_LOG_FORMAT: human_readable
       CELERY_LOG_FILE_ENABLED: 'false'
-      DB_URL: postgresql://pantos-service-node:pantos@db/pantos-service-node
+      DB_URL: postgresql+psycopg://pantos-service-node:pantos@db/pantos-service-node
       CELERY_BROKER: amqp://pantos-service-node:pantos@broker:5672/pantos-service-node
-      CELERY_BACKEND: db+postgresql://pantos-service-node:pantos@db/pantos-service-node-celery
+      CELERY_BACKEND: db+postgresql+psycopg://pantos-service-node:pantos@db/pantos-service-node-celery
       DEV_MODE: ${DEV_MODE}
     healthcheck:
       test: ["CMD", "/usr/bin/pantos-service-node-celery", "--status"]
