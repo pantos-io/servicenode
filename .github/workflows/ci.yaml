@@ -169,6 +169,8 @@ jobs:
           sparse-checkout: |
            Makefile
            docker-compose.yml
+           docker-compose.ci.yml
+           docker-compose.local.yml
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
