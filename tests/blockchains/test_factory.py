@@ -13,9 +13,9 @@ from pantos.servicenode.blockchains.factory import _blockchain_clients
 from pantos.servicenode.blockchains.factory import get_blockchain_client
 from pantos.servicenode.blockchains.factory import \
     initialize_blockchain_clients
-from pantos.servicenode.blockchains.fantom import FantomClient
 from pantos.servicenode.blockchains.polygon import PolygonClient
 from pantos.servicenode.blockchains.solana import SolanaClient
+from pantos.servicenode.blockchains.sonic import SonicClient
 
 
 @pytest.fixture(autouse=True)
@@ -54,8 +54,8 @@ def _get_blockchain_client_class(blockchain):
         return CronosClient
     if blockchain is Blockchain.ETHEREUM:
         return EthereumClient
-    if blockchain is Blockchain.FANTOM:
-        return FantomClient
+    if blockchain is Blockchain.SONIC:
+        return SonicClient
     if blockchain is Blockchain.POLYGON:
         return PolygonClient
     if blockchain is Blockchain.SOLANA:
