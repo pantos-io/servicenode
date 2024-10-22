@@ -136,7 +136,7 @@ def postgres_db_engine():
 
     """
     sql_engine = sqlalchemy.create_engine(
-        'postgresql://pantos-service-node:kP13yU9f@localhost/'
+        'postgresql+psycopg://pantos-service-node:kP13yU9f@localhost/'
         'pantos-service-node-test')
     return sql_engine
 
