@@ -75,6 +75,7 @@ jobs:
                 format: 'sarif'
                 output: 'trivy-app-results.sarif'
                 severity: 'CRITICAL,HIGH'
+                trivy-config: .github/workflows/config/trivy.yaml
             
             - name: Upload Trivy scan results for app to GitHub Security tab
               uses: github/codeql-action/upload-sarif@v3
