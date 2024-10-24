@@ -1,0 +1,9 @@
+image:
+    registry: "public.ecr.aws"
+    tag: latest
+
+dbRegistry: "public.ecr.aws"
+dbRepository: "aquasecurity/trivy-db"
+
+javaDbRegistry: "public.ecr.aws"
+javaDbRepository: "aquasecurity/trivy-java-db"
