@@ -42,17 +42,21 @@ else:
 print(f'Starting the server on {host}:{port}...')
 # the server should not run on a priviledged port (<1024)
 if port < 1024:
+    print(f'Port {port} is a privileged port, '
+          'redirecting to a default port...')
     if ssl_certificate:
         default_port = NON_ROOT_DEFAULT_HTTPS_PORT
+        print('SSL certificate is present, using '
+              f'default HTTPS port {default_port}')
     else:
         default_port = NON_ROOT_DEFAULT_HTTP_PORT
+        print('No SSL certificate present, '
+              f'using default HTTP port {default_port}')
     port_redirect_command = (
         'nft add table ip nat && nft -- add chain ip nat prerouting '
         '{ type nat hook prerouting priority -100 \\; } '
         f'&& nft add rule ip nat prerouting tcp dport {port} '
         f'redirect to :{default_port}')  # noqa E203
-    print(
-        f'Port {port} is a privileged port, redirecting to {default_port}...')
     try:
         completed_process = subprocess.run(port_redirect_command, text=True,
                                            shell=True,
