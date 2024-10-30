@@ -4,6 +4,8 @@ application:
     debug: !ENV tag:yaml.org,2002:bool ${APP_DEBUG:false}
     host: !ENV ${APP_HOST:127.0.0.1}
     port: !ENV tag:yaml.org,2002:int ${APP_PORT:443}
+    #ssl_certificate: !ENV ${APP_SSL_CERTIFICATE:/etc/pantos/service-node-fullchain.pem}
+    #ssl_private_key: !ENV ${APP_SSL_PRIVATE_KEY:/etc/pantos/service-node-privkey.pem}
     url: !ENV ${APP_URL}
     log:
         format: !ENV ${APP_LOG_FORMAT:human_readable}
