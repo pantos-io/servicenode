@@ -215,6 +215,45 @@ class _Transfer(flask_restful.Resource):
 
     """
     def post(self) -> flask.Response:
+        """
+        Endpoint for submitting a token transfer request.
+        ---
+        requestBody:
+          description: Transfer request
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/_Transfer"
+        responses:
+            200:
+              description: Transfer request accepted
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    example:
+                      task_id: '123e4567-e89b-12d3-a456-426614174000'
+            406:
+              description: Transfer request no accepted
+              content:
+                application/json:
+                  schema:
+                    type: array
+                    items:
+                      type: string
+                    example: "[bid has been rejected by service node: \
+                        'bid not accepted']"
+            409:
+              description: Sender nonce from transfer request is not unique
+              content:
+                application/json:
+                  schema:
+                    type: string
+                    example: sender nonce 1337 is not unique
+            500:
+              description: Internal server error
+        """
         try:
             time_received = time.time()
             arguments = flask_restful.request.json
@@ -244,6 +283,53 @@ class _TransferStatus(flask_restful.Resource):
 
     """
     def get(self, task_id: str) -> flask.Response:
+        """
+        Endpoint that returns the status of a transfer.
+        ---
+        parameters:
+          - in: path
+            name: task_id
+            schema:
+              $ref: '#/components/schemas/_TransferStatus'
+            required: true
+            description: Id of a transfer submitted to the service node
+        responses:
+          200:
+            description: Object containing the status of a transfer with
+             the given task ID
+            content:
+              application/json:
+                schema:
+                  type: object
+                  example:
+                    task_id: '123e4567-e89b-12d3-a456-426614174000'
+                    source_blockchain_id: 1
+                    destination_blockchain_id: 2
+                    sender_address: \
+                        '0x1234567890123456789012345678901234567890'
+                    recipient_address: \
+                        '0x1234567890123456789012345678901234567890'
+                    source_token_address: \
+                        '0x1234567890123456789012345678901234567890'
+                    destination_token_address: \
+                        '0x1234567890123456789012345678901234567890'
+                    amount: 100
+                    fee: 1
+                    status: 'pending'
+                    transfer_id: \
+                        '0x1234567890123456789012345678901234567890'
+                    transaction_id: \
+                        '0x1234567890123456789012345678901234567890'
+          404:
+            description: 'not found'
+            content:
+              application/json:
+                schema:
+                  type: string
+                  example: {"message": "task ID 123 is unknown"}
+          500:
+            description: 'internal server error'
+        """
         try:
             task_id_uuid = _TransferStatusSchema().load({'task_id': task_id})
             _logger.info(f'new transfer status request: {task_id}')
@@ -289,6 +375,45 @@ class _Bids(flask_restful.Resource):
 
     """
     def get(self) -> flask.Response:
+        """
+        Endpoint that returns a list of bids for a given source and \
+            destination blockchain.
+        ---
+        parameters:
+          - in: query
+            name: source_blockchain
+            schema:
+              $ref: '#/components/schemas/_Bids/properties/source_blockchain'
+            required: true
+            description: Numeric ID of the supported Blockchain ID
+          - in: query
+            name: destination_blockchain
+            schema:
+              $ref: \
+                '#/components/schemas/_Bids/properties/destination_blockchain'
+            required: true
+            description: Numeric ID of the supported Blockchain ID
+        responses:
+          200:
+            description: List of bids for a given source and \
+                destination blockchain
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/_Bid'
+          400:
+            description: 'bad request'
+            content:
+              application/json:
+                schema:
+                  type: string
+                  example: {"message": {"source_blockchain": \
+                    ["Missing data for required field."], \
+                    "destination_blockchain": \
+                    ["Missing data for required field."]}}
+          500:
+            description: 'internal server error'
+        """
         try:
             query_arguments = flask_restful.request.args
             bids_parameter = _BidsSchema().load(query_arguments)
