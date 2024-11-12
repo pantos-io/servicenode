@@ -6,6 +6,7 @@ STACK_BASE_NAME=stack-service-node
 INSTANCE_COUNT ?= 1
 DEV_MODE ?= false
 SHELL := $(shell which bash)
+OPENAPI_FILE_LOCATION ?= ./docs/openapi.json
 
 .PHONY: check-version
 check-version:
@@ -85,7 +86,7 @@ tar: dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION).tar.gz
 
 .PHONY: openapi-docs
 openapi-docs:
-	poetry run python3 -m openapi
+	poetry run python3 -m openapi $(OPENAPI_FILE_LOCATION)
 
 dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION).tar.gz: pantos/ service-node-config.yml service-node-config.env bids.yml alembic.ini pantos-service-node.sh pantos-service-node-worker.sh
 	cp service-node-config.yml pantos/service-node-config.yml
