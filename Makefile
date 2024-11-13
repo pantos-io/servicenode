@@ -1,11 +1,12 @@
 PANTOS_SERVICE_NODE_VERSION := $(shell command -v poetry >/dev/null 2>&1 && poetry version -s || echo "0.0.0")
 PANTOS_SERVICE_NODE_SSH_HOST ?= bdev-service-node
-PYTHON_FILES_WITHOUT_TESTS := pantos/servicenode linux/scripts/start-web.py
+PYTHON_FILES_WITHOUT_TESTS := pantos/servicenode linux/scripts/start-web.py openapi.py
 PYTHON_FILES := $(PYTHON_FILES_WITHOUT_TESTS) tests
 STACK_BASE_NAME=stack-service-node
 INSTANCE_COUNT ?= 1
 DEV_MODE ?= false
 SHELL := $(shell which bash)
+OPENAPI_FILE_LOCATION ?= ./docs/openapi.json
 
 .PHONY: check-version
 check-version:
@@ -82,6 +83,10 @@ coverage-all:
 
 .PHONY: tar
 tar: dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION).tar.gz
+
+.PHONY: openapi-docs
+openapi-docs:
+	poetry run python3 -m openapi $(OPENAPI_FILE_LOCATION)
 
 dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION).tar.gz: pantos/ service-node-config.yml service-node-config.env bids.yml alembic.ini pantos-service-node.sh pantos-service-node-worker.sh
 	cp service-node-config.yml pantos/service-node-config.yml

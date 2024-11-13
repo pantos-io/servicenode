@@ -34,6 +34,12 @@ yapf = "0.40.2"
 [tool.poetry.group.dev.dependencies]
 pre-commit = "4.0.1"
 
+
+[tool.poetry.group.docs.dependencies]
+apispec = "^6.7.1"
+apispec-webframeworks = "^1.2.0"
+flasgger = "^0.9.7.1"
+
 [tool.poetry.dependencies]
 python = "^3.10"
 pantos-common = "4.0.1"

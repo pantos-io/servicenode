@@ -170,7 +170,21 @@ Run the following command from the repository's root directory:
 make code
 ```
 
-### 3.2 Local development environment
+### 3.2 OpenAPI
+
+If you want to generate the OpenAPI documentation, you can run the following command:
+
+```bash
+make openapi-docs
+```
+which will generate a `openapi.json` file in the `docs` directory.
+If you want to specify a different path for the output file, you can do so by running:
+
+```bash
+make openapi-docs OUTPUT_FILE=<path>/<filename.json>
+```
+
+### 3.3 Local development environment
 
 #### PostgreSQL
 
