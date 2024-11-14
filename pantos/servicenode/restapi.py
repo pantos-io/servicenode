@@ -232,8 +232,9 @@ class _Transfer(flask_restful.Resource):
                 application/json:
                   schema:
                     type: object
-                    example:
-                      task_id: '123e4567-e89b-12d3-a456-426614174000'
+                    properties:
+                      task_id:
+                        type: string
             406:
               description: Transfer request no accepted
               content:
@@ -301,25 +302,31 @@ class _TransferStatus(flask_restful.Resource):
               application/json:
                 schema:
                   type: object
-                  example:
-                    task_id: '123e4567-e89b-12d3-a456-426614174000'
-                    source_blockchain_id: 1
-                    destination_blockchain_id: 2
-                    sender_address: \
-                        '0x1234567890123456789012345678901234567890'
-                    recipient_address: \
-                        '0x1234567890123456789012345678901234567890'
-                    source_token_address: \
-                        '0x1234567890123456789012345678901234567890'
-                    destination_token_address: \
-                        '0x1234567890123456789012345678901234567890'
-                    amount: 100
-                    fee: 1
-                    status: 'pending'
-                    transfer_id: \
-                        '0x1234567890123456789012345678901234567890'
-                    transaction_id: \
-                        '0x1234567890123456789012345678901234567890'
+                  properties:
+                    task_id:
+                      type: string
+                    source_blockchain_id:
+                      $ref: '#/components/schemas/_Bids/properties/source_blockchain'
+                    destination_blockchain_id:
+                      $ref: '#/components/schemas/_Bids/properties/destination_blockchain'
+                    sender_address:
+                      type: string
+                    recipient_address:
+                      type: string
+                    source_token_address:
+                      type: string
+                    destination_token_address:
+                      type: string
+                    amount:
+                      type: integer
+                    fee:
+                      type: integer
+                    status:
+                      type: string
+                    transfer_id:
+                      type: string
+                    transaction_id:
+                      type: string
           404:
             description: 'not found'
             content:
