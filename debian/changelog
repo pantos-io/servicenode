@@ -1,3 +1,9 @@
+pantos-service-node (2.1.0) RELEASED; urgency=medium
+
+  * Add sonic ABI
+
+ -- Pantos GmbH <contact@pantos.io> Thu, 14 Nov 2024 18:00:00 +0000
+
 pantos-service-node (2.0.1) RELEASED; urgency=medium
 
   * Fix docker release pipeline
