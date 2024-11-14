@@ -244,7 +244,7 @@ class _Transfer(flask_restful.Resource):
                     items:
                       type: string
                     example: "[bid has been rejected by service node: \
-                        'bid not accepted']"
+'bid not accepted']"
             409:
               description: Sender nonce from transfer request is not unique
               content:
@@ -306,9 +306,11 @@ class _TransferStatus(flask_restful.Resource):
                     task_id:
                       type: string
                     source_blockchain_id:
-                      $ref: '#/components/schemas/_Bids/properties/source_blockchain'
+                      $ref: "#/components/schemas/ \
+_Bids/properties/source_blockchain"
                     destination_blockchain_id:
-                      $ref: '#/components/schemas/_Bids/properties/destination_blockchain'
+                      $ref: "#/components/schemas/ \
+_Bids/properties/destination_blockchain"
                     sender_address:
                       type: string
                     recipient_address:
@@ -384,7 +386,7 @@ class _Bids(flask_restful.Resource):
     def get(self) -> flask.Response:
         """
         Endpoint that returns a list of bids for a given source and \
-            destination blockchain.
+destination blockchain.
         ---
         parameters:
           - in: query
@@ -403,7 +405,7 @@ class _Bids(flask_restful.Resource):
         responses:
           200:
             description: List of bids for a given source and \
-                destination blockchain
+destination blockchain
             content:
               application/json:
                 schema:
