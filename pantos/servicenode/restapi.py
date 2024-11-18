@@ -218,6 +218,8 @@ class _Transfer(flask_restful.Resource):
         """
         Endpoint for submitting a token transfer request.
         ---
+        tags:
+          - Transfer
         requestBody:
           description: Transfer request
           required: true
@@ -287,6 +289,8 @@ class _TransferStatus(flask_restful.Resource):
         """
         Endpoint that returns the status of a transfer.
         ---
+        tags:
+          - Transfer Status
         parameters:
           - in: path
             name: task_id
@@ -306,10 +310,10 @@ class _TransferStatus(flask_restful.Resource):
                     task_id:
                       type: string
                     source_blockchain_id:
-                      $ref: "#/components/schemas/ \
+                      $ref: "#/components/schemas/\
 _Bids/properties/source_blockchain"
                     destination_blockchain_id:
-                      $ref: "#/components/schemas/ \
+                      $ref: "#/components/schemas/\
 _Bids/properties/destination_blockchain"
                     sender_address:
                       type: string
@@ -388,6 +392,8 @@ class _Bids(flask_restful.Resource):
         Endpoint that returns a list of bids for a given source and \
 destination blockchain.
         ---
+        tags:
+          - Bids
         parameters:
           - in: query
             name: source_blockchain
