@@ -7,6 +7,7 @@ import sys
 
 import amqp  # type: ignore
 import celery  # type: ignore
+import certifi  # type: ignore
 from pantos.common.logging import LogFile
 from pantos.common.logging import LogFormat
 from pantos.common.logging import initialize_logger
@@ -47,7 +48,7 @@ celery_app = celery.Celery(
         'pantos.common.blockchains.tasks',
         'pantos.servicenode.business.transfers',
         'pantos.servicenode.business.plugins'
-    ])
+    ], broker_use_ssl={'ca_certs': certifi.where()})
 """Celery application instance."""
 
 # Additional Celery configuration
