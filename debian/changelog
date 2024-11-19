@@ -1,29 +1,35 @@
+pantos-service-node (2.1.1) RELEASED; urgency=high
+
+  * Patch certificates when using TLS
+
+-- Pantos GmbH <contact@pantos.io> Thu, 19 Nov 2024 13:00:00 +0000
+
 pantos-service-node (2.1.0) RELEASED; urgency=medium
 
   * Add sonic ABI
 
- -- Pantos GmbH <contact@pantos.io> Thu, 14 Nov 2024 18:00:00 +0000
+-- Pantos GmbH <contact@pantos.io> Thu, 14 Nov 2024 18:00:00 +0000
 
 pantos-service-node (2.0.1) RELEASED; urgency=medium
 
   * Fix docker release pipeline
 
- -- Pantos GmbH <contact@pantos.io> Thu, 21 Oct 2024 16:15:00 +0000
+-- Pantos GmbH <contact@pantos.io> Thu, 21 Oct 2024 16:15:00 +0000
 
 pantos-service-node (2.0.0) RELEASED; urgency=medium
 
   * Support for Sonic and Polygon 2.0
 
- -- Pantos GmbH <contact@pantos.io> Thu, 21 OCT 2024 16:00:00 +0000
+-- Pantos GmbH <contact@pantos.io> Thu, 21 OCT 2024 16:00:00 +0000
 
 pantos-service-node (1.8.2) UNRELEASED; urgency=medium
 
   * NA
 
- -- Pantos GmbH <contact@pantos.io> Thu, 24 Jun 2024 14:00:15 +0000
+-- Pantos GmbH <contact@pantos.io> Thu, 24 Jun 2024 14:00:15 +0000
 
 pantos-service-node (1.8.1) RELEASED; urgency=medium
 
   * pantos-service-node: Initial debian packaging
 
- -- Pantos GmbH <contact@pantos.io> Thu, 24 Jun 2024 14:00:15 +0000
+-- Pantos GmbH <contact@pantos.io> Thu, 24 Jun 2024 14:00:15 +0000
