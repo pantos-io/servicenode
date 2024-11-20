@@ -1,3 +1,9 @@
+pantos-service-node (2.1.2) RELEASED; urgency=high
+
+  * Patch certificates when using TLS
+
+-- Pantos GmbH <contact@pantos.io> Thu, 20 Nov 2024 13:00:00 +0000
+
 pantos-service-node (2.1.1) RELEASED; urgency=high
 
   * Patch certificates when using TLS
