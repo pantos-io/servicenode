@@ -1,16 +1,16 @@
 Package: pantos-service-node
-Version: 2.1.1
+Version: 2.1.2
 Architecture: all
 Maintainer: Pantos GmbH <contact@pantos.io>
-Installed-Size: 409265
+Installed-Size: 409266
 Pre-Depends: dpkg (>= 1.16.1), python3, python3-venv
 Depends: debconf (>= 0.5) | debconf-2.0, sysuser-helper (>= 1.3.3), libpq-dev, debconf
 Recommends: iptables
-Filename: ./pantos-service-node_2.1.1_amd64.deb
-Size: 96067092
-MD5sum: 1df0a6853370c66acc5725fd277118fc
-SHA1: 0f311d00279da3105136c1027a9e4d3f3be63ace
-SHA256: bf21941bd1b648ae9d664783e6a085af454aa569089f36d8f594d22cd8535924
+Filename: ./pantos-service-node_2.1.2_amd64.deb
+Size: 96073184
+MD5sum: 28a86cc750a16bffaf711d5222a72ab6
+SHA1: 4fcf37bbafb2d7d21bcef428facbc10d0537d6a7
+SHA256: efeb97b5dab9bab5f9449e2f07bfc12171e9858d9e6c2295c806680a58363490
 Section: contrib/python
 Priority: extra
 Homepage: https://github.com/pantos-io/servicenode
@@ -18,16 +18,16 @@ Description: Service Node reference implementation for the Pantos multi-blockcha
 
 Package: pantos-service-node-full
 Source: pantos-service-node-full
-Version: 2.1.1
+Version: 2.1.2
 Architecture: all
 Maintainer: Pantos GmbH <contact@pantos.io>
 Pre-Depends: debhelper (>=10), dpkg (>= 1.16.1)
 Depends: pantos-service-node, postgresql, rabbitmq-server, openssh-client
-Filename: ./pantos-service-node-full_2.1.1_all.deb
-Size: 5670
-MD5sum: 86664e834893defb5e75970a52ccc0a7
-SHA1: 57b4ff4aaf10ea897d72843a02602a1f35e90c48
-SHA256: 0326e751499b7962d27a241268cb25c8ec6b00749d90e759c0fab9eb70b88a97
+Filename: ./pantos-service-node-full_2.1.2_all.deb
+Size: 5678
+MD5sum: e424bb094aae6cf73c91c3516d9433cb
+SHA1: 62eb8662e323413e7f19f17687add60efe5f253b
+SHA256: be9113e7e0889d407f81f8e26c64a6b8608925b68eab955dd1e3a97d422b26f3
 Section: contrib/python
 Priority: extra
 Homepage: https://github.com/pantos-io/servicenode
