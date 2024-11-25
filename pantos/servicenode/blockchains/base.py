@@ -115,6 +115,18 @@ class BlockchainClient(BlockchainHandler, ErrorCreator[BlockchainClientError]):
                 'utilities')
 
     @abc.abstractmethod
+    def get_own_address(self) -> BlockchainAddress:
+        """Get the service node's own address on the blockchain.
+
+        Returns
+        -------
+        BlockchainAddress
+            The service node's own address.
+
+        """
+        pass  # pragma: no cover
+
+    @abc.abstractmethod
     def is_node_registered(self) -> bool:
         """Determine if the service node is registered at the Pantos Hub
         on the blockchain.
@@ -172,6 +184,24 @@ class BlockchainClient(BlockchainHandler, ErrorCreator[BlockchainClientError]):
         pass  # pragma: no cover
 
     @abc.abstractmethod
+    def read_minimum_deposit(self) -> int:
+        """Read the service node's minimum deposit at the Pantos Hub on
+        the blockchain.
+
+        Returns
+        -------
+        int
+            The service node's minimum deposit.
+
+        Raises
+        ------
+        BlockchainClientError
+            If the service node's minimum deposit cannot be read.
+
+        """
+        pass  # pragma: no cover
+
+    @abc.abstractmethod
     def read_node_url(self) -> str:
         """Read the service node's URL that is registered at the Pantos
         Hub on the blockchain.
@@ -188,6 +218,29 @@ class BlockchainClient(BlockchainHandler, ErrorCreator[BlockchainClientError]):
 
         """
         pass  # pragma: no cover
+
+    def read_own_pan_balance(self) -> int:
+        """Read the service node's own PAN token balance on the
+        blockchain.
+
+        Returns
+        -------
+        int
+            The service node's own PAN token balance.
+
+        Raises
+        ------
+        BlockchainClientError
+            If the service node's own PAN token balance cannot be read.
+
+        """
+        try:
+            return self._get_utilities().get_balance(
+                self.get_own_address(),
+                token_address=self._get_config()['pan_token'])
+        except Exception:
+            raise self._create_error(
+                'unable to read the own PAN token balance')
 
     @abc.abstractmethod
     def register_node(self, node_url: str, node_deposit: int,

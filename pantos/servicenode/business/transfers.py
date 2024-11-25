@@ -69,6 +69,11 @@ class TransferInteractor(Interactor):
     """Interactor for handling token transfers.
 
     """
+    @classmethod
+    def get_error_class(cls) -> type[InteractorError]:
+        # Docstring inherited
+        return TransferInteractorError
+
     @dataclasses.dataclass
     class ConfirmTransferRequest:
         """Request data for confirming the inclusion of a token transfer
@@ -158,7 +163,7 @@ class TransferInteractor(Interactor):
                 request.internal_transfer_id, TransferStatus.CONFIRMED)
             return True
         except Exception:
-            raise TransferInteractorError(
+            raise self._create_error(
                 'unable to determine if a token transfer is confirmed',
                 request=request)
 
@@ -250,8 +255,8 @@ class TransferInteractor(Interactor):
         except TransferInteractorUnrecoverableError:
             raise
         except Exception:
-            raise TransferInteractorError('unable to execute a token transfer',
-                                          request=request)
+            raise self._create_error('unable to execute a token transfer',
+                                     request=request)
 
     def __single_chain_transfer(self,
                                 request: ExecuteTransferRequest) -> uuid.UUID:
@@ -634,8 +639,8 @@ class TransferInteractor(Interactor):
         except TransferInteractorResourceNotFoundError:
             raise
         except Exception:
-            raise TransferInteractorError(
-                'unable to search for a token transfer', task_id=task_id)
+            raise self._create_error('unable to search for a token transfer',
+                                     task_id=task_id)
 
     @dataclasses.dataclass
     class InitiateTransferRequest:
@@ -772,8 +777,8 @@ class TransferInteractor(Interactor):
         except TransferInteractorBidNotAcceptedError:
             raise
         except Exception:
-            raise TransferInteractorError(
-                'unable to initiate a new token transfer', request=request)
+            raise self._create_error('unable to initiate a new token transfer',
+                                     request=request)
 
 
 @celery.current_app.task(bind=True, max_retries=100)
