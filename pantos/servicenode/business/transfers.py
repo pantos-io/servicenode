@@ -290,6 +290,9 @@ class TransferInteractor(Interactor):
 
     def __cross_chain_transfer(self,
                                request: ExecuteTransferRequest) -> uuid.UUID:
+        source_blockchain_client = get_blockchain_client(
+            request.source_blockchain)
+        self.__validate_destination_token(source_blockchain_client, request)
         transfer_from_request = \
             BlockchainClient.TransferFromSubmissionStartRequest(
                 request.internal_transfer_id,
@@ -299,8 +302,6 @@ class TransferInteractor(Interactor):
                 request.destination_token_address,
                 request.amount, request.fee, request.sender_nonce,
                 request.valid_until, request.signature)
-        source_blockchain_client = get_blockchain_client(
-            request.source_blockchain)
         try:
             return source_blockchain_client.start_transfer_from_submission(
                 transfer_from_request)
@@ -315,6 +316,23 @@ class TransferInteractor(Interactor):
             database_access.update_transfer_status(
                 request.internal_transfer_id, TransferStatus.ACCEPTED)
             raise
+
+    def __validate_destination_token(
+            self, source_blockchain_client: BlockchainClient,
+            request: ExecuteTransferRequest) -> None:
+        external_token_request = BlockchainClient.ExternalTokenRecordRequest(
+            token_address=request.source_token_address,
+            external_blockchain=request.destination_blockchain)
+        external_token_response = source_blockchain_client.\
+            read_external_token_record(external_token_request)
+        if (not external_token_response.is_registration_active
+                or request.destination_token_address
+                != external_token_response.external_token_address):
+            database_access.update_transfer_status(
+                request.internal_transfer_id, TransferStatus.FAILED)
+            raise TransferInteractorUnrecoverableError(
+                'invalid destination token', request=request,
+                **dataclasses.asdict(external_token_response))
 
     def __check_valid_until(self, source_blockchain: Blockchain,
                             valid_until: int, bid_execution_time: int,

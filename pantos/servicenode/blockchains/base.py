@@ -183,6 +183,61 @@ class BlockchainClient(BlockchainHandler, ErrorCreator[BlockchainClientError]):
         """
         pass  # pragma: no cover
 
+    @dataclasses.dataclass
+    class ExternalTokenRecordRequest:
+        """Request data for reading an external token record.
+
+        Attributes
+        ----------
+        token_address : BlockchainAddress
+            The address of the token on the blockchain the external
+            token record is read from.
+        external_blockchain : Blockchain
+            The blockchain to read the external token record for.
+
+        """
+        token_address: BlockchainAddress
+        external_blockchain: Blockchain
+
+    @dataclasses.dataclass
+    class ExternalTokenRecordResponse:
+        """Response data from reading an external token record.
+
+        Attributes
+        ----------
+        is_registration_active : bool
+            True if the external token registration is active.
+        external_token_address : BlockchainAddress
+            The registered external address of the token.
+
+        """
+        is_registration_active: bool
+        external_token_address: BlockchainAddress
+
+    @abc.abstractmethod
+    def read_external_token_record(
+            self, request: ExternalTokenRecordRequest) \
+            -> ExternalTokenRecordResponse:
+        """Read an external token record from the Pantos Hub.
+
+        Parameters
+        ----------
+        request : ExternalTokenRecordRequest
+            The request data.
+
+        Returns
+        -------
+        ExternalTokenRecordResponse
+            The response data.
+
+        Raises
+        ------
+        BlockchainClientError
+            If the external token record cannot be read.
+
+        """
+        pass  # pragma: no cover
+
     @abc.abstractmethod
     def read_minimum_deposit(self) -> int:
         """Read the service node's minimum deposit at the Pantos Hub on

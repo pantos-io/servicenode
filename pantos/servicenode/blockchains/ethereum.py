@@ -105,6 +105,29 @@ class EthereumClient(BlockchainClient):
         is_zero_address = int(recipient_address, 0) == 0
         return not is_zero_address
 
+    def read_external_token_record(
+            self, request: BlockchainClient.ExternalTokenRecordRequest) \
+            -> BlockchainClient.ExternalTokenRecordResponse:
+        # Docstring inherited
+        try:
+            node_connections = self.__create_node_connections()
+            hub_contract = self._create_hub_contract(node_connections)
+            external_token_record = hub_contract.caller().\
+                getExternalTokenRecord(request.token_address,
+                                       request.external_blockchain.value).get()
+            assert len(external_token_record) == 2
+            is_registration_active = external_token_record[0]
+            assert isinstance(is_registration_active, bool)
+            external_token_address = external_token_record[1]
+            assert isinstance(external_token_address, str)
+            return BlockchainClient.ExternalTokenRecordResponse(
+                is_registration_active=is_registration_active,
+                external_token_address=BlockchainAddress(
+                    external_token_address))
+        except Exception:
+            raise self._create_error('unable to read an external token record',
+                                     request=request)
+
     def read_minimum_deposit(self) -> int:
         # Docstring inherited
         try:

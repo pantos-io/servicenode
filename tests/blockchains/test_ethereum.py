@@ -69,6 +69,10 @@ _TRANSFER_SIGNATURE = 'signature'
 
 _TRANSFER_DESTIONATION_TOKEN_ADDRESS = 'destination_token'
 
+_TOKEN_ADDRESS = '0xa6fd6EB118BBdf6c4B31866542972d3D589b24C6'
+
+_EXTERNAL_TOKEN_ADDRESS = '0x4E4d4470d72CA0CE478d6f87a1ae3a868F0e8Bb9'
+
 
 @pytest.fixture(scope='module')
 def web3_account():
@@ -331,6 +335,49 @@ def test_is_valid_recipient_address_0_address_false(mock_is_valid_address,
         recipient_address)
 
     assert is_recipient_address_correct is False
+
+
+@pytest.mark.parametrize('is_registration_active', [True, False])
+@pytest.mark.parametrize('external_blockchain', [
+    blockchain
+    for blockchain in Blockchain if blockchain is not Blockchain.ETHEREUM
+])
+def test_read_external_token_record_correct(
+        external_blockchain, is_registration_active, ethereum_client,
+        mock_get_blockchain_config, provider_timeout, hub_contract_address,
+        mock_get_blockchain_utilities):
+    mock_get_blockchain_config.return_value = {
+        'provider_timeout': provider_timeout,
+        'hub': hub_contract_address
+    }
+    mock_get_blockchain_utilities().create_contract().caller().\
+        getExternalTokenRecord().get.return_value = (is_registration_active,
+                                                     _EXTERNAL_TOKEN_ADDRESS)
+
+    request = BlockchainClient.ExternalTokenRecordRequest(
+        token_address=_TOKEN_ADDRESS, external_blockchain=external_blockchain)
+    response = ethereum_client.read_external_token_record(request)
+
+    assert response.is_registration_active is is_registration_active
+    assert response.external_token_address == _EXTERNAL_TOKEN_ADDRESS
+
+
+def test_read_external_token_record_error(ethereum_client,
+                                          mock_get_blockchain_config,
+                                          provider_timeout,
+                                          hub_contract_address,
+                                          mock_get_blockchain_utilities):
+    mock_get_blockchain_config.return_value = {
+        'provider_timeout': provider_timeout,
+        'hub': hub_contract_address
+    }
+    mock_get_blockchain_utilities().create_contract().caller.side_effect = \
+        EthereumUtilitiesError
+
+    request = BlockchainClient.ExternalTokenRecordRequest(
+        token_address=_TOKEN_ADDRESS, external_blockchain=Blockchain.AVALANCHE)
+    with pytest.raises(EthereumClientError):
+        ethereum_client.read_external_token_record(request)
 
 
 def test_read_minimum_deposit_correct(ethereum_client,
