@@ -40,7 +40,6 @@ def test_transfer_status_correct(mocked_load, mocked_find_transfer,
     mocked_find_transfer.return_value = find_transfer_response
 
     response = test_client.get(f'/transfer/{uuid_}/status')
-
     assert response.status_code == 200
     assert json.loads(response.text) == expected_transfer_status
 

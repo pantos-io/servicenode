@@ -56,7 +56,6 @@ def test_transfer_sender_nonce_not_unique_error(mocked_load,
             406, message=error_message)
 
     response = test_client.post('/transfer', json={})
-
     mocked_conflict.assert_called_once_with(
         f'sender nonce {mocked_load().nonce} is not unique')
     assert response.status_code == 406
@@ -77,9 +76,9 @@ def test_transfer_bid_not_accepted_error(mocked_load, mocked_initiate_transfer,
             406, message=error_message)
 
     response = test_client.post('/transfer', json={})
-
     assert response.status_code == 406
-    mocked_not_acceptable.assert_called_once()
+    mocked_not_acceptable.assert_called_once_with(
+        'bid has been rejected by service node: bid not accepted')
 
 
 @unittest.mock.patch('pantos.servicenode.restapi.internal_server_error')

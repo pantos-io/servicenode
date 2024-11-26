@@ -186,6 +186,13 @@ class _TransferSchema(marshmallow.Schema):
         return TransferInteractor.InitiateTransferRequest(**data)
 
 
+class _TransferResponseSchema(marshmallow.Schema):
+    """Validation schema for the transfer response.
+
+    """
+    task_id = marshmallow.fields.UUID(required=True)
+
+
 class _TransferStatusSchema(marshmallow.Schema):
     """Validation schema for the transfer status endpoint parameters.
 
@@ -196,6 +203,28 @@ class _TransferStatusSchema(marshmallow.Schema):
     def make_task_id(self, data: typing.Dict[str, typing.Any],
                      **kwargs) -> uuid.UUID:
         return data['task_id']
+
+
+class _TransferStatusResponseSchema(marshmallow.Schema):
+    """Validation schema for the transfer status response.
+
+    """
+    task_id = marshmallow.fields.String(required=True)
+    source_blockchain_id = marshmallow.fields.Integer(
+        required=True, validate=marshmallow.validate.OneOf(
+            [blockchain.value for blockchain in Blockchain]))
+    destination_blockchain_id = marshmallow.fields.Integer(
+        required=True, validate=marshmallow.validate.OneOf(
+            [blockchain.value for blockchain in Blockchain]))
+    sender_address = marshmallow.fields.String(required=True)
+    recipient_address = marshmallow.fields.String(required=True)
+    source_token_address = marshmallow.fields.String(required=True)
+    destination_token_address = marshmallow.fields.String(required=True)
+    amount = marshmallow.fields.Integer(required=True)
+    fee = marshmallow.fields.Integer(required=True)
+    status = marshmallow.fields.String(required=True)
+    transfer_id = marshmallow.fields.Integer(required=True)
+    transaction_id = marshmallow.fields.String(required=True)
 
 
 class _BidsSchema(marshmallow.Schema):
@@ -233,27 +262,24 @@ class _Transfer(flask_restful.Resource):
               content:
                 application/json:
                   schema:
-                    type: object
-                    properties:
-                      task_id:
-                        type: string
+                    $ref: "#/components/schemas/_TransferResponse"
             406:
               description: Transfer request no accepted
               content:
                 application/json:
                   schema:
-                    type: array
+                    type: string
                     items:
                       type: string
-                    example: "[bid has been rejected by service node: \
-'bid not accepted']"
+                    example: {message': 'bid has been rejected by service \
+node: bid not accepted'}
             409:
               description: Sender nonce from transfer request is not unique
               content:
                 application/json:
                   schema:
                     type: string
-                    example: sender nonce 1337 is not unique
+                    example: {'message': 'sender nonce 1337 is not unique'}
             500:
               description: Internal server error
         """
@@ -265,6 +291,7 @@ class _Transfer(flask_restful.Resource):
             _logger.info('new transfer request', extra=arguments)
             task_id = TransferInteractor().initiate_transfer(
                 initiate_transfer_request)
+            response = _TransferResponseSchema().dump({'task_id': task_id})
         except marshmallow.ValidationError as error:
             not_acceptable(error.messages)
         except SenderNonceNotUniqueError as error:
@@ -273,12 +300,12 @@ class _Transfer(flask_restful.Resource):
                      f'{initiate_transfer_request.nonce} is not unique')
         except TransferInteractorBidNotAcceptedError as error:
             _logger.warning(f'bid has been rejected by service node: {error}')
-            not_acceptable([f'bid has been rejected by service node: {error}'])
+            not_acceptable(f'bid has been rejected by service node: {error}')
         except Exception:
             _logger.critical('unable to process a transfer request',
                              exc_info=True)
             internal_server_error()
-        return ok_response({'task_id': str(task_id)})
+        return ok_response(response)
 
 
 class _TransferStatus(flask_restful.Resource):
@@ -305,34 +332,7 @@ class _TransferStatus(flask_restful.Resource):
             content:
               application/json:
                 schema:
-                  type: object
-                  properties:
-                    task_id:
-                      type: string
-                    source_blockchain_id:
-                      $ref: "#/components/schemas/\
-_Bids/properties/source_blockchain"
-                    destination_blockchain_id:
-                      $ref: "#/components/schemas/\
-_Bids/properties/destination_blockchain"
-                    sender_address:
-                      type: string
-                    recipient_address:
-                      type: string
-                    source_token_address:
-                      type: string
-                    destination_token_address:
-                      type: string
-                    amount:
-                      type: integer
-                    fee:
-                      type: integer
-                    status:
-                      type: string
-                    transfer_id:
-                      type: string
-                    transaction_id:
-                      type: string
+                  $ref: '#/components/schemas/_TransferStatusResponse'
           404:
             description: 'not found'
             content:
@@ -360,7 +360,8 @@ _Bids/properties/destination_blockchain"
             _logger.critical('unable to process a transfer status request',
                              exc_info=True)
             internal_server_error()
-        return ok_response({
+
+        response = _TransferStatusResponseSchema().load({
             'task_id': str(task_id_uuid),
             'source_blockchain_id': find_transfer_response.source_blockchain.
             value,
@@ -381,6 +382,7 @@ _Bids/properties/destination_blockchain"
             'transaction_id': '' if find_transfer_response.transaction_id
             is None else find_transfer_response.transaction_id
         })
+        return response
 
 
 class _Bids(flask_restful.Resource):
