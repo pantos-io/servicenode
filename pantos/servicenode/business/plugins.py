@@ -32,6 +32,11 @@ class BidPluginInteractor(Interactor):
     """Interactor for handling the bid plugin operations.
 
     """
+    @classmethod
+    def get_error_class(cls) -> type[InteractorError]:
+        # Docstring inherited
+        return BidPluginInteractorError
+
     def replace_bids(self, source_blockchain: Blockchain) -> int:
         """Replace the old bids with new bids given by the bid plugin.
         Additionally, the Validator fee is added to the bid fee.

@@ -25,6 +25,11 @@ class BidInteractor(Interactor):
     """Interactor for managing service node bids.
 
     """
+    @classmethod
+    def get_error_class(cls) -> type[InteractorError]:
+        # Docstring inherited
+        return BidInteractorError
+
     def get_current_bids(
             self, source_blockchain_id: int,
             destination_blockchain_id: int) -> list[dict[str, int | str]]:
@@ -76,7 +81,7 @@ class BidInteractor(Interactor):
                     'signature': signature
                 })
         except Exception:
-            raise BidInteractorError(
+            raise self._create_error(
                 'unable to get the current bids',
                 source_blockchain_id=source_blockchain_id,
                 destination_blockchain_id=destination_blockchain_id)

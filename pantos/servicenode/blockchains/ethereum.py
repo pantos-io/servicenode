@@ -79,6 +79,10 @@ class EthereumClient(BlockchainClient):
         # Docstring inherited
         return EthereumClientError
 
+    def get_own_address(self) -> BlockchainAddress:
+        # Docstring inherited
+        return self.__address  # pragma: no cover
+
     def is_node_registered(self) -> bool:
         # Docstring inherited
         try:
@@ -100,6 +104,16 @@ class EthereumClient(BlockchainClient):
             return False
         is_zero_address = int(recipient_address, 0) == 0
         return not is_zero_address
+
+    def read_minimum_deposit(self) -> int:
+        # Docstring inherited
+        try:
+            node_connections = self.__create_node_connections()
+            hub_contract = self._create_hub_contract(node_connections)
+            return hub_contract.caller().\
+                getCurrentMinimumServiceNodeDeposit().get()
+        except Exception:
+            raise self._create_error('unable to read the minimum deposit')
 
     def read_node_url(self) -> str:
         # Docstring inherited
