@@ -382,7 +382,7 @@ class _TransferStatus(flask_restful.Resource):
             'transaction_id': '' if find_transfer_response.transaction_id
             is None else find_transfer_response.transaction_id
         })
-        return response
+        return ok_response(response)
 
 
 class _Bids(flask_restful.Resource):
