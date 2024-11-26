@@ -291,7 +291,7 @@ node: bid not accepted'}
             _logger.info('new transfer request', extra=arguments)
             task_id = TransferInteractor().initiate_transfer(
                 initiate_transfer_request)
-            # response = _TransferResponseSchema().dump({'task_id': task_id})
+            response = _TransferResponseSchema().dump({'task_id': task_id})
         except marshmallow.ValidationError as error:
             not_acceptable(error.messages)
         except SenderNonceNotUniqueError as error:
@@ -305,8 +305,7 @@ node: bid not accepted'}
             _logger.critical('unable to process a transfer request',
                              exc_info=True)
             internal_server_error()
-        # return ok_response(response)
-        return ok_response({'task_id': str(task_id)})
+        return ok_response(response)
 
 
 class _TransferStatus(flask_restful.Resource):
@@ -362,8 +361,7 @@ class _TransferStatus(flask_restful.Resource):
                              exc_info=True)
             internal_server_error()
 
-        # response = _TransferStatusResponseSchema().load({
-        return ok_response({
+        response = _TransferStatusResponseSchema().dump({
             'task_id': str(task_id_uuid),
             'source_blockchain_id': find_transfer_response.source_blockchain.
             value,
@@ -384,7 +382,7 @@ class _TransferStatus(flask_restful.Resource):
             'transaction_id': '' if find_transfer_response.transaction_id
             is None else find_transfer_response.transaction_id
         })
-        # return response
+        return response
 
 
 class _Bids(flask_restful.Resource):
