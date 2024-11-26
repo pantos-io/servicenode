@@ -291,7 +291,7 @@ node: bid not accepted'}
             _logger.info('new transfer request', extra=arguments)
             task_id = TransferInteractor().initiate_transfer(
                 initiate_transfer_request)
-            response = _TransferResponseSchema().dump({'task_id': task_id})
+            # response = _TransferResponseSchema().dump({'task_id': task_id})
         except marshmallow.ValidationError as error:
             not_acceptable(error.messages)
         except SenderNonceNotUniqueError as error:
