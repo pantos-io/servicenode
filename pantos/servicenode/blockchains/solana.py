@@ -35,11 +35,19 @@ class SolanaClient(BlockchainClient):
         # Docstring inherited
         return SolanaClientError
 
+    def get_own_address(self) -> BlockchainAddress:
+        # Docstring inherited
+        raise NotImplementedError  # pragma: no cover
+
     def is_node_registered(self) -> bool:
         # Docstring inherited
         return False  # pragma: no cover
 
     def is_valid_recipient_address(self, recipient_address: str) -> bool:
+        # Docstring inherited
+        raise NotImplementedError  # pragma: no cover
+
+    def read_minimum_deposit(self) -> int:
         # Docstring inherited
         raise NotImplementedError  # pragma: no cover
 

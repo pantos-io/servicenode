@@ -45,6 +45,8 @@ _WITHDRAWAL_ADDRESS = '0xCe87D7e9c79Cca53C6d7Cb916FAd4e5b4F83b621'
 
 _SERVICE_NODE_URL = 'servicenode.pantos.testurl'
 
+_MINIMUM_DEPOSIT = 10**5 * 10**8
+
 _DESTINATION_BLOCKCHAIN = Blockchain.BNB_CHAIN
 
 _TRANSFER_INTERNAL_ID = 7
@@ -329,6 +331,38 @@ def test_is_valid_recipient_address_0_address_false(mock_is_valid_address,
         recipient_address)
 
     assert is_recipient_address_correct is False
+
+
+def test_read_minimum_deposit_correct(ethereum_client,
+                                      mock_get_blockchain_config,
+                                      provider_timeout, hub_contract_address,
+                                      mock_get_blockchain_utilities):
+    mock_get_blockchain_config.return_value = {
+        'provider_timeout': provider_timeout,
+        'hub': hub_contract_address
+    }
+    mock_get_blockchain_utilities().create_contract().caller().\
+        getCurrentMinimumServiceNodeDeposit().get.return_value = \
+        _MINIMUM_DEPOSIT
+
+    minimum_deposit = ethereum_client.read_minimum_deposit()
+
+    assert minimum_deposit == _MINIMUM_DEPOSIT
+
+
+def test_read_minimum_deposit_error(ethereum_client,
+                                    mock_get_blockchain_config,
+                                    provider_timeout, hub_contract_address,
+                                    mock_get_blockchain_utilities):
+    mock_get_blockchain_config.return_value = {
+        'provider_timeout': provider_timeout,
+        'hub': hub_contract_address
+    }
+    mock_get_blockchain_utilities().create_contract().caller.side_effect = \
+        EthereumUtilitiesError
+
+    with pytest.raises(EthereumClientError):
+        ethereum_client.read_minimum_deposit()
 
 
 def test_read_node_url_correct(ethereum_client, mock_get_blockchain_config,
