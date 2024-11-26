@@ -305,7 +305,8 @@ node: bid not accepted'}
             _logger.critical('unable to process a transfer request',
                              exc_info=True)
             internal_server_error()
-        return ok_response(response)
+        # return ok_response(response)
+        return ok_response({'task_id': str(task_id)})
 
 
 class _TransferStatus(flask_restful.Resource):
