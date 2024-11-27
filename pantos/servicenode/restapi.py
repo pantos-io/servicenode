@@ -377,8 +377,7 @@ class _TransferStatus(flask_restful.Resource):
             'fee': find_transfer_response.fee,
             'status': find_transfer_response.status.to_public_status().name.
             lower(),
-            'transfer_id': '' if find_transfer_response.transfer_id is None
-            else find_transfer_response.transfer_id,
+            'transfer_id': find_transfer_response.transfer_id,
             'transaction_id': '' if find_transfer_response.transaction_id
             is None else find_transfer_response.transaction_id
         })
