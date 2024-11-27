@@ -319,6 +319,11 @@ def test_execute_transfer_cross_chain_correct(mocked_database_access,
                                               mocked_time,
                                               execute_transfer_request):
     mocked_time.time.return_value = execute_transfer_request.valid_until - 1
+    mocked_get_blockchain_client().read_external_token_record.return_value = \
+        BlockchainClient.ExternalTokenRecordResponse(
+            is_registration_active=True,
+            external_token_address=execute_transfer_request.
+            destination_token_address)
     expected_transfer_from_request = \
         BlockchainClient.TransferFromSubmissionStartRequest(
             execute_transfer_request.internal_transfer_id,
@@ -344,6 +349,50 @@ def test_execute_transfer_cross_chain_correct(mocked_database_access,
             start_transfer_from_submission(expected_transfer_from_request))
 
 
+@unittest.mock.patch('pantos.servicenode.business.transfers.time')
+@unittest.mock.patch(
+    'pantos.servicenode.business.transfers.get_blockchain_client')
+@unittest.mock.patch('pantos.servicenode.business.transfers.database_access')
+def test_execute_transfer_cross_chain_destination_token_inactive_error(
+        mocked_database_access, mocked_get_blockchain_client, mocked_time,
+        execute_transfer_request):
+    mocked_time.time.return_value = execute_transfer_request.valid_until - 1
+    mocked_get_blockchain_client().read_external_token_record.return_value = \
+        BlockchainClient.ExternalTokenRecordResponse(
+            is_registration_active=False,
+            external_token_address=execute_transfer_request.
+            destination_token_address)
+
+    with pytest.raises(TransferInteractorUnrecoverableError):
+        TransferInteractor().execute_transfer(execute_transfer_request)
+
+    mocked_database_access.update_transfer_status.assert_called_once_with(
+        execute_transfer_request.internal_transfer_id, TransferStatus.FAILED)
+
+
+@unittest.mock.patch('pantos.servicenode.business.transfers.time')
+@unittest.mock.patch(
+    'pantos.servicenode.business.transfers.get_blockchain_client')
+@unittest.mock.patch('pantos.servicenode.business.transfers.database_access')
+def test_execute_transfer_cross_chain_destination_token_address_invalid_error(
+        mocked_database_access, mocked_get_blockchain_client, mocked_time,
+        execute_transfer_request):
+    external_token_address = '0x3b25C4449EF3aB8c383774a2194C573D1cC6e4c5'
+    assert (external_token_address
+            != execute_transfer_request.destination_token_address)
+    mocked_time.time.return_value = execute_transfer_request.valid_until - 1
+    mocked_get_blockchain_client().read_external_token_record.return_value = \
+        BlockchainClient.ExternalTokenRecordResponse(
+            is_registration_active=True,
+            external_token_address=external_token_address)
+
+    with pytest.raises(TransferInteractorUnrecoverableError):
+        TransferInteractor().execute_transfer(execute_transfer_request)
+
+    mocked_database_access.update_transfer_status.assert_called_once_with(
+        execute_transfer_request.internal_transfer_id, TransferStatus.FAILED)
+
+
 @unittest.mock.patch('pantos.servicenode.business.transfers.'
                      'time')
 @unittest.mock.patch('pantos.servicenode.business.transfers.'
@@ -354,6 +403,11 @@ def test_execute_transfer_cross_chain_unrecoverable_error(
         mocked_database_access, mocked_get_blockchain_client, mocked_time,
         execute_transfer_request):
     mocked_time.time.return_value = execute_transfer_request.valid_until - 1
+    mocked_get_blockchain_client().read_external_token_record.return_value = \
+        BlockchainClient.ExternalTokenRecordResponse(
+            is_registration_active=True,
+            external_token_address=execute_transfer_request.
+            destination_token_address)
     mocked_get_blockchain_client().start_transfer_from_submission.\
         side_effect = InvalidSignatureError
 

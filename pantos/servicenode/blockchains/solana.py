@@ -47,6 +47,12 @@ class SolanaClient(BlockchainClient):
         # Docstring inherited
         raise NotImplementedError  # pragma: no cover
 
+    def read_external_token_record(
+            self, request: BlockchainClient.ExternalTokenRecordRequest) \
+            -> BlockchainClient.ExternalTokenRecordResponse:
+        # Docstring inherited
+        raise NotImplementedError  # pragma: no cover
+
     def read_minimum_deposit(self) -> int:
         # Docstring inherited
         raise NotImplementedError  # pragma: no cover
