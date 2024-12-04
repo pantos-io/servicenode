@@ -10,10 +10,9 @@ import flask
 import flask_cors  # type: ignore
 import flask_restful  # type: ignore
 import flask_restful.reqparse  # type: ignore
-from flask_wtf.csrf import CSRFProtect  # type: ignore
-
 import marshmallow
 import marshmallow.validate
+from flask_wtf.csrf import CSRFProtect  # type: ignore
 from pantos.common.blockchains.enums import Blockchain
 from pantos.common.entities import ServiceNodeBid
 from pantos.common.restapi import Live
