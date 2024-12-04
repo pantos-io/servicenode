@@ -10,6 +10,8 @@ import flask
 import flask_cors  # type: ignore
 import flask_restful  # type: ignore
 import flask_restful.reqparse  # type: ignore
+from flask_wtf.csrf import CSRFProtect
+
 import marshmallow
 import marshmallow.validate
 from pantos.common.blockchains.enums import Blockchain
@@ -38,6 +40,8 @@ flask_app = flask.Flask(__name__)
 
 # Allow CORS for all domains on all routes
 flask_cors.CORS(flask_app)
+csrf = CSRFProtect()
+csrf.init_app(flask_app) # Compliant
 
 _logger = logging.getLogger(__name__)
 """Logger for this module."""
