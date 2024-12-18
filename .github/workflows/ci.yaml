@@ -65,14 +65,6 @@ jobs:
         uses: docker/setup-buildx-action@v3
         id: buildx
 
-      - name: Cache Docker layers
-        uses: actions/cache@v4
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-v1.0-service-node-${{ matrix.arch }}-${{ github.ref_name }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-v1.0-service-node-${{ matrix.arch }}-
-
       - name: Check docker config and disable live reload
         run: |
           cat /etc/docker/daemon.json
@@ -106,8 +98,7 @@ jobs:
       - name: Build and load
         run: |
           mkdir export
-          make docker-build ARGS='--set "*.cache-from=type=local,src=/tmp/.buildx-cache" \
-            --set "*.cache-to=type=local,dest=/tmp/.buildx-cache-new" \
+          make docker-build ARGS='--set "*.cache-from=type=gha" \
             --set "*.platform=linux/${{ matrix.arch }}" \
             --builder ${{ steps.buildx.outputs.name }} \
             --set "app.output=type=tar,dest=export/app.tar" \
@@ -132,11 +123,6 @@ jobs:
         run: |
           timeout 1 make docker-logs || true
         working-directory: ethereum-contracts
-
-      - name: Move cache
-        run: |
-          rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

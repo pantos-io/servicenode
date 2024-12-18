@@ -213,7 +213,7 @@ blockchains:
             - !ENV ${SONIC_FALLBACK_PROVIDER:https://rpc.blaze.soniclabs.com}
         average_block_time: !ENV tag:yaml.org,2002:int ${SONIC_AVERAGE_BLOCK_TIME:1}
         provider_timeout: !ENV tag:yaml.org,2002:int ${SONIC_PROVIDER_TIMEOUT:100}
-        chain_id: !ENV tag:yaml.org,2002:int ${SONIC_CHAIN_ID:64165}
+        chain_id: !ENV tag:yaml.org,2002:int ${SONIC_CHAIN_ID:57054}
         hub: !ENV ${SONIC_HUB:<fill me>}
         forwarder: !ENV ${SONIC_FORWARDER:<fill me>}
         pan_token: !ENV ${SONIC_PAN_TOKEN:<fill me>}
