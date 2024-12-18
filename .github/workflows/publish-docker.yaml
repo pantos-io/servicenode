@@ -84,8 +84,7 @@ jobs:
             export EXTRA_TAG=$DOCKER_TAG
           fi
           docker buildx bake \
-            --set "*.cache-from=type=gha" \
-            ${{ inputs.cache_enabled && '--set "*.cache-to=type=gha,mode=max" \' || '' }}
+            --set "*.cache-from=type=gha" ${{ inputs.cache_enabled && '--set "*.cache-to=type=gha,mode=max"' || '' }} \
             --set "*.platform=linux/amd64" \
             --builder ${{ steps.buildx.outputs.name }} \
             --sbom=true \

@@ -99,8 +99,7 @@ jobs:
       - name: Build package
         run: |
           make docker-debian-build ARGS='--platform=linux/${{ matrix.architecture }} \
-            --cache-from=type=local,src=/tmp/.buildx-cache \
-            --cache-to=type=local,dest=/tmp/.buildx-cache-new \
+            --cache-from=type=gha \
             --builder ${{ steps.buildx.outputs.name }}'
 
       - name: Sign package
