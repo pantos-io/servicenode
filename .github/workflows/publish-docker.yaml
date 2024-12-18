@@ -15,6 +15,11 @@ on:
         required: false
         type: string
         default: ""
+      cache_enabled:
+        description: 'Enable caching'
+        required: false
+        type: boolean
+        default: false
     secrets:
       DOCKERHUB_USERNAME:
         description: 'Docker Hub username'
@@ -45,14 +50,6 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         id: buildx
-
-      - name: Cache Docker layers
-        uses: actions/cache@v4
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-to-publish-service-node-${{ matrix.arch }}-${{ github.ref_name }}
-          restore-keys: |
-            ${{ runner.os }}-to-publish-service-node-${{ matrix.arch }}-
 
       - uses: actions/download-artifact@v4
         with:
@@ -87,8 +84,8 @@ jobs:
             export EXTRA_TAG=$DOCKER_TAG
           fi
           docker buildx bake \
-            --set "*.cache-from=type=local,src=/tmp/.buildx-cache" \
-            --set "*.cache-to=type=local,dest=/tmp/.buildx-cache-new" \
+            --set "*.cache-from=type=gha" \
+            ${{ inputs.cache_enabled && '--set "*.cache-to=type=gha,mode=max" \' || '' }}
             --set "*.platform=linux/amd64" \
             --builder ${{ steps.buildx.outputs.name }} \
             --sbom=true \
@@ -116,8 +113,3 @@ jobs:
         env:
           DOCKER_TAG: ${{ inputs.tag }}
           COSIGN_EXPERIMENTAL: "true"
-
-      - name: Move cache
-        run: |
-          rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache

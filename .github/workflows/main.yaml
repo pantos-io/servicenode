@@ -19,6 +19,7 @@ jobs:
     with:
       tag: development
       environment: main
+      cache_enabled: true
 
   test:
     needs: publish-docker

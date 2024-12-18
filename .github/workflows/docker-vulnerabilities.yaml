@@ -48,18 +48,10 @@ jobs:
               uses: docker/setup-buildx-action@v3
               id: buildx
 
-            - name: Cache Docker layers
-              uses: actions/cache@v4
-              with:
-                path: /tmp/.buildx-cache
-                key: ${{ runner.os }}-trivy-service-node-${{ matrix.arch }}-${{ github.ref_name }}
-                restore-keys: |
-                  ${{ runner.os }}-trivy-service-node-${{ matrix.arch }}-
             - name: Build and load
               run: |
                     docker buildx bake \
-                    --set "*.cache-from=type=local,src=/tmp/.buildx-cache" \
-                    --set "*.cache-to=type=local,dest=/tmp/.buildx-cache-new" \
+                    --set "*.cache-from=type=gha" \
                     --set "*.platform=linux/${{ matrix.arch }}" \
                     --builder ${{ steps.buildx.outputs.name }} \
                     -f docker-compose.yml \
@@ -98,9 +90,3 @@ jobs:
               with:
                 category: 'service-node-worker-${{ matrix.arch }}'
                 sarif_file: 'trivy-worker-results.sarif'
-
-            - name: Move cache
-              if: always()
-              run: |
-                rm -rf /tmp/.buildx-cache
-                mv /tmp/.buildx-cache-new /tmp/.buildx-cache
