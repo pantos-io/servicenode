@@ -197,13 +197,13 @@ files = [
 
 [[package]]
 name = "apispec"
-version = "6.8.0"
+version = "6.8.1"
 description = "A pluggable API specification generator. Currently supports the OpenAPI Specification (f.k.a. the Swagger specification)."
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "apispec-6.8.0-py3-none-any.whl", hash = "sha256:09d0b43eaf95fb3e94b5b15ba6288e45ae8b9a922f73073345b606204589df34"},
-    {file = "apispec-6.8.0.tar.gz", hash = "sha256:861cca82bbc0652ca9acea896921b254944580342fde849f86f6dac1acc6ca96"},
+    {file = "apispec-6.8.1-py3-none-any.whl", hash = "sha256:eacba00df745efc9adb2a45cf992300e87938582077e101fb26b78ecf4320beb"},
+    {file = "apispec-6.8.1.tar.gz", hash = "sha256:f4916cbb7be156963b18f5929a0e42bd2349135834b680a81b12432bcfaa9a39"},
 ]
 
 [package.dependencies]
