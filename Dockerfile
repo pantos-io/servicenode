@@ -22,7 +22,7 @@ RUN ARCH=$(uname -m) && \
     bash miniconda.sh -b && \
     rm -f miniconda.sh
 
-RUN python3 -m pip install poetry
+RUN python3 -m pip install 'poetry<2.0.0'
 
 WORKDIR /app
 
