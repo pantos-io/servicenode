@@ -145,6 +145,35 @@ class BlockchainClient(BlockchainHandler, ErrorCreator[BlockchainClientError]):
         """
         pass  # pragma: no cover
 
+    def is_protocol_version_supported_by_forwarder_contract(self) -> bool:
+        """Determine if the configured protocol version is supported by
+        the configured Forwarder contract.
+
+        Returns
+        -------
+        bool
+            True if the Forwarder contract supports the protocol
+            version.
+
+        """
+        return self._get_utilities().is_protocol_version_supported_by_contract(
+            self._get_config()['forwarder'],
+            self._versioned_pantos_forwarder_abi)  # pragma: no cover
+
+    def is_protocol_version_supported_by_hub_contract(self) -> bool:
+        """Determine if the configured protocol version is supported by
+        the configured Hub contract.
+
+        Returns
+        -------
+        bool
+            True if the Hub contract supports the protocol version.
+
+        """
+        return self._get_utilities().is_protocol_version_supported_by_contract(
+            self._get_config()['hub'],
+            self._versioned_pantos_hub_abi)  # pragma: no cover
+
     def is_valid_address(self, address: str) -> bool:
         """Determine if an address string is a valid address on the
         blockchain.
@@ -775,6 +804,11 @@ class BlockchainClient(BlockchainHandler, ErrorCreator[BlockchainClientError]):
             blocks_until_resubmission)
         return self._get_utilities().start_transaction_submission(
             request_, node_connections)
+
+    @property
+    def _versioned_pantos_forwarder_abi(self) -> VersionedContractAbi:
+        return VersionedContractAbi(ContractAbi.PANTOS_FORWARDER,
+                                    self.protocol_version)
 
     @property
     def _versioned_pantos_hub_abi(self) -> VersionedContractAbi:
