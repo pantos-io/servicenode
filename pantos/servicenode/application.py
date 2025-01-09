@@ -6,16 +6,20 @@ import pathlib
 import sys
 
 import flask
+import semantic_version  # type: ignore
+from pantos.common.blockchains.enums import Blockchain
 from pantos.common.health import initialize_blockchain_nodes
 from pantos.common.logging import LogFile
 from pantos.common.logging import LogFormat
 from pantos.common.logging import initialize_logger
 from pantos.common.signer import get_signer
 
+from pantos.servicenode.blockchains.factory import get_blockchain_client
 from pantos.servicenode.blockchains.factory import \
     initialize_blockchain_clients
 from pantos.servicenode.business.node import NodeInteractor
 from pantos.servicenode.configuration import config
+from pantos.servicenode.configuration import get_blockchain_config
 from pantos.servicenode.configuration import get_blockchains_rpc_nodes
 from pantos.servicenode.configuration import get_signer_config
 from pantos.servicenode.configuration import load_config
@@ -90,8 +94,35 @@ def initialize_application(is_flask_app: bool = False) -> None:
         _logger.critical('unable to initialize the blockchain clients',
                          exc_info=True)
         sys.exit(1)
+    check_protocol_version_compatibility()
     blockchain_rpc_nodes = get_blockchains_rpc_nodes()
     initialize_blockchain_nodes(blockchain_rpc_nodes)
+
+
+def check_protocol_version_compatibility() -> None:
+    try:
+        check_hub_contract = (semantic_version.Version(config['protocol'])
+                              >= semantic_version.Version('0.2.0'))
+        active_blockchains = [
+            blockchain for blockchain in Blockchain
+            if get_blockchain_config(blockchain)['active']
+        ]
+        for blockchain in active_blockchains:
+            blockchain_client = get_blockchain_client(blockchain)
+            if not blockchain_client.\
+                    is_protocol_version_supported_by_forwarder_contract():
+                _logger.critical(
+                    f'incompatible Forwarder contract on {blockchain.name}')
+                sys.exit(1)
+            if check_hub_contract and not blockchain_client.\
+                    is_protocol_version_supported_by_hub_contract():
+                _logger.critical(
+                    f'incompatible Hub contract on {blockchain.name}')
+                sys.exit(1)
+    except Exception:
+        _logger.critical('unable to check the protocol version compatibility',
+                         exc_info=True)
+        sys.exit(1)
 
 
 def _update_registrations() -> None:
