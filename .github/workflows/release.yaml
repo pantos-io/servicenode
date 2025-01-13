@@ -115,28 +115,10 @@ jobs:
           # Do not sign deb artifacts
           rm release/*.deb
 
-      - uses: sigstore/gh-action-sigstore-python@61f6a500bbfdd9a2a339cf033e5421951fbc1cd2 # v2.1.1
+      - uses: sigstore/gh-action-sigstore-python@f514d46b907ebcd5bedc05145c03b69c1edd8b46 # v3.0.0
         with:
           inputs: release/*
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: signed-build
-          path: release/*.whl
-
-      - name: Merge with previous files
-        run: |
-          cp dist/*.deb release/
-          ls -lha release
-
-      - name: Upload release assets
-        uses: svenstaro/upload-release-action@04733e069f2d7f7f0b4aebc4fbdbce8613b03ccd # v2.9.0
-        with:
-          file: "./release/*"
-          file_glob: true
-          overwrite: true
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ github.event.release.tag_name }}
+          release-signing-artifacts: true
 
   publish-pypi:
     name: Publish to ${{ needs.define-environment.outputs.deployment_pypi_environment }}
@@ -163,6 +145,10 @@ jobs:
         run: |
           ls -lha .
           ls -lha dist
+
+      - name: Remove all non wheel files
+        run: |
+          find dist -type f -not -name "*.whl" -delete
 
       - name: Publish package distributions to ${{ needs.define-environment.outputs.deployment_pypi_environment }}
         uses: pypa/gh-action-pypi-publish@f7600683efdcb7656dec5b29656edb7bc586e597 # stable/v1.10.3
