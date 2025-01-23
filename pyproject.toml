@@ -50,7 +50,7 @@ Flask = "3.1.0"
 Flask-Cors = "5.0.0"
 Flask-RESTful = "0.3.10"
 marshmallow = "3.25.1"
-psycopg = {extras = ["binary", "pool"], version = "3.2.3"}
+psycopg = {extras = ["binary", "pool"], version = "3.2.4"}
 PyYAML = "6.0.1"
 SQLAlchemy = "2.0.37"
 web3 = "6.5.0"
