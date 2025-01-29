@@ -102,7 +102,7 @@ def initialize_application(is_flask_app: bool = False) -> None:
 def check_protocol_version_compatibility() -> None:
     try:
         check_hub_contract = (semantic_version.Version(config['protocol'])
-                              >= semantic_version.Version('0.2.0'))
+                              >= semantic_version.Version('0.3.0'))
         active_blockchains = [
             blockchain for blockchain in Blockchain
             if get_blockchain_config(blockchain)['active']

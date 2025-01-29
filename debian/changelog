@@ -1,3 +1,7 @@
+pantos-service-node (3.0.0) RELEASED; urgency=low
+
+  * Updated ABI support to 0.3.0
+
 pantos-service-node (2.2.0) RELEASED; urgency=low
 
   * Updated ABI support
