@@ -13,7 +13,7 @@ jobs:
     secrets: inherit  
   docker-build:
     name: Build Docker images
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions: 
       contents: read
     strategy:
@@ -161,7 +161,7 @@ jobs:
 
       - name: Check docker config and disable live reload
         run: |
-          cat /etc/docker/daemon.json
+          # cat /etc/docker/daemon.json
           echo '{ "live-restore": false }' | sudo tee /etc/docker/daemon.json
           sudo systemctl reload docker
           make check-swarm-init
