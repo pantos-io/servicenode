@@ -240,10 +240,13 @@ jobs:
           sudo cat /etc/pantos/ETHEREUM.env | sudo tee -a /etc/pantos/service-node-config.env > /dev/null
           sudo cat /etc/pantos/BNB_CHAIN.env | sudo tee -a /etc/pantos/service-node-config.env > /dev/null
           sudo chmod 644 /etc/pantos/service-node-config.env
+          mv /etc/pantos/service-node-config.env service-node-config.docker.env
 
       - name: Run Service Node Docker
         run: |
           make docker
+        env:
+          DEV_MODE: "false"
 
       # Check service is running
       - name: Check service is running

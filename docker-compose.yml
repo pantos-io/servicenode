@@ -39,8 +39,8 @@ services:
       - 808${INSTANCE-0}:8080
     healthcheck:
       #test: ["CMD", "/usr/bin/pantos-service-node-server", "--status"]
-      #test: ["CMD", "echo", "hello"]
-      test: ["CMD", "echo "]
+      test: ["CMD", "echo", "hello"]
+      #test: ["CMD", "echo "]
       #test: curl --fail http://pantos-service-node:pantos@app:8080 || exit 1
       interval: 5s
       timeout: 10s
