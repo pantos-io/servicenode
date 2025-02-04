@@ -139,9 +139,6 @@ jobs:
           path: export
           retention-days: 1
 
-  # build:
-  #  uses: ./.github/workflows/build.yml
-
   install:
     needs: [docker-build]
     runs-on: ${{ matrix.os }}
@@ -169,7 +166,6 @@ jobs:
 
       - name: Check docker config and disable live reload
         run: |
-          # cat /etc/docker/daemon.json
           echo '{ "live-restore": false }' | sudo tee /etc/docker/daemon.json
           sudo systemctl reload docker
           make check-swarm-init
@@ -227,12 +223,14 @@ jobs:
           # Copy files from the eth service
           docker cp $ETH_TASK_ID:/data/keystore /etc/pantos/keystore.eth
           docker cp $ETH_TASK_ID:/data/ETHEREUM.env /etc/pantos/ETHEREUM.env
+          cat /etc/pantos/ETHEREUM.env
 
           # Get the task ID for the bnb service
           BNB_CHAIN_TASK_ID=$(docker ps --filter "name=stack-ethereum-contracts--1-bnb" --format "{{.ID}}")
           # Copy files from the bnb service
           docker cp $BNB_CHAIN_TASK_ID:/data/keystore /etc/pantos/keystore.bnb
           docker cp $BNB_CHAIN_TASK_ID:/data/BNB_CHAIN.env /etc/pantos/BNB_CHAIN.env
+          cat /etc/pantos/BNB_CHAIN.env
         working-directory: ethereum-contracts
 
       - name: Set env
@@ -246,8 +244,6 @@ jobs:
       - name: Run Service Node Docker
         run: |
           make docker
-        env:
-          DEV_MODE: "true"
 
       # Check service is running
       - name: Check service is running
