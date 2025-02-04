@@ -228,11 +228,6 @@ jobs:
           sudo cat /etc/pantos/BNB_CHAIN.env | sudo tee -a /etc/pantos/service-node-config.env > /dev/null
           sudo chmod 644 /etc/pantos/service-node-config.env
 
-      - name: Install Debian package
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y ./build/*.deb curl
-
       # Check service is running
       - name: Check service is running
         timeout-minutes: 5
