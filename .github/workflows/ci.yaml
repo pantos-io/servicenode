@@ -62,8 +62,8 @@ jobs:
       - name: Upload signer key
         uses: actions/upload-artifact@v4
         with:
-          name: signer-key-${{ matrix.arch }}
-          path: export
+          name: signer-key
+          path: signer_key.pem
           retention-days: 1
 
       - name: Set up QEMU
@@ -215,7 +215,7 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: signer-key-${{ matrix.arch }}
+          name: signer-key
           path: ./signer_key.pem
 
       - name: Copy files from eth-data and bnb-data
