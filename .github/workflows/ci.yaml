@@ -228,6 +228,12 @@ jobs:
           sudo cat /etc/pantos/BNB_CHAIN.env | sudo tee -a /etc/pantos/service-node-config.env > /dev/null
           sudo chmod 644 /etc/pantos/service-node-config.env
 
+      - name: Run Service Node Docker
+        run: |
+          make docker
+        env:
+          DEV_MODE: "true"
+
       # Check service is running
       - name: Check service is running
         timeout-minutes: 5
