@@ -22,7 +22,7 @@ database:
     pool_size: !ENV tag:yaml.org,2002:int ${DB_POOL_SIZE:20}
     max_overflow: !ENV tag:yaml.org,2002:int ${DB_MAX_OVERFLOW:50}
     echo: !ENV tag:yaml.org,2002:bool ${DB_ECHO:false}
-    alembic_config: !ENV ${DB_ALEMBIC_CONFIG:/opt/pantos/pantos-service-node/alembic.ini}
+    alembic_config: !ENV ${DB_ALEMBIC_CONFIG:alembic.ini}
     apply_migrations: !ENV tag:yaml.org,2002:bool ${DB_APPLY_MIGRATIONS:true}
 
 celery:
@@ -52,7 +52,7 @@ plugins:
             file_path: !ENV ${PLUGINS_BIDS_ARGUMENTS_FILE_PATH:/etc/pantos/service-node-bids.yml}
 
 signer:
-    pem: !ENV ${SIGNER_PEM:/etc/pantos/service-node-signer.pem}
+    pem: !ENV ${SIGNER_PEM:service-node-signer.pem}
     pem_password: !ENV ${SIGNER_PEM_PASSWORD}
 
 blockchains:
@@ -60,7 +60,7 @@ blockchains:
         active: !ENV tag:yaml.org,2002:bool ${AVALANCHE_ACTIVE:true}
         registered: !ENV tag:yaml.org,2002:bool ${AVALANCHE_REGISTERED:true}
         withdrawal_address: !ENV ${AVALANCHE_WITHDRAWAL_ADDRESS:<fill me>}
-        private_key: !ENV ${AVALANCHE_PRIVATE_KEY:/etc/pantos/service-node.keystore}
+        private_key: !ENV ${AVALANCHE_PRIVATE_KEY:service-node.keystore}
         private_key_password: !ENV ${AVALANCHE_PRIVATE_KEY_PASSWORD:<fill me>}
         provider: !ENV ${AVALANCHE_PROVIDER:https://api.avax-test.network/ext/bc/C/rpc}
         fallback_providers:
@@ -102,7 +102,7 @@ blockchains:
         active: !ENV tag:yaml.org,2002:bool ${CELO_ACTIVE:true}
         registered: !ENV tag:yaml.org,2002:bool ${CELO_REGISTERED:true}
         withdrawal_address: !ENV ${CELO_WITHDRAWAL_ADDRESS:<fill me>}
-        private_key: !ENV ${CELO_PRIVATE_KEY:/etc/pantos/service-node.keystore}
+        private_key: !ENV ${CELO_PRIVATE_KEY:service-node.keystore}
         private_key_password: !ENV ${CELO_PRIVATE_KEY_PASSWORD:<fill me>}
         provider: !ENV ${CELO_PROVIDER:https://alfajores-forno.celo-testnet.org}
         fallback_providers:
@@ -123,7 +123,7 @@ blockchains:
         active: !ENV tag:yaml.org,2002:bool ${CRONOS_ACTIVE:true}
         registered: !ENV tag:yaml.org,2002:bool ${CRONOS_REGISTERED:true}
         withdrawal_address: !ENV ${CRONOS_WITHDRAWAL_ADDRESS:<fill me>}
-        private_key: !ENV ${CRONOS_PRIVATE_KEY:/etc/pantos/service-node.keystore}
+        private_key: !ENV ${CRONOS_PRIVATE_KEY:service-node.keystore}
         private_key_password: !ENV ${CRONOS_PRIVATE_KEY_PASSWORD:<fill me>}
         provider: !ENV ${CRONOS_PROVIDER:https://evm-t3.cronos.org}
         fallback_providers:
@@ -144,7 +144,7 @@ blockchains:
         active: !ENV tag:yaml.org,2002:bool ${ETHEREUM_ACTIVE:true}
         registered: !ENV tag:yaml.org,2002:bool ${ETHEREUM_REGISTERED:true}
         withdrawal_address: !ENV ${ETHEREUM_WITHDRAWAL_ADDRESS:<fill me>}
-        private_key: !ENV ${ETHEREUM_PRIVATE_KEY:/etc/pantos/service-node.keystore}
+        private_key: !ENV ${ETHEREUM_PRIVATE_KEY:service-node.keystore}
         private_key_password: !ENV ${ETHEREUM_PRIVATE_KEY_PASSWORD:<fill me>}
         provider: !ENV ${ETHEREUM_PROVIDER:https://ethereum-holesky.publicnode.com}
         fallback_providers:
@@ -165,7 +165,7 @@ blockchains:
         active: !ENV tag:yaml.org,2002:bool ${POLYGON_ACTIVE:true}
         registered: !ENV tag:yaml.org,2002:bool ${POLYGON_REGISTERED:true}
         withdrawal_address: !ENV ${POLYGON_WITHDRAWAL_ADDRESS:<fill me>}
-        private_key: !ENV ${POLYGON_PRIVATE_KEY:/etc/pantos/service-node.keystore}
+        private_key: !ENV ${POLYGON_PRIVATE_KEY:service-node.keystore}
         private_key_password: !ENV ${POLYGON_PRIVATE_KEY_PASSWORD:<fill me>}
         provider: !ENV ${POLYGON_PROVIDER:https://rpc.ankr.com/polygon_amoy}
         fallback_providers:
@@ -206,7 +206,7 @@ blockchains:
         active: !ENV tag:yaml.org,2002:bool ${SONIC_ACTIVE:true}
         registered: !ENV tag:yaml.org,2002:bool ${SONIC_REGISTERED:true}
         withdrawal_address: !ENV ${SONIC_WITHDRAWAL_ADDRESS:<fill me>}
-        private_key: !ENV ${SONIC_PRIVATE_KEY:/etc/pantos/service-node.keystore}
+        private_key: !ENV ${SONIC_PRIVATE_KEY:service-node.keystore}
         private_key_password: !ENV ${SONIC_PRIVATE_KEY_PASSWORD:<fill me>}
         provider: !ENV ${SONIC_PROVIDER:https://rpc.blaze.soniclabs.com}
         fallback_providers:

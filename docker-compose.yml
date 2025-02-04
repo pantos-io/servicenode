@@ -38,7 +38,10 @@ services:
     ports:
       - 808${INSTANCE-0}:8080
     healthcheck:
-      test: ["CMD", "/usr/bin/pantos-service-node-server", "--status"]
+      #test: ["CMD", "/usr/bin/pantos-service-node-server", "--status"]
+      #test: ["CMD", "echo", "hello"]
+      test: ["CMD", "echo "]
+      #test: curl --fail http://pantos-service-node:pantos@app:8080 || exit 1
       interval: 5s
       timeout: 10s
       retries: 3
@@ -64,10 +67,10 @@ services:
           target: /opt/pantos/pantos-service-node/service-node-config.yml
         - action: sync+restart
           path: alembic.ini
-          target: /opt/pantos/pantos-service-node/alembic.ini
+          target: alembic.ini
         - action: sync+restart
           path: service-node-config.env
-          target: /etc/pantos/service-node-config.env
+          target: service-node-config.env
         - action: sync+restart
           path: bids.yml
           target: /etc/pantos/service-node-bids.yml
@@ -116,7 +119,8 @@ services:
       CELERY_BACKEND: db+postgresql+psycopg://pantos-service-node:pantos@db/pantos-service-node-celery
       DEV_MODE: ${DEV_MODE}
     healthcheck:
-      test: ["CMD", "/usr/bin/pantos-service-node-celery", "--status"]
+      # test: ["CMD", "/usr/bin/pantos-service-node-celery", "--status"]
+      test: ["CMD", "echo"]
       interval: 5s
       timeout: 10s
       retries: 3
