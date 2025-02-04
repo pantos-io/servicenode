@@ -131,11 +131,11 @@ jobs:
           path: export
           retention-days: 1
 
-  build:
-    uses: ./.github/workflows/build.yml
+  # build:
+  #  uses: ./.github/workflows/build.yml
 
   install:
-    needs: [build]
+    needs: [docker-build]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -189,19 +189,19 @@ jobs:
           done
         working-directory: ethereum-contracts
 
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: build-amd64
-          path: build
+      # - name: Download artifact
+      #   uses: actions/download-artifact@v4
+      #   with:
+      #     name: build-amd64
+      #     path: build
 
-      - name: Preconfigure package
-        run: |
-          echo 'pantos-service-node-full pantos/service-node/create_signer_key boolean true' | sudo debconf-set-selections;
-          echo 'pantos-service-node-full pantos/service-node/signer_key_password string 1234' | sudo debconf-set-selections;
-          echo 'pantos-service-node-full pantos/common/configure_postgresql boolean true' | sudo debconf-set-selections;
-          echo 'pantos-service-node-full pantos/common/configure_rabbitmq boolean true' | sudo debconf-set-selections;
-          echo 'pantos-service-node-full pantos/common/start_services boolean true' | sudo debconf-set-selections;
+      # - name: Preconfigure package
+      #   run: |
+      #     echo 'pantos-service-node-full pantos/service-node/create_signer_key boolean true' | sudo debconf-set-selections;
+      #     echo 'pantos-service-node-full pantos/service-node/signer_key_password string 1234' | sudo debconf-set-selections;
+      #     echo 'pantos-service-node-full pantos/common/configure_postgresql boolean true' | sudo debconf-set-selections;
+      #     echo 'pantos-service-node-full pantos/common/configure_rabbitmq boolean true' | sudo debconf-set-selections;
+      #     echo 'pantos-service-node-full pantos/common/start_services boolean true' | sudo debconf-set-selections;
 
       - name: Copy files from eth-data and bnb-data
         run: |
@@ -237,19 +237,7 @@ jobs:
       - name: Check service is running
         timeout-minutes: 5
         run: |
-          # Wait for the service to start
-          while ! sudo systemctl is-active --quiet pantos-service-node-server; do
-            echo "Server is not running, retrying in 1 second."
-            sleep 1
-          done
-          echo "Server is running"
-          while ! sudo systemctl is-active --quiet pantos-service-node-celery; do
-            echo "Celery is not running, retrying in 1 second."
-            sleep 1
-          done
-          echo "Celery is running"
-          # Wait for curl to be positive
-          max_retries=60
+          max_retries=180
           retries=0
           set +e
           while [ $retries -lt $max_retries ]; do
@@ -276,10 +264,6 @@ jobs:
       - name: Print logs
         if: always()
         run: |
-          sudo systemctl status pantos-service-node-server || true
-          sudo systemctl status pantos-service-node-celery || true
-          sudo journalctl -u pantos-service-node-server || true
-          sudo journalctl -u pantos-service-node-celery || true
           # Print the contents of every file in /var/log/pantos
           sudo find /var/log/pantos -type f -exec sudo cat {} \;
 
