@@ -55,9 +55,16 @@ jobs:
 
       - name: Create local signer_key
         run: |
-          pwd
           ssh-keygen -t ed25519 -f signer_key.pem -N ''
           chmod 777 signer_key.pem
+      
+      # Upload the signer key to be used later
+      - name: Upload signer key
+        uses: actions/upload-artifact@v4
+        with:
+          name: signer-key-${{ matrix.arch }}
+          path: export
+          retention-days: 1
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -203,6 +210,13 @@ jobs:
       #     echo 'pantos-service-node-full pantos/common/configure_postgresql boolean true' | sudo debconf-set-selections;
       #     echo 'pantos-service-node-full pantos/common/configure_rabbitmq boolean true' | sudo debconf-set-selections;
       #     echo 'pantos-service-node-full pantos/common/start_services boolean true' | sudo debconf-set-selections;
+
+      # Recover the key used for the ethereum contracts
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: signer-key-${{ matrix.arch }}
+          path: ./signer_key.pem
 
       - name: Copy files from eth-data and bnb-data
         run: |
