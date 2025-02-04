@@ -9,7 +9,7 @@ services:
     networks:
       pantos-service-node:
       pantos-ethereum:
-    entrypoint: sh -c 'set -a; . /tmp/pantos/ETHEREUM.env && . /tmp/pantos/BNB_CHAIN.env; set +a; exec /app/pantos-service-node.sh'
+    entrypoint: sh -c 'set -a; . /etc/pantos/ETHEREUM.env && . /etc/pantos/BNB_CHAIN.env; set +a; exec /app/pantos-service-node.sh'
     environment:
       PANTOS_ENV_FILE: /app/service-node-config.env
       APP_URL: http://localhost:808${INSTANCE-1}
@@ -42,7 +42,7 @@ services:
     networks:
       pantos-service-node:
       pantos-ethereum:
-    entrypoint: sh -c 'set -a; . /tmp/pantos/ETHEREUM.env && . /tmp/pantos/BNB_CHAIN.env; set +a; exec /app/pantos-service-node-worker.sh'
+    entrypoint: sh -c 'set -a; . /etc/pantos/ETHEREUM.env && . /etc/pantos/BNB_CHAIN.env; set +a; exec /app/pantos-service-node-worker.sh'
     environment:
       PANTOS_ENV_FILE: /app/pantos/service-node-config.env
       APP_URL: http://localhost:808${INSTANCE-1}
