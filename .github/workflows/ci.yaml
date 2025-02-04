@@ -55,6 +55,7 @@ jobs:
 
       - name: Create local signer_key
         run: |
+          pwd
           ssh-keygen -t ed25519 -f signer_key.pem -N ''
           chmod 777 signer_key.pem
 
