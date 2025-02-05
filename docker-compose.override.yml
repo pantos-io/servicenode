@@ -14,15 +14,15 @@ services:
       PANTOS_ENV_FILE: /app/service-node-config.env
       APP_URL: http://localhost:808${INSTANCE-1}
       BNB_CHAIN_PRIVATE_KEY: /app/bnb-data/keystore
-      ETHEREUM_PRIVATE_KEY: /app/pantos/eth-data/keystore
+      ETHEREUM_PRIVATE_KEY: /app/eth-data/keystore
     volumes:
       - type: volume
         source: bnb-data
-        target: /app/pantos/bnb-data
+        target: /app/bnb-data/keystore
         read_only: true
       - type: volume
         source: eth-data
-        target: /app/pantos/eth-data
+        target: /app/eth-data/keystore
         read_only: true
       - type: bind
         source: ./signer_key.pem
