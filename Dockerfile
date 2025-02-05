@@ -27,7 +27,8 @@ RUN apt-get update && \
     python3 -m pip install 'poetry<2.0.0' && \
     apt-get clean && \
     poetry install && \
-    mkdir /var/log/pantos
+    mkdir /var/log/pantos && \
+    chown -R pantos:pantos /var/log/pantos
 
 # Switch to the non-root user "pantos"
 USER pantos

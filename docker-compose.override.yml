@@ -9,7 +9,7 @@ services:
     networks:
       pantos-service-node:
       pantos-ethereum:
-    entrypoint: sh -c 'set -a; cat /etc/pantos/ETHEREUM.env && . /etc/pantos/ETHEREUM.env && . /etc/pantos/BNB_CHAIN.env; set +a; exec /app/pantos-service-node.sh'
+    entrypoint: sh -c 'set -a; . /etc/pantos/ETHEREUM.env ; . /etc/pantos/BNB_CHAIN.env; set +a; exec /app/pantos-service-node.sh'
     environment:
       PANTOS_ENV_FILE: /app/service-node-config.env
       APP_URL: http://localhost:808${INSTANCE-1}
@@ -18,11 +18,11 @@ services:
     volumes:
       - type: volume
         source: bnb-data
-        target: /app/bnb-data/keystore
+        target: /app/bnb-data/
         read_only: true
       - type: volume
         source: eth-data
-        target: /app/eth-data/keystore
+        target: /app/eth-data/
         read_only: true
       - type: bind
         source: ./signer_key.pem
@@ -60,19 +60,19 @@ services:
     volumes:
       - type: volume
         source: bnb-data
-        target: /app/pantos/bnb-data
+        target: /app/bnb-data/
         read_only: true
       - type: volume
         source: eth-data
-        target: /app/pantos/eth-data
+        target: /app/eth-data/
         read_only: true
       - type: bind
         source: ./signer_key.pem
-        target: /app/pantos/service-node-signer.pem
+        target: /app/service-node-signer.pem
         read_only: true
       - type: bind
         source: ./service-node-config.docker.env
-        target: /app/pantos/service-node-config.env
+        target: /app/service-node-config.env
         read_only: true
       - type: bind
         source: ${BNB_CHAIN_CONFIG}
