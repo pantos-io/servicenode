@@ -113,11 +113,10 @@ jobs:
             --set "worker.output=type=tar,dest=export/worker.tar"'
 
       # Create local signer key
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: signer-key
-          path: ./signer_key.pem
+      - name: Create local signer_key
+        run: |
+          ssh-keygen -t ed25519 -f signer_key.pem -N ''
+          chmod 777 signer_key.pem
 
       - name: Copy files from eth-data and bnb-data
         run: |
