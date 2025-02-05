@@ -103,14 +103,14 @@ jobs:
           done
         working-directory: ethereum-contracts
 
-      - name: Build and load
-        run: |
-          mkdir export
-          make docker-build ARGS='--set "*.cache-from=type=gha" \
-            --set "*.platform=linux/${{ matrix.arch }}" \
-            --builder ${{ steps.buildx.outputs.name }} \
-            --set "app.output=type=tar,dest=export/app.tar" \
-            --set "worker.output=type=tar,dest=export/worker.tar"'
+      # - name: Build and load
+      #   run: |
+      #     mkdir export
+      #     make docker-build ARGS='--set "*.cache-from=type=gha" \
+      #       --set "*.platform=linux/${{ matrix.arch }}" \
+      #       --builder ${{ steps.buildx.outputs.name }} \
+      #       --set "app.output=type=tar,dest=export/app.tar" \
+      #       --set "worker.output=type=tar,dest=export/worker.tar"'
 
       - name: Copy files from eth-data and bnb-data
         run: |
@@ -138,6 +138,8 @@ jobs:
         timeout-minutes: ${{ matrix.arch == 'amd64' && 10 || 30 }}
         run: |
           make docker
+        env:
+          DEV_MODE: "true"
 
       - name: Dump service node logs
         if: always()
