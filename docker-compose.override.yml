@@ -32,6 +32,12 @@ services:
         source: ./service-node-config.docker.env
         target: /app/service-node-config.env
         read_only: true
+      - type: bind
+        source: ${BNB_CHAIN_CONFIG}
+        target: /etc/pantos/BNB_CHAIN.env
+      - type: bind
+        source: ${ETH_CONFIG}
+        target: /etc/pantos/ETHEREUM.env
     develop:
       watch:
         - action: sync+restart
@@ -68,6 +74,12 @@ services:
         source: ./service-node-config.docker.env
         target: /app/pantos/service-node-config.env
         read_only: true
+      - type: bind
+        source: ${BNB_CHAIN_CONFIG}
+        target: /etc/pantos/BNB_CHAIN.env
+      - type: bind
+        source: ${ETH_CONFIG}
+        target: /etc/pantos/ETHEREUM.env
     develop:
       watch:
         - action: sync+restart

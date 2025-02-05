@@ -112,6 +112,35 @@ jobs:
             --set "app.output=type=tar,dest=export/app.tar" \
             --set "worker.output=type=tar,dest=export/worker.tar"'
 
+      # Create local signer key
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: signer-key
+          path: ./signer_key.pem
+
+      - name: Copy files from eth-data and bnb-data
+        run: |
+          sudo mkdir -p /etc/pantos
+          sudo chmod 777 /etc/pantos
+          # Get the task ID for the eth service
+          ETH_TASK_ID=$(docker ps --filter "name=stack-ethereum-contracts--1-eth" --format "{{.ID}}")
+          # Copy files from the eth service
+          docker cp $ETH_TASK_ID:/data/keystore /etc/pantos/keystore.eth
+          docker cp $ETH_TASK_ID:/data/ETHEREUM.env /etc/pantos/ETHEREUM.env
+          cat /etc/pantos/ETHEREUM.env
+          echo "ETH_CONFIG=/etc/pantos/ETHEREUM.env" >> $GITHUB_ENV
+          
+          # Get the task ID for the bnb service
+          BNB_CHAIN_TASK_ID=$(docker ps --filter "name=stack-ethereum-contracts--1-bnb" --format "{{.ID}}")
+          # Copy files from the bnb service
+          docker cp $BNB_CHAIN_TASK_ID:/data/keystore /etc/pantos/keystore.bnb
+          docker cp $BNB_CHAIN_TASK_ID:/data/BNB_CHAIN.env /etc/pantos/BNB_CHAIN.env
+          cat /etc/pantos/BNB_CHAIN.env
+          echo "BNB_CHAIN_CONFIG=/etc/pantos/BNB_CHAIN.env" >> $GITHUB_ENV
+
+        working-directory: ethereum-contracts
+
       - name: Test image
         timeout-minutes: ${{ matrix.arch == 'amd64' && 10 || 30 }}
         run: |
