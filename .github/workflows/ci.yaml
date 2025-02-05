@@ -103,14 +103,14 @@ jobs:
           done
         working-directory: ethereum-contracts
 
-      # - name: Build and load
-      #   run: |
-      #     mkdir export
-      #     make docker-build ARGS='--set "*.cache-from=type=gha" \
-      #       --set "*.platform=linux/${{ matrix.arch }}" \
-      #       --builder ${{ steps.buildx.outputs.name }} \
-      #       --set "app.output=type=tar,dest=export/app.tar" \
-      #       --set "worker.output=type=tar,dest=export/worker.tar"'
+      - name: Build and load
+        run: |
+          mkdir export
+          make docker-build ARGS='--set "*.cache-from=type=gha" \
+            --set "*.platform=linux/${{ matrix.arch }}" \
+            --builder ${{ steps.buildx.outputs.name }} \
+            --set "app.output=type=tar,dest=export/app.tar" \
+            --set "worker.output=type=tar,dest=export/worker.tar"'
 
       - name: Copy files from eth-data and bnb-data
         run: |
@@ -350,18 +350,19 @@ jobs:
             service-node-config.docker.env
             Makefile
             
-      #- name: Download artifacts
-      #  uses: actions/download-artifact@v4
-      #  with:
-      #    name: docker-images-${{ matrix.arch }}
-      #    path: export
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-images-${{ matrix.arch }}
+          path: export
 
       # - name: Load images
       #   run: |
       #     cat export/app.tar | docker import - pantosio/service-node-app:local
       #     cat export/worker.tar | docker import - pantosio/service-node-worker:local
 
-      - uses: pantos-io/e2e-testing/.github/actions/run-tests@main
+      # - uses: pantos-io/e2e-testing/.github/actions/run-tests@main
+      - uses: pantos-io/e2e-testing/.github/actions/run-tests@feature/fetch-bnb-eth-configs
         with:
           servicenode-path: ${{ env.PANTOS_SERVICE_NODE }}
           servicenode-version: 'local'
