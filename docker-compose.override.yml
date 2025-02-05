@@ -38,6 +38,9 @@ services:
       - type: bind
         source: ${ETH_CONFIG}
         target: /etc/pantos/ETHEREUM.env
+      - type: bind
+        source: bids.yml
+        target: /etc/pantos/service-node-bids.yml
     develop:
       watch:
         - action: sync+restart
@@ -80,6 +83,9 @@ services:
       - type: bind
         source: ${ETH_CONFIG}
         target: /etc/pantos/ETHEREUM.env
+      - type: bind
+        source: bids.yml
+        target: /etc/pantos/service-node-bids.yml
     develop:
       watch:
         - action: sync+restart

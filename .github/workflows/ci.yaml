@@ -138,8 +138,6 @@ jobs:
         timeout-minutes: ${{ matrix.arch == 'amd64' && 10 || 30 }}
         run: |
           make docker
-        env:
-          DEV_MODE: "true"
 
       - name: Dump service node logs
         if: always()
