@@ -1,6 +1,6 @@
 #syntax=docker/dockerfile:1.7.0-labs
 # SPDX-License-Identifier: GPL-3.0-only
-FROM python:3.12-bookworm AS dev
+FROM python:3.13-bookworm AS dev
 
 RUN apt-get update && \
     apt-get install build-essential debhelper devscripts \
