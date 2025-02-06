@@ -59,7 +59,7 @@ if is_main_module():  # pragma: no cover
     _logger.info('Initializing the Celery application...')
     initialize_application(False)
 else:
-    _logger.info('Celery - not main module...')
+    _logger.info('Celery application initialization skipped...')
     load_config(reload=False)
 
 ca_certs = {'ca_certs': certifi.where()} if verify_celery_url_has_ssl() else {}
