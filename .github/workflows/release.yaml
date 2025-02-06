@@ -12,7 +12,7 @@ concurrency:
 jobs:
   define-environment:
     name: Define Environment
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: (!github.event.release.draft)
     outputs:
       deployment_environment: ${{ steps.get-environment.outputs.deployment_environment }}
@@ -73,7 +73,7 @@ jobs:
   add-assets:
     name: Add Assets to the ${{ github.event.release.tag_name }} Release
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
       id-token: write
@@ -123,7 +123,7 @@ jobs:
   publish-pypi:
     name: Publish to ${{ needs.define-environment.outputs.deployment_pypi_environment }}
     needs: [define-environment, add-assets]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment:
       name: ${{ needs.define-environment.outputs.deployment_pypi_environment }}
       url: ${{ needs.define-environment.outputs.deployment_url }}
@@ -165,7 +165,7 @@ jobs:
       pages: write
     needs: [add-assets]
     # Disable the job for the moment being
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: step-security/harden-runner@91182cccc01eb5e619899d80e4e971d6181294a7 # v2.10.1
         with:
