@@ -48,6 +48,8 @@ services:
         condition: service_healthy
       db:
         condition: service_healthy
+      worker:
+        condition: service_started
     develop:
       watch:
         - action: sync
@@ -122,9 +124,13 @@ services:
       retries: 3
       start_period: 20s
     depends_on:
-      # Wait for the app to setup the DB
-      app:
+      broker:
         condition: service_healthy
+      db:
+        condition: service_healthy
+    #   # Wait for the app to setup the DB
+    #   app:
+    #     condition: service_healthy
     develop:
       watch:
         - action: sync
