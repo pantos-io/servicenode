@@ -66,8 +66,7 @@ celery_app = celery.Celery(
     backend=config['celery']['backend'], include=[
         'pantos.common.blockchains.tasks',
         'pantos.servicenode.business.transfers',
-        'pantos.servicenode.business.plugins',
-        'pantos.servicenode.business.tasks'
+        'pantos.servicenode.business.plugins'
     ], broker_use_ssl=ca_certs)
 """Celery application instance."""
 
@@ -83,12 +82,13 @@ celery_app.conf.update(
         'pantos.servicenode.business.transfers.*': {
             'queue': _TRANSFERS_QUEUE_NAME
         },
-        'pantos.common.blockchains.tasks.*': {
+        'pantos.common.blockchains.tasks._transaction_resubmission_task': {
             'queue': _TRANSFERS_QUEUE_NAME
         },
-        'pantos.servicenode.business.tasks.*': {
+        'pantos.servicenode.business.tasks.'
+        '_dependent_transaction_submission_task': {
             'queue': _TRANSACTIONS_QUEUE_NAME
-        }
+        }  # yapf: disable
     },
     task_track_started=True,
     worker_enable_remote_control=False,

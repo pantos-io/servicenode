@@ -518,15 +518,27 @@ def test_unregister_node_error(mock_start_transaction_submission,
 
 @unittest.mock.patch.object(EthereumClient, '_start_transaction_submission',
                             return_value=uuid.uuid4())
-def test_update_node_url_correct(mock_start_transaction_submission,
-                                 ethereum_client, service_node_url):
+@unittest.mock.patch.object(EthereumClient,
+                            '_start_depending_transactions_submission',
+                            return_value=uuid.uuid4())
+@unittest.mock.patch.object(EthereumClient, 'get_commitment_wait_period')
+def test_update_node_url_correct(mock_get_commitment_wait_period,
+                                 mock_start_depending_transactions_submission,
+                                 mock_start_transaction_submission,
+                                 ethereum_client, service_node_url,
+                                 protocol_version, commitment_wait_period):
     ethereum_client.update_node_url(service_node_url)
 
-    mock_start_transaction_submission.assert_called_once()
-    update_request = mock_start_transaction_submission.call_args.args[0]
-    assert update_request.versioned_contract_abi.contract_abi is \
-        ContractAbi.PANTOS_HUB
-    assert update_request.function_args == (service_node_url, )
+    mock_get_commitment_wait_period.return_value = commitment_wait_period
+
+    if protocol_version >= semantic_version.Version('0.3.0'):
+        assert mock_start_depending_transactions_submission.call_count == 1
+    else:
+        mock_start_transaction_submission.assert_called_once()
+        update_request = mock_start_transaction_submission.call_args.args[0]
+        assert update_request.versioned_contract_abi.contract_abi is \
+            ContractAbi.PANTOS_HUB
+        assert update_request.function_args == (service_node_url, )
 
 
 @unittest.mock.patch.object(EthereumClient, '_start_transaction_submission',

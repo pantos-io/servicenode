@@ -315,12 +315,46 @@ class EthereumClient(BlockchainClient):
             node_connections = self.__create_node_connections()
             nonce = node_connections.eth.get_transaction_count(
                 self.__address).get()
-            request = BlockchainClient._TransactionSubmissionStartRequest(
-                self._versioned_pantos_hub_abi,
-                _HUB_UPDATE_SERVICE_NODE_URL_FUNCTION_SELECTOR, (node_url, ),
-                _HUB_UPDATE_SERVICE_NODE_URL_GAS, None, nonce)
-            internal_transaction_id = self._start_transaction_submission(
-                request, node_connections)
+            if self.protocol_version >= semantic_version.Version('0.3.0'):
+                # This part is going to be moved somewhere else
+                commitment_wait_period = self.get_commitment_wait_period(
+                    self.get_blockchain())
+                commit_hash = self.calculate_commitment(
+                    ['string', 'address'], [node_url, self.__address])
+
+                commit_hash_request = \
+                    BlockchainClient._TransactionSubmissionStartRequest(
+                        self._versioned_pantos_hub_abi,
+                        _HUB_COMMIT_HASH_FUNCTION_SELECTOR, (commit_hash, ),
+                        _HUB_COMMIT_HASH_GAS, None, nonce)
+
+                nonce += 1
+                update_node_url_request = \
+                    BlockchainClient._TransactionSubmissionStartRequest(
+                        self._versioned_pantos_hub_abi,
+                        _HUB_UPDATE_SERVICE_NODE_URL_FUNCTION_SELECTOR,
+                        (node_url, ), _HUB_UPDATE_SERVICE_NODE_URL_GAS, None,
+                        nonce)
+                nonce += 1
+
+                dependent_requests = BlockchainClient \
+                    ._DependingTransactionSubmissionStartRequest(
+                        prerequisite_transaction=commit_hash_request,
+                        dependent_transaction=update_node_url_request,
+                        blocks_to_wait=commitment_wait_period,
+                    )
+
+                internal_transaction_id = \
+                    self._start_depending_transactions_submission(
+                        dependent_requests, node_connections)
+            else:
+                request = BlockchainClient._TransactionSubmissionStartRequest(
+                    self._versioned_pantos_hub_abi,
+                    _HUB_UPDATE_SERVICE_NODE_URL_FUNCTION_SELECTOR,
+                    (node_url, ), _HUB_UPDATE_SERVICE_NODE_URL_GAS, None,
+                    nonce)
+                internal_transaction_id = self._start_transaction_submission(
+                    request, node_connections)
             extra_info |= {'internal_transaction_id': internal_transaction_id}
             _logger.info('node URL update submitted', extra=extra_info)
         except Exception:
