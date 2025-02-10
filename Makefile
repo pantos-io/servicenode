@@ -255,31 +255,28 @@ docker-build:
 
 .PHONY: docker
 docker: check-swarm-init docker-build
+	if [ "$(DEV_MODE)" = "true" ]; then \
+		make dev_docker; \
+	else \
+		make ci_docker; \
+	fi; \
+
+.PHONY: dev_docker
+dev_docker:
 	@for i in $$(seq 1 $(INSTANCE_COUNT)); do \
         ( \
         export STACK_NAME="${STACK_BASE_NAME}-${STACK_IDENTIFIER}-$$i"; \
         export INSTANCE=$$i; \
         echo "Deploying stack $$STACK_NAME"; \
 		export STATUS=-1; \
-        if [ "$(DEV_MODE)" = "true" ]; then \
-            echo "Running in development mode"; \
-            export ARGS="$(ARGS) --watch"; \
-            docker compose -f docker-compose.yml -f docker-compose.override.yml -p $$STACK_NAME $$EXTRA_COMPOSE up $$ARGS & \
-            COMPOSE_PID=$$!; \
-            trap 'echo "Caught INT, killing background processes..."; kill $$COMPOSE_PID; exit 1' INT; \
-        else \
-            export ARGS="--detach --wait $(ARGS)"; \
-            docker compose -f docker-compose.yml -f docker-compose.override.yml -p $$STACK_NAME $$EXTRA_COMPOSE up $$ARGS; \
-			STATUS=$$?; \
-			if [ $$STATUS -ne 0 ]; then \
-				$(error "Something was broken during the stack deployment"); \
-			fi; \
-        fi; \
-        trap 'exit 1' INT; \
+		echo "Running in development mode"; \
+		export ARGS="$(ARGS) --watch"; \
+		docker compose -f docker-compose.yml -f docker-compose.override.yml -p $$STACK_NAME $$EXTRA_COMPOSE up $$ARGS & \
+		COMPOSE_PID=$$!; \
+		trap 'echo "Caught INT, killing background processes..."; kill $$COMPOSE_PID; exit 1' INT; \
+		trap 'exit 1' INT; \
         echo "Stack $$STACK_NAME deployed"; \
-        if [ "$(DEV_MODE)" = "true" ]; then \
-            wait $$COMPOSE_PID; \
-        fi; \
+        wait $$COMPOSE_PID; \
         ) & \
     done; \
     trap 'echo "Caught INT, killing all background processes..."; kill 0; exit 1' INT; \
@@ -287,6 +284,24 @@ docker: check-swarm-init docker-build
     # We need to use compose because swarm goes absolutely crazy on MacOS when using cross architecture
     # And can't pull the correct images
     #docker stack deploy -c docker-compose.yml -c docker-compose.override.yml $$STACK_NAME --with-registry-auth --detach=false $(ARGS) & \
+
+.PHONY: ci_docker
+ci_docker:
+	export STACK_NAME="${STACK_BASE_NAME}-${STACK_IDENTIFIER}-1"; \
+	export INSTANCE=1; \
+	echo "Deploying stack $$STACK_NAME"; \
+	export STATUS=-1; \
+	
+	export ARGS="--detach --wait $(ARGS)"; \
+	docker compose -f docker-compose.yml -f docker-compose.override.yml -p $$STACK_NAME $$EXTRA_COMPOSE up $$ARGS; \
+	STATUS=$$?; \
+	if [ $$STATUS -ne 0 ]; then \
+		echo "Something was broken during the stack deployment"; \
+		exit $$STATUS; \
+	fi; \
+
+	echo "Stack $$STACK_NAME deployed"; \
+    
 
 .PHONY: docker-remove
 docker-remove:
