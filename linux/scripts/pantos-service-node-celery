@@ -71,7 +71,7 @@ fi
 
 while true; do
   echo "Starting the celery worker"
-  $PROGRAM -m celery -A pantos.servicenode worker $EXTRA_ARGS -l INFO -n pantos.servicenode -Q transfers,bids
+  $PROGRAM -m celery -A pantos.servicenode worker $EXTRA_ARGS -l INFO -n pantos.servicenode -Q transfers,bids,transactions
   PYTHON_EXIT_CODE=$?
 
   if [ "$PANTOS_CELERY_AUTORESTART" != "true" ]; then

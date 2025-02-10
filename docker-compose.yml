@@ -48,8 +48,6 @@ services:
         condition: service_healthy
       db:
         condition: service_healthy
-      worker:
-        condition: service_started
     develop:
       watch:
         - action: sync
@@ -128,9 +126,9 @@ services:
         condition: service_healthy
       db:
         condition: service_healthy
-    #   # Wait for the app to setup the DB
-    #   app:
-    #     condition: service_healthy
+      # Wait for the app to setup the DB
+      app:
+        condition: service_healthy
     develop:
       watch:
         - action: sync

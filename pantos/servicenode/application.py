@@ -19,7 +19,6 @@ from pantos.servicenode.blockchains.factory import \
 from pantos.servicenode.business.node import NodeInteractor
 from pantos.servicenode.configuration import config
 from pantos.servicenode.configuration import get_blockchain_config
-from pantos.servicenode.configuration import get_blockchains_rpc_nodes
 from pantos.servicenode.configuration import get_signer_config
 from pantos.servicenode.configuration import load_config
 from pantos.servicenode.database import \
@@ -94,7 +93,6 @@ def initialize_application(is_flask_app: bool = False) -> None:
                          exc_info=True)
         sys.exit(1)
     check_protocol_version_compatibility()
-    blockchain_rpc_nodes = get_blockchains_rpc_nodes()
 
 
 def check_protocol_version_compatibility() -> None:

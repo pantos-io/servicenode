@@ -3,6 +3,7 @@ import uuid
 
 import hexbytes
 import pytest
+import semantic_version  # type: ignore
 import web3
 import web3.datastructures
 from eth_account.account import Account
@@ -438,16 +439,25 @@ def test_read_node_url_error(ethereum_client, mock_get_blockchain_config):
 @pytest.mark.parametrize('node_deposit', [0, 1])
 @unittest.mock.patch.object(EthereumClient, '_start_transaction_submission',
                             return_value=uuid.uuid4())
-def test_register_node_correct(mock_start_transaction_submission, node_deposit,
+@unittest.mock.patch.object(EthereumClient,
+                            '_start_depending_transactions_submission',
+                            return_value=uuid.uuid4())
+@unittest.mock.patch.object(EthereumClient, 'get_commitment_wait_period')
+def test_register_node_correct(mock_get_commitment_wait_period,
+                               mock_start_depending_transactions_submission,
+                               mock_start_transaction_submission, node_deposit,
                                ethereum_client, mock_get_blockchain_config,
                                hub_contract_address, service_node_url,
-                               service_node_address):
+                               service_node_address, commitment_wait_period,
+                               protocol_version):
     mock_get_blockchain_config.return_value = {'hub': hub_contract_address}
+    mock_get_commitment_wait_period.return_value = commitment_wait_period
 
-    ethereum_client.register_node(service_node_url, node_deposit,
-                                  service_node_address)
+    with unittest.mock.patch.object(ethereum_client, 'protocol_version',
+                                    new=protocol_version):
+        ethereum_client.register_node(service_node_url, node_deposit,
+                                      service_node_address)
 
-    assert mock_start_transaction_submission.call_count == node_deposit + 1
     if node_deposit > 0:
         approve_request = mock_start_transaction_submission.call_args_list[
             0].args[0]
@@ -455,13 +465,20 @@ def test_register_node_correct(mock_start_transaction_submission, node_deposit,
             ContractAbi.PANTOS_TOKEN
         assert approve_request.function_args == (hub_contract_address,
                                                  node_deposit)
-    register_request = mock_start_transaction_submission.call_args_list[
-        node_deposit].args[0]
-    assert register_request.versioned_contract_abi.contract_abi is \
-        ContractAbi.PANTOS_HUB
-    assert register_request.function_args == (service_node_address,
-                                              service_node_url, node_deposit,
-                                              service_node_address)
+
+    if protocol_version >= semantic_version.Version('0.3.0'):
+        assert mock_start_depending_transactions_submission.call_count == 1
+    else:
+        assert mock_start_transaction_submission.call_count == node_deposit + 1
+
+        register_request = mock_start_transaction_submission.call_args_list[
+            node_deposit].args[0]
+        assert register_request.versioned_contract_abi.contract_abi is \
+            ContractAbi.PANTOS_HUB
+        assert register_request.function_args == (service_node_address,
+                                                  service_node_url,
+                                                  node_deposit,
+                                                  service_node_address)
 
 
 @pytest.mark.parametrize('node_deposit', [0, 1])

@@ -1,8 +1,10 @@
 """Module for Solana-specific clients and errors.
 
 """
+import typing
 import uuid
 
+from hexbytes import HexBytes
 from pantos.common.blockchains.enums import Blockchain
 from pantos.common.types import BlockchainAddress
 
@@ -94,6 +96,15 @@ class SolanaClient(BlockchainClient):
     def cancel_unregistration(self) -> None:
         # Docstring inherited
         raise NotImplementedError  # pragma: no cover
+
+    def calculate_commitment(self, abi_types: list[str],
+                             values: list[typing.Any]) -> HexBytes:
+        # Docstring inherited
+        raise NotImplementedError
+
+    def get_commitment_wait_period(self, blockchain: Blockchain) -> int:
+        # Docstring inherited
+        raise NotImplementedError
 
     def get_validator_fee_factor(self, blockchain: Blockchain) -> int:
         # Docstring inherited

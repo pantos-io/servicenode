@@ -20,6 +20,7 @@ from pantos.servicenode.plugins import initialize_plugins
 
 _TRANSFERS_QUEUE_NAME = 'transfers'
 _BIDS_QUEUE_NAME = 'bids'
+_TRANSACTIONS_QUEUE_NAME = 'transactions'
 
 _logger = logging.getLogger(__name__)
 """Logger for this module."""
@@ -65,7 +66,8 @@ celery_app = celery.Celery(
     backend=config['celery']['backend'], include=[
         'pantos.common.blockchains.tasks',
         'pantos.servicenode.business.transfers',
-        'pantos.servicenode.business.plugins'
+        'pantos.servicenode.business.plugins',
+        'pantos.servicenode.business.tasks'
     ], broker_use_ssl=ca_certs)
 """Celery application instance."""
 
@@ -83,6 +85,9 @@ celery_app.conf.update(
         },
         'pantos.common.blockchains.tasks.*': {
             'queue': _TRANSFERS_QUEUE_NAME
+        },
+        'pantos.servicenode.business.tasks.*': {
+            'queue': _TRANSACTIONS_QUEUE_NAME
         }
     },
     task_track_started=True,

@@ -6,9 +6,11 @@ import logging
 import typing
 import uuid
 
+import semantic_version  # type: ignore
 import web3
 import web3.contract.contract
 import web3.exceptions
+from hexbytes import HexBytes
 from pantos.common.blockchains.base import NodeConnections
 from pantos.common.blockchains.base import TransactionNonceTooLowError
 from pantos.common.blockchains.base import TransactionUnderpricedError
@@ -22,6 +24,9 @@ from pantos.servicenode.database import access as database_access
 
 _HUB_REGISTER_SERVICE_NODE_FUNCTION_SELECTOR = '0x901428b0'
 _HUB_REGISTER_SERVICE_NODE_GAS = 300000
+
+_HUB_COMMIT_HASH_FUNCTION_SELECTOR = '0x3c37b640'
+_HUB_COMMIT_HASH_GAS = 250000
 
 _HUB_TRANSFER_FUNCTION_SELECTOR = '0x87d28cd6'
 _HUB_TRANSFER_GAS = 200000
@@ -181,13 +186,55 @@ class EthereumClient(BlockchainClient):
                 _logger.info('node deposit allowance submitted',
                              extra=extra_info)
                 nonce += 1
-            request = BlockchainClient._TransactionSubmissionStartRequest(
-                self._versioned_pantos_hub_abi,
-                _HUB_REGISTER_SERVICE_NODE_FUNCTION_SELECTOR,
-                (self.__address, node_url, node_deposit, withdrawal_address),
-                _HUB_REGISTER_SERVICE_NODE_GAS, None, nonce)
-            internal_transaction_id = self._start_transaction_submission(
-                request, node_connections)
+            if self.protocol_version >= semantic_version.Version('0.3.0'):
+                # This part is going to be moved somewhere else
+                commitment_wait_period = self.get_commitment_wait_period(
+                    self.get_blockchain())
+                commit_hash = self.calculate_commitment(
+                    ['address', 'address', 'string', 'address'], [
+                        self.__address, withdrawal_address, node_url,
+                        self.__address
+                    ])
+
+                commit_hash_request = \
+                    BlockchainClient._TransactionSubmissionStartRequest(
+                        self._versioned_pantos_hub_abi,
+                        _HUB_COMMIT_HASH_FUNCTION_SELECTOR, (commit_hash, ),
+                        _HUB_COMMIT_HASH_GAS, None, nonce)
+
+                nonce += 1
+                register_node_request = \
+                    BlockchainClient._TransactionSubmissionStartRequest(
+                        self._versioned_pantos_hub_abi,
+                        _HUB_REGISTER_SERVICE_NODE_FUNCTION_SELECTOR,
+                        (
+                            self.__address, node_url,
+                            node_deposit, withdrawal_address
+                        ),
+                        _HUB_REGISTER_SERVICE_NODE_GAS, None, nonce
+                    )
+                nonce += 1
+
+                dependent_requests = BlockchainClient \
+                    ._DependingTransactionSubmissionStartRequest(
+                        prerequisite_transaction=commit_hash_request,
+                        dependent_transaction=register_node_request,
+                        blocks_to_wait=commitment_wait_period,
+                    )
+
+                internal_transaction_id = \
+                    self._start_depending_transactions_submission(
+                        dependent_requests, node_connections)
+            else:
+                # for version < 0.3.0
+                request = BlockchainClient._TransactionSubmissionStartRequest(
+                    self._versioned_pantos_hub_abi,
+                    _HUB_REGISTER_SERVICE_NODE_FUNCTION_SELECTOR,
+                    (self.__address, node_url, node_deposit,
+                     withdrawal_address), _HUB_REGISTER_SERVICE_NODE_GAS, None,
+                    nonce)
+                internal_transaction_id = self._start_transaction_submission(
+                    request, node_connections)
             extra_info |= {'internal_transaction_id': internal_transaction_id}
             _logger.info('node registration submitted', extra=extra_info)
         except Exception:
@@ -315,6 +362,19 @@ class EthereumClient(BlockchainClient):
             raise self._create_error(
                 'unable to cancel the service node unregistration')
 
+    def get_commitment_wait_period(self, blockchain: Blockchain) -> int:
+        # Docstring inherited
+        try:
+            node_connections = self.__create_node_connections()
+            hub_contract = self._create_hub_contract(node_connections)
+            wait_period = hub_contract.functions \
+                .getCommitmentWaitPeriod().call().get()
+            assert isinstance(wait_period, int)
+            return wait_period
+        except Exception:
+            raise self._create_error(
+                'unable to get the commitment wait period')
+
     def get_validator_fee_factor(self, blockchain: Blockchain) -> int:
         # Docstring inherited
         try:
@@ -326,6 +386,11 @@ class EthereumClient(BlockchainClient):
             return fee_factor
         except Exception:
             raise self._create_error('unable to get the validator fee factor')
+
+    def calculate_commitment(self, abi_types: list[str],
+                             values: list[typing.Any]) -> HexBytes:
+        # Docstring inherited
+        return web3.Web3.solidity_keccak(abi_types, values)
 
     def _create_hub_contract(
             self, node_connections: NodeConnections) \

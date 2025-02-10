@@ -8,6 +8,7 @@ import typing
 import uuid
 
 import semantic_version  # type: ignore
+from hexbytes import HexBytes
 from pantos.common.blockchains.base import BlockchainHandler
 from pantos.common.blockchains.base import BlockchainUtilities
 from pantos.common.blockchains.base import BlockchainUtilitiesError
@@ -17,6 +18,8 @@ from pantos.common.blockchains.enums import Blockchain
 from pantos.common.blockchains.enums import ContractAbi
 from pantos.common.blockchains.factory import get_blockchain_utilities
 from pantos.common.blockchains.factory import initialize_blockchain_utilities
+from pantos.common.blockchains.tasks import \
+    _dependent_transaction_submission_task
 from pantos.common.entities import TransactionStatus
 from pantos.common.exceptions import ErrorCreator
 from pantos.common.types import BlockchainAddress
@@ -647,6 +650,43 @@ class BlockchainClient(BlockchainHandler, ErrorCreator[BlockchainClientError]):
         pass  # pragma: no cover
 
     @abc.abstractmethod
+    def calculate_commitment(self, abi_types: list[str],
+                             values: list[typing.Any]) -> HexBytes:
+        """Calculate the commitment hash for the given ABI types and
+        values.
+
+        Parameters
+        ----------
+        abi_types : list[str]
+            The ABI types of the values.
+        values : list[typing.Any]
+            The values to be hashed.
+
+        Returns
+        -------
+        web3.HexBytes
+            The commitment hash.
+        """
+        pass  # pragma: no cover
+
+    @abc.abstractmethod
+    def get_commitment_wait_period(self, blockchain: Blockchain) -> int:
+        """Get the commitment wait period for the service node.
+
+        Returns
+        -------
+        int
+            The commitment wait period in blocks.
+
+        Raises
+        ------
+        BlockchainClientError
+            If the commitment wait period cannot be obtained.
+
+        """
+        pass
+
+    @abc.abstractmethod
     def get_validator_fee_factor(self, blockchain: Blockchain) -> int:
         """Get the validator fee factor of the given blockchain.
 
@@ -804,6 +844,105 @@ class BlockchainClient(BlockchainHandler, ErrorCreator[BlockchainClientError]):
             blocks_until_resubmission)
         return self._get_utilities().start_transaction_submission(
             request_, node_connections)
+
+    @dataclasses.dataclass
+    class _DependingTransactionSubmissionStartRequest:
+        """Request data for starting a depending transaction submission.
+
+        Attributes
+        ----------
+        prerequisite_transaction: _TransactionSubmissionStartRequest
+            Transaction submission request data for the transaction to be
+            send before the depending transaction.
+        dependent_transaction: _TransactionSubmissionStartRequest
+            Transaction submission request data for the depending
+            transaction.
+        blocks_to_wait: int
+            The number of blocks to wait before submitting the depending
+            transaction.
+        """
+        # Forward Reference: Python postpones the evaluation for Python >v3.10
+        # automatically
+        prerequisite_transaction: \
+            "BlockchainClient._TransactionSubmissionStartRequest"
+        dependent_transaction: \
+            "BlockchainClient._TransactionSubmissionStartRequest"
+        blocks_to_wait: int
+
+    def _start_depending_transactions_submission(
+            self, request: _DependingTransactionSubmissionStartRequest,
+            node_connections: NodeConnections) -> uuid.UUID:
+        """Start a depending transaction submission. The dependent
+        transaction is automatically submitted as soon as the prerequisite
+        transaction is included and reaches a given number of blocks.
+
+        Parameters
+        ----------
+        request : _DependingTransactionSubmissionStartRequest
+            The request data for starting a depending transaction
+            submission.
+        node_connections : NodeConnections
+            The NodeConnections instance to be used when interacting
+            with blockchain nodes.
+
+        Returns
+        -------
+        uuid.UUID
+            The unique internal transaction ID, which can be used later
+            to retrieve the status of the transaction submission.
+        """
+        contract_abi = \
+            request.prerequisite_transaction \
+            .versioned_contract_abi.contract_abi
+        if contract_abi is ContractAbi.PANTOS_HUB:
+            contract_address = self._get_config()['hub']
+        elif contract_abi is ContractAbi.PANTOS_TOKEN:
+            contract_address = self._get_config()['pan_token']
+        else:
+            raise NotImplementedError
+        min_adaptable_fee_per_gas = \
+            self._get_config()['min_adaptable_fee_per_gas']
+        max_total_fee_per_gas = self._get_config().get('max_total_fee_per_gas')
+        if max_total_fee_per_gas == 0:
+            # Since YAML Tag directives do not support the `or` operation
+            max_total_fee_per_gas = None
+        adaptable_fee_increase_factor = \
+            self._get_config()['adaptable_fee_increase_factor']
+        blocks_until_resubmission = \
+            self._get_config()['blocks_until_resubmission']
+        prerequisite_request = \
+            BlockchainUtilities.TransactionSubmissionStartRequest(
+                contract_address,
+                request.prerequisite_transaction.versioned_contract_abi,
+                request.prerequisite_transaction.function_selector,
+                request.prerequisite_transaction.function_args,
+                request.prerequisite_transaction.gas,
+                min_adaptable_fee_per_gas,
+                max_total_fee_per_gas, request.prerequisite_transaction.amount,
+                request.prerequisite_transaction.nonce,
+                adaptable_fee_increase_factor, blocks_until_resubmission)
+
+        prerequisite_internal_id = self._get_utilities(
+        ).start_transaction_submission(prerequisite_request, node_connections)
+
+        dependent_request = \
+            BlockchainUtilities.TransactionSubmissionStartRequest(
+                contract_address,
+                request.dependent_transaction.versioned_contract_abi,
+                request.dependent_transaction.function_selector,
+                request.dependent_transaction.function_args,
+                request.dependent_transaction.gas, min_adaptable_fee_per_gas,
+                max_total_fee_per_gas, request.dependent_transaction.amount,
+                request.dependent_transaction.nonce,
+                adaptable_fee_increase_factor,
+                blocks_until_resubmission)
+
+        return _dependent_transaction_submission_task.delay(
+            blockchain_id=self.get_blockchain().value,
+            prerequisite_internal_id=str(prerequisite_internal_id),
+            blocks_to_wait=request.blocks_to_wait,
+            average_block_time=self._get_config()['average_block_time'],
+            request=dependent_request.to_dict())
 
     @property
     def _versioned_pantos_forwarder_abi(self) -> VersionedContractAbi:
