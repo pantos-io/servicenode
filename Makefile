@@ -260,6 +260,7 @@ docker: check-swarm-init docker-build
         export STACK_NAME="${STACK_BASE_NAME}-${STACK_IDENTIFIER}-$$i"; \
         export INSTANCE=$$i; \
         echo "Deploying stack $$STACK_NAME"; \
+		export STATUS=-1; \
         if [ "$(DEV_MODE)" = "true" ]; then \
             echo "Running in development mode"; \
             export ARGS="$(ARGS) --watch"; \
@@ -269,6 +270,11 @@ docker: check-swarm-init docker-build
         else \
             export ARGS="--detach --wait $(ARGS)"; \
             docker compose -f docker-compose.yml -f docker-compose.override.yml -p $$STACK_NAME $$EXTRA_COMPOSE up $$ARGS; \
+			STATUS=$$?; \
+			if [ $$STATUS -ne 0 ]; then \
+				echo "Something was broken during the stack deployment"; \
+				exit $$STATUS; \
+			fi; \
         fi; \
         trap 'exit 1' INT; \
         echo "Stack $$STACK_NAME deployed"; \
