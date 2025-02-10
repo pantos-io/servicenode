@@ -272,8 +272,7 @@ docker: check-swarm-init docker-build
             docker compose -f docker-compose.yml -f docker-compose.override.yml -p $$STACK_NAME $$EXTRA_COMPOSE up $$ARGS; \
 			STATUS=$$?; \
 			if [ $$STATUS -ne 0 ]; then \
-				echo "Something was broken during the stack deployment"; \
-				exit $$STATUS; \
+				$(error "Something was broken during the stack deployment"); \
 			fi; \
         fi; \
         trap 'exit 1' INT; \
