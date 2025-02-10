@@ -271,7 +271,7 @@ dev_docker:
 		export STATUS=-1; \
 		echo "Running in development mode"; \
 		export ARGS="$(ARGS) --watch"; \
-		docker compose -f docker-compose.yml -f docker-compose.override.yml -p $$STACK_NAME $$EXTRA_COMPOSE up $$ARGS & \
+		docker compose -f docker-compose.yml -f docker-compose.override.yml -p $$STACK_NAME $$EXTRA_COMPOSE up $$(ARGS) & \
 		COMPOSE_PID=$$!; \
 		trap 'echo "Caught INT, killing background processes..."; kill $$COMPOSE_PID; exit 1' INT; \
 		trap 'exit 1' INT; \
