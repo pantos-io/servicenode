@@ -52,7 +52,7 @@ services:
       watch:
         - action: sync
           path: ./pantos
-          target: /opt/pantos/pantos-service-node/lib/python3.12/site-packages/pantos
+          target: /opt/pantos/pantos-service-node/lib/python3.13/site-packages/pantos
         - action: sync+restart
           path: ./linux/scripts/start-web.py
           target: /opt/pantos/pantos-service-node/bin/start-web.py
@@ -115,12 +115,12 @@ services:
       CELERY_BROKER: amqp://pantos-service-node:pantos@broker:5672/pantos-service-node
       CELERY_BACKEND: db+postgresql+psycopg://pantos-service-node:pantos@db/pantos-service-node-celery
       DEV_MODE: ${DEV_MODE}
-    healthcheck:
-      test: ["CMD", "/usr/bin/pantos-service-node-celery", "--status"]
-      interval: 5s
-      timeout: 10s
-      retries: 3
-      start_period: 20s
+    #healthcheck:
+    #  test: ["CMD", "/usr/bin/pantos-service-node-celery", "--status"]
+    #  interval: 5s
+    #  timeout: 10s
+    #  retries: 3
+    #  start_period: 20s
     depends_on:
       broker:
         condition: service_healthy

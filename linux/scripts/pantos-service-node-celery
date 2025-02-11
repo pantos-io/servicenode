@@ -34,6 +34,9 @@ while [ $# -gt 0 ]; do
       ;;
     -s|--status)
       echo "Querying the status of the celery worker"
+      . /etc/pantos/service-node-config.env
+      . /etc/pantos/eth-data/ETHEREUM.env 
+      . /etc/pantos/bnb-data/BNB_CHAIN.env
       ./bin/python -m celery -A pantos.servicenode report
       status=$?
       if [ $status -ne 0 ]; then
