@@ -15,6 +15,7 @@ from pantos.common.logging import initialize_logger
 
 from pantos.servicenode.application import initialize_application
 from pantos.servicenode.configuration import config
+from pantos.servicenode.configuration import load_config
 from pantos.servicenode.database import get_engine
 from pantos.servicenode.plugins import initialize_plugins
 
@@ -35,7 +36,9 @@ def is_main_module() -> bool:
         True if the current process is a Celery worker process.
 
     """
-    potential_celery_markers = ['celery', 'worker', 'beat', 'flower']
+    potential_celery_markers = [
+        'celery', 'worker', 'beat', 'flower', 'report', 'ping'
+    ]
     return (__name__ == '__main__'
             or any(marker in sys.argv for marker in potential_celery_markers))
 
@@ -58,6 +61,9 @@ def verify_celery_url_has_ssl() -> bool:
 if is_main_module():  # pragma: no cover
     _logger.info('Initializing the Celery application...')
     initialize_application(False)
+else:
+    _logger.info('Celery application initialization skipped...')
+    load_config(reload=False)
 
 ca_certs = {'ca_certs': certifi.where()} if verify_celery_url_has_ssl() else {}
 
