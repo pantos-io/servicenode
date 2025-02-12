@@ -342,7 +342,7 @@ jobs:
           cat export/app.tar | docker import - pantosio/service-node-app:local
           cat export/worker.tar | docker import - pantosio/service-node-worker:local
 
-      - uses: jacekv/e2e-testing/.github/actions/run-tests@main
+      - uses: pantos-io/e2e-testing/.github/actions/run-tests@main
         with:
           servicenode-path: ${{ env.PANTOS_SERVICE_NODE }}
           servicenode-version: 'local'
