@@ -24,6 +24,15 @@ source_if_not_set() {
 
 source_if_not_set /etc/default/"$APP_NAME"
 
+# Check if SOURCE_ENV_FILES is defined and source each file
+if [ -n "$SOURCE_ENV_FILES" ]; then
+    echo "Sourcing environment files: $SOURCE_ENV_FILES"
+    IFS=',' read -ra FILES <<< "$SOURCE_ENV_FILES"
+    for file in "${FILES[@]}"; do
+        . "$file"
+    done
+fi
+
 cd "$APP_DIR"
 
 while [ $# -gt 0 ]; do
