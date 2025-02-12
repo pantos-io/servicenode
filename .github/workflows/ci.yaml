@@ -346,3 +346,4 @@ jobs:
         with:
           servicenode-path: ${{ env.PANTOS_SERVICE_NODE }}
           servicenode-version: 'local'
+

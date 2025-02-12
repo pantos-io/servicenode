@@ -55,12 +55,12 @@ class NodeInteractor(Interactor):
 
         """
         for blockchain in Blockchain:
-            _logger.info('updating the service node registration on '
-                         '{}'.format(blockchain.name))
             try:
                 blockchain_config = get_blockchain_config(blockchain)
                 if not blockchain_config['active']:
                     continue
+                _logger.info("updating the service node registration on "
+                             f"{blockchain.name}...")
                 to_be_registered = blockchain_config['registered']
                 blockchain_client = get_blockchain_client(blockchain)
                 is_registered = blockchain_client.is_node_registered()

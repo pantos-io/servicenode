@@ -284,8 +284,9 @@ class Transfer(Base):
     status_id = sqlalchemy.Column(sqlalchemy.Integer,
                                   sqlalchemy.ForeignKey('transfer_status.id'),
                                   nullable=False)
-    created = sqlalchemy.Column(sqlalchemy.DateTime, nullable=False,
-                                default=datetime.datetime.utcnow)
+    created = sqlalchemy.Column(sqlalchemy.DateTime(timezone=True),
+                                nullable=False,
+                                default=datetime.datetime.now(datetime.UTC))
     updated = sqlalchemy.Column(sqlalchemy.DateTime)
     source_blockchain = sqlalchemy.orm.relationship(
         'Blockchain',
