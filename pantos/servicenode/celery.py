@@ -21,6 +21,7 @@ from pantos.servicenode.plugins import initialize_plugins
 
 _TRANSFERS_QUEUE_NAME = 'transfers'
 _BIDS_QUEUE_NAME = 'bids'
+_TRANSACTIONS_QUEUE_NAME = 'transactions'
 
 _logger = logging.getLogger(__name__)
 """Logger for this module."""
@@ -87,9 +88,13 @@ celery_app.conf.update(
         'pantos.servicenode.business.transfers.*': {
             'queue': _TRANSFERS_QUEUE_NAME
         },
-        'pantos.common.blockchains.tasks.*': {
+        'pantos.common.blockchains.tasks._transaction_resubmission_task': {
             'queue': _TRANSFERS_QUEUE_NAME
-        }
+        },
+        'pantos.servicenode.business.tasks.'
+        '_dependent_transaction_submission_task': {
+            'queue': _TRANSACTIONS_QUEUE_NAME
+        }  # yapf: disable
     },
     task_track_started=True,
     worker_enable_remote_control=False,

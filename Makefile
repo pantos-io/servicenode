@@ -81,12 +81,12 @@ coverage-postgres:
 coverage-all:
 	poetry run python3 -m pytest --cov-report term-missing --cov=pantos tests
 
-.PHONY: tar
-tar: dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION).tar.gz
-
 .PHONY: openapi-docs
 openapi-docs:
 	poetry run python3 -m openapi $(OPENAPI_FILE_LOCATION)
+
+.PHONY: tar
+tar: dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION).tar.gz
 
 dist/pantos_service_node-$(PANTOS_SERVICE_NODE_VERSION).tar.gz: pantos/ service-node-config.yml service-node-config.env bids.yml alembic.ini pantos-service-node.sh pantos-service-node-worker.sh
 	cp service-node-config.yml pantos/service-node-config.yml

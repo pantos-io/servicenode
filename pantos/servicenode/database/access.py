@@ -296,7 +296,7 @@ def update_on_chain_transfer_id(internal_transfer_id: int,
         transfer.on_chain_transfer_id = typing.cast(sqlalchemy.Column,
                                                     on_chain_transfer_id)
         transfer.updated = typing.cast(sqlalchemy.Column,
-                                       datetime.datetime.utcnow())
+                                       datetime.datetime.now(datetime.UTC))
 
 
 def update_transfer_nonce(internal_transfer_id: int, blockchain: Blockchain,
@@ -394,7 +394,7 @@ def update_transfer_status(internal_transfer_id: int,
             # the unique sender nonce constraint
             transfer.sender_nonce = typing.cast(sqlalchemy.Column, None)
         transfer.updated = typing.cast(sqlalchemy.Column,
-                                       datetime.datetime.utcnow())
+                                       datetime.datetime.now(datetime.UTC))
 
 
 def update_transfer_transaction_id(internal_transfer_id: int,
@@ -424,7 +424,7 @@ def update_transfer_transaction_id(internal_transfer_id: int,
         transfer.transaction_id = typing.cast(sqlalchemy.Column,
                                               transaction_id)
         transfer.updated = typing.cast(sqlalchemy.Column,
-                                       datetime.datetime.utcnow())
+                                       datetime.datetime.now(datetime.UTC))
 
 
 def update_transfer_task_id(internal_transfer_id: int,
@@ -452,7 +452,7 @@ def update_transfer_task_id(internal_transfer_id: int,
                 f'unknown internal transfer ID: {internal_transfer_id}')
         transfer.task_id = typing.cast(sqlalchemy.Column, str(task_id))
         transfer.updated = typing.cast(sqlalchemy.Column,
-                                       datetime.datetime.utcnow())
+                                       datetime.datetime.now(datetime.UTC))
 
 
 def _read_id(session: sqlalchemy.orm.Session, model: typing.Type[B],

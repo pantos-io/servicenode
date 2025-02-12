@@ -8,6 +8,7 @@ from pantos.common.protocol import \
     is_supported_protocol_version as _is_supported_protocol_version_by_common
 
 _SUPPORTED_PROTOCOL_VERSIONS: typing.Final[set[semantic_version.Version]] = {
+    semantic_version.Version('0.2.0'),
     semantic_version.Version('0.3.0'),
 }
 
