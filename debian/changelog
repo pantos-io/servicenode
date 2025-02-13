@@ -1,6 +1,9 @@
 pantos-service-node (3.0.0) RELEASED; urgency=low
 
   * Updated ABI support to 0.3.0
+  
+-- Pantos GmbH <contact@pantos.io> Thu, 13 Feb 2025 16:00:00 +0000
+
 
 pantos-service-node (2.2.0) RELEASED; urgency=low
 
