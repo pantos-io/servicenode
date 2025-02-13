@@ -52,7 +52,7 @@ Flask-RESTful = "0.3.10"
 marshmallow = "3.26.1"
 psycopg = {extras = ["binary", "pool"], version = "3.2.4"}
 PyYAML = "6.0.1"
-SQLAlchemy = "2.0.37"
+SQLAlchemy = "2.0.38"
 web3 = "6.5.0"
 JSON-log-formatter = "0.5.2"
 pyaml-env = "1.2.1"
