@@ -23,7 +23,7 @@ web3 = {extras = ["tester"], version = "^6.5.0"}
 
 [tool.poetry.group.lint.dependencies]
 bandit = "1.8.2"
-flake8 = "7.1.1"
+flake8 = "7.1.2"
 isort = "6.0.0"
 mypy = "1.0.1"
 types-pyyaml = "6.0.12.20241230"
